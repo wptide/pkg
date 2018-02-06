@@ -1,6 +1,5 @@
 GO=`which go`
 GOTEST=${GO} list -f '{{if len .TestGoFiles}}"go test -cover {{.ImportPath}}"{{end}}' ./... | xargs -L 1 sh -c
-PACKAGEPATH=./cmd/lh-server/...
 
 # Show available make subcommands
 default:
