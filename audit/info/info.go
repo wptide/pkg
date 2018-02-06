@@ -6,7 +6,7 @@ import (
 	"github.com/wptide/pkg/audit/ingest"
 	"fmt"
 	"github.com/hhatto/gocloc"
-	"github.com/pkg/errors"
+	"errors"
 	"github.com/wptide/pkg/tide"
 	"strings"
 	"io/ioutil"

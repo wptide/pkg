@@ -10,7 +10,7 @@ import (
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/storage"
 	"io/ioutil"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 var(

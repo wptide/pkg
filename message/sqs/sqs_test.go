@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 	"github.com/wptide/pkg/message"
-	"github.com/pkg/errors"
+	"errors"
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 )

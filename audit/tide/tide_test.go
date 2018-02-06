@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/pkg/errors"
+	"errors"
 	"github.com/wptide/pkg/audit"
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/tide"
