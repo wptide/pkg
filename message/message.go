@@ -12,7 +12,26 @@ type Message struct {
 	Force               bool    `json:"force"`
 	Visibility          string  `json:"visibility"`
 	ExternalRef         *string `json:"external_ref,omitempty"`
+	// @todo: Legacy fields. Need to deprecate over time.
+	Standards           []string `json:"standards,omitempty"`
+	Audits              *[]Audit `json:"audits,omitempty"`
 }
+
+// @todo: Legacy. Needs to be deprecated over time.
+type Audit struct {
+	Type    string        `json:"type"`
+	Options *AuditOption  `json:"options"`
+}
+
+// @todo: Legacy. Needs to be deprecated over time.
+type AuditOption struct {
+	Standard   string `json:"standard"`
+	Report     string `json:"report"`
+	Encoding   string `json:"encoding,omitempty"`
+	RuntimeSet string `json:"runtime-set,omitempty"`
+	Ignore     string `json:"ignore,omitempty"`
+}
+
 
 type MessageProvider interface {
 	SendMessage(msg *Message) error
