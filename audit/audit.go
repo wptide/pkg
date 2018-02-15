@@ -2,6 +2,7 @@ package audit
 
 import (
 	"github.com/wptide/pkg/message"
+	"io"
 )
 
 // Result is an interface map used to store results from processes.
@@ -11,6 +12,12 @@ type Result map[string]interface{}
 type Processor interface {
 	Process(msg message.Message, result *Result)
 	Kind() string
+}
+
+type PostProcessor interface {
+	Processor
+	SetReport(reader io.Reader)
+	Parent(processor Processor)
 }
 
 func CanRunAudit(p Processor, results *Result) bool {

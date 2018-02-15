@@ -61,9 +61,10 @@ type AuditResult struct {
 		*PhpcsResults
 		*LighthouseResults
 	} `json:"details,omitempty"`
-	Summary            *AuditSummary `json:"summary,omitempty"`
-	CompatibleVersions []string      `json:"compatible_versions,omitempty"`
-	Error              string        `json:"error,omitempty"`
+	Summary            *AuditSummary          `json:"summary,omitempty"`
+	CompatibleVersions []string               `json:"compatible_versions,omitempty"`
+	Error              string                 `json:"error,omitempty"`
+	Extra              map[string]interface{} `json:"extra"`
 }
 
 type PhpcsResults struct {
