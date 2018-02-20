@@ -1,0 +1,53 @@
+hash: c8fba8712aedf2b3c007590e3a18ad1d056a225f61b2a4d8b578e55e72a37267
+updated: 2018-02-20T16:41:14.591191208+11:00
+imports:
+- name: github.com/aws/aws-sdk-go
+  version: 63324a33d7e42a386c04d4daec764a3de243492e
+  subpackages:
+  - aws
+  - aws/awserr
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/corehandlers
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/credentials/stscreds
+  - aws/defaults
+  - aws/ec2metadata
+  - aws/endpoints
+  - aws/request
+  - aws/session
+  - aws/signer/v4
+  - internal/sdkrand
+  - internal/shareddefaults
+  - private/protocol
+  - private/protocol/query
+  - private/protocol/query/queryutil
+  - private/protocol/rest
+  - private/protocol/restxml
+  - private/protocol/xml/xmlutil
+  - service/s3
+  - service/s3/s3iface
+  - service/s3/s3manager
+  - service/s3/s3manager/s3manageriface
+  - service/sqs
+  - service/sqs/sqsiface
+  - service/sts
+- name: github.com/go-ini/ini
+  version: 32e4be5f41bb918afb6e37c07426e2ddbcb6647e
+- name: github.com/hhatto/gocloc
+  version: 7b315f8ae7054b69fbbe05c61fb5b2e645c368f3
+- name: github.com/jmespath/go-jmespath
+  version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
+- name: github.com/toqueteos/trie
+  version: 56fed4a05683322f125e2d78ee269bb102280392
+- name: gopkg.in/src-d/enry.v1
+  version: 0db3b4b5536e6dc4d9109d42897c00a5d92af0a7
+  subpackages:
+  - data
+  - internal/tokenizer
+- name: gopkg.in/toqueteos/substring.v1
+  version: c5f61671513240ddf5563635cc4a90e9f3ae4710
+testImports: []

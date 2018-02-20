@@ -1,9 +1,10 @@
 package log
 
 import (
-	"testing"
 	"bytes"
 	"os"
+	"testing"
+	"io"
 )
 
 func TestLog(t *testing.T) {
@@ -79,5 +80,22 @@ func fromStruct() struct {
 	}{
 		"Struct Title",
 		"Struct Content",
+	}
+}
+
+func TestSetOutput(t *testing.T) {
+	tests := []struct {
+		name  string
+		writer io.Writer
+	}{
+		{
+			"Set to Stdin",
+			os.Stdin,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			SetOutput(tt.writer)
+		})
 	}
 }
