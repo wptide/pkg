@@ -33,7 +33,6 @@ func (mgr SqsProvider) SendMessage(msg *message.Message) error {
 
 	// Create the message object.
 	messageInput := &sqs.SendMessageInput{
-		DelaySeconds: aws.Int64(10),
 		MessageBody:  aws.String(string(taskEncoded)),
 		QueueUrl:     mgr.QueueUrl,
 	}
@@ -42,6 +41,8 @@ func (mgr SqsProvider) SendMessage(msg *message.Message) error {
 	var messageGroupId string = fmt.Sprintf("%s-%s", msg.RequestClient, msg.Slug)
 	if strings.HasSuffix(*mgr.QueueName, ".fifo") {
 		messageInput.MessageGroupId = &messageGroupId
+	} else {
+		messageInput.DelaySeconds = aws.Int64(10)
 	}
 
 	// Send the message and check for errors.

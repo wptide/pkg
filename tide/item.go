@@ -64,7 +64,7 @@ type AuditResult struct {
 	Summary            *AuditSummary          `json:"summary,omitempty"`
 	CompatibleVersions []string               `json:"compatible_versions,omitempty"`
 	Error              string                 `json:"error,omitempty"`
-	Extra              map[string]interface{} `json:"extra"`
+	Extra              map[string]interface{} `json:"extra,omitempty"`
 }
 
 type PhpcsResults struct {
