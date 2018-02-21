@@ -13,3 +13,4 @@ import:
   - service/sqs
   - service/sqs/sqsiface
 - package: github.com/hhatto/gocloc
+- package: github.com/blang/semver
