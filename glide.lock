@@ -1,5 +1,5 @@
 hash: cb376418631d95235e1a9a52ef332dde183cd93d63f859e20d0aa81d5fa24a5c
-updated: 2018-02-21T11:28:11.197200317+11:00
+updated: 2018-02-21T11:59:34.234442127+11:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: f9a6880d84e16e2a37055793e17164a228d637f4
@@ -52,4 +52,6 @@ imports:
   - internal/tokenizer
 - name: gopkg.in/toqueteos/substring.v1
   version: c5f61671513240ddf5563635cc4a90e9f3ae4710
-testImports: []
+testImports:
+- name: github.com/pkg/errors
+  version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
