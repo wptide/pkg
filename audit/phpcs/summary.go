@@ -79,7 +79,7 @@ func getPhpcsSummary(fullResults tide.PhpcsResults) *tide.PhpcsSummary {
 		summary.Files[filename] = struct {
 			Errors   int `json:"errors"`
 			Warnings int `json:"warnings"`
-		} {
+		}{
 			data.Errors,
 			data.Warnings,
 		}

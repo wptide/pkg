@@ -100,7 +100,7 @@ func (p *Processor) Process(msg message.Message, result *audit.Result) {
 		"--report=json",
 		"--report-json=" + p.ReportFilePath,
 		"--parallel=" + strconv.Itoa(p.Parallel),
-		"-d", // Required to be before "memory_limit".
+		"-d",              // Required to be before "memory_limit".
 		"memory_limit=-1", // Leave memory handling up to the system.
 	}
 
