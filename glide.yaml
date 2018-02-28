@@ -1,7 +1,7 @@
 package: github.com/wptide/pkg
 import:
 - package: github.com/aws/aws-sdk-go
-  version: ~1.13.0
+  version: ~1.13.7
   subpackages:
   - aws
   - aws/awserr
@@ -12,5 +12,6 @@ import:
   - service/s3/s3manager/s3manageriface
   - service/sqs
   - service/sqs/sqsiface
-- package: github.com/hhatto/gocloc
 - package: github.com/blang/semver
+  version: ~3.5.1
+- package: github.com/hhatto/gocloc

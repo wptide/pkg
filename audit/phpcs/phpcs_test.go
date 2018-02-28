@@ -7,7 +7,7 @@ import (
 	"github.com/wptide/pkg/audit"
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/tide"
-	"github.com/pkg/errors"
+	"errors"
 	"bytes"
 	"github.com/wptide/pkg/log"
 	"github.com/wptide/pkg/storage"
