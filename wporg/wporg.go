@@ -34,6 +34,30 @@ type RepoProject struct {
 	Type             string `json:"-"`
 }
 
+// Create a custom unmarshaller for RepoProject to deal with version passed as numbers.
+func (rp *RepoProject) UnmarshalJSON(d []byte) error {
+	type altRepoProject RepoProject // Do this to remove methods and avoid UnmarshalJSON loop.
+	temp := struct {
+		altRepoProject
+		// Override the version.
+		Version json.Number `json:"version"`
+	}{
+		// Pass in original project pointer so that other fields are not skipped.
+		altRepoProject: altRepoProject(*rp),
+	}
+
+	// Attempt to unmarshal into the new struct.
+	if err := json.Unmarshal(d, &temp); err != nil {
+		return err
+	}
+
+	// Pass it back to the original.
+	*rp = RepoProject(temp.altRepoProject)
+	rp.Version = temp.Version.String() // convert the numeric version into string version/
+
+	return nil
+}
+
 type ApiResponse struct {
 	Info    ApiInfo       `json:"info"`
 	// Type is excluded from the json object as this does not come

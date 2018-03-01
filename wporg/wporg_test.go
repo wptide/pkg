@@ -31,6 +31,12 @@ var mockPluginsApi = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWri
 
 	for _, part := range parts {
 		switch part {
+		case "request[browse]=versionFail":
+			fmt.Fprintln(w, wantedPluginVersionFailJson)
+			return
+		case "request[browse]=versionNumeric":
+			fmt.Fprintln(w, wantedPluginVersionNumericJson)
+			return
 		case "request[browse]=alternate":
 			fmt.Fprintln(w, wantedPluginResponse5JsonAlternate)
 			return
@@ -74,6 +80,27 @@ var
 					"plugin-5": {"name": "Plugin 5", "slug": "plugin-5", "version": "5.0.0", "last_updated": "2018-02-25", "short_description": "Plugin 5 Short", "description": "", "download_link": "http://example.local/plugin-5-5.0.0.zip" }
 				}
 			}`
+	wantedPluginVersionNumericJson = `{
+				"info": {
+					"page": 1,
+					"pages": 1,
+ 					"results": 1
+				},
+				"plugins": [
+					{"name": "Plugin 1", "slug": "plugin-1", "version": 1, "last_updated": "2018-02-21", "short_description": "Plugin 1 Short", "description": "", "download_link": "http://example.local/plugin-1-1.0.0.zip" }
+				]
+			}`
+	wantedPluginVersionFailJson = `{
+				"info": {
+					"page": 1,
+					"pages": 1,
+ 					"results": 1
+				},
+				"plugins": [
+					{"name": "Plugin 1", "slug": "plugin-1", "version": {}, "last_updated": "2018-02-21", "short_description": "Plugin 1 Short", "description": "", "download_link": "http://example.local/plugin-1-1.0.0.zip" }
+				]
+			}`
+
 	wantedPluginResponse5 = ApiResponse{
 		Info: ApiInfo{
 			1,
@@ -134,6 +161,28 @@ var
 			},
 		},
 	}
+
+	wantedPluginVersionNumeric = ApiResponse{
+		Info: ApiInfo{
+			1,
+			1,
+			1,
+		},
+		Type: "plugins",
+		Plugins: []RepoProject{
+			{
+				"Plugin 1",
+				"plugin-1",
+				"1",
+				"2018-02-21",
+				"Plugin 1 Short",
+				"",
+				"http://example.local/plugin-1-1.0.0.zip",
+				"",
+			},
+		},
+	}
+
 	wantedThemeResponse5Json = `{
 				"info": {
 					"page": 1,
@@ -284,6 +333,32 @@ func TestClient_Request(t *testing.T) {
 				"https://fakeurl",
 				"plugins",
 				"httpError",
+				-1,
+				1,
+			},
+			nil,
+			true,
+		},
+		{
+			"Plugin Numeric Version",
+			Client{},
+			args{
+				mockPluginsApi.URL,
+				"plugins",
+				"versionNumeric",
+				-1,
+				1,
+			},
+			&wantedPluginVersionNumeric,
+			false,
+		},
+		{
+			"Plugin Failed Version",
+			Client{},
+			args{
+				mockPluginsApi.URL,
+				"plugins",
+				"versionFail",
 				-1,
 				1,
 			},
@@ -460,7 +535,7 @@ func TestClient_SetThemeApiSource(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want string
+		want   string
 	}{
 		{
 			"Set theme API url",
