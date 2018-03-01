@@ -194,18 +194,17 @@ func getValidItem(isCollection bool, item tide.Item, msg message.Message, result
 		validItem.Project = []string{project}
 	}
 
-	// Some values should only be set if it was a collection endpoint.
+	validItem.Title, ok = fallbackValue(simpleInfo.Name, msg.Title).(string)
+	validItem.Description, ok = fallbackValue(simpleInfo.Description, msg.Content).(string)
+	validItem.ProjectType, ok = fallbackValue(resultItem.CodeInfo.Type, codeInfo.Type, msg.ProjectType).(string)
+	validItem.Version, ok = fallbackValue(resultSimpleInfo.Version, simpleInfo.Version).(string)
+
+	validItem.Checksum = item.Checksum
+	validItem.SourceType = item.SourceType
+	validItem.SourceUrl = item.SourceUrl
+
+	// Set the request client on new items or forced items.
 	if isCollection || msg.Force {
-		validItem.Title, ok = fallbackValue(simpleInfo.Name, msg.Title).(string)
-		validItem.Description, ok = fallbackValue(simpleInfo.Description, msg.Content).(string)
-		validItem.ProjectType, ok = fallbackValue(resultItem.CodeInfo.Type, codeInfo.Type, msg.ProjectType).(string)
-		validItem.Version, ok = fallbackValue(resultSimpleInfo.Version, simpleInfo.Version).(string)
-
-		validItem.Checksum = item.Checksum
-		validItem.SourceType = item.SourceType
-		validItem.SourceUrl = item.SourceUrl
-
-		// Set the request client on the API.
 		defaultRequestClient, ok := result["clientCreditedUser"].(string)
 		if ! ok {
 			defaultRequestClient = ""

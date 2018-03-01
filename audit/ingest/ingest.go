@@ -126,7 +126,7 @@ func (p *Processor) Process(msg message.Message, result *audit.Result) {
 		return
 	}
 
-	p.Dest = tempFolder + "/lh-" + base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+	p.Dest = tempFolder + "/audit-" + base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 
 	err := srcMgr.PrepareFiles(p.Dest)
 	if err != nil {
