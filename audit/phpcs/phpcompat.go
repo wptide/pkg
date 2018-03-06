@@ -29,7 +29,7 @@ type PhpCompat struct {
 
 // Kind is required to implement audit.PostProcessor.
 func (p PhpCompat) Kind() string {
-	return "phpcs_phpcompat"
+	return "phpcs_phpcompatibility"
 }
 
 // Process runs the PHPCompatiblity post processing and determines the compatible versions.
