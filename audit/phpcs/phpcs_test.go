@@ -241,6 +241,31 @@ func TestProcessor_Process(t *testing.T) {
 			true,
 		},
 		{
+			"PHPCS Audit With Real PhpCompatibility PostProcess",
+			&Processor{
+				Standard:   "PHPCompatibility",
+				RuntimeSet: []string{"testVersion 5.2-"},
+				PostProcessors: []audit.Processor{
+					&PhpCompat{},
+				},
+			},
+			args{
+				message.Message{},
+				&audit.Result{
+					"audits": []string{
+						"phpcs_phpcompatibility",
+					},
+					"ingest": &ingest.Processor{
+						Dest: "./testdata/plugin",
+					},
+					"checksum":   "27dd8ed44a83ff94d557f9fd0412ed5a8cbca69ea04922d88c01184a07300a5a",
+					"tempFolder": currentDir + "/testdata/tmp",
+					"fileStore":  &storageProvider,
+				},
+			},
+			true,
+		},
+		{
 			"Error: Invalid standard.",
 			&Processor{
 				Standard: "Invalid",
