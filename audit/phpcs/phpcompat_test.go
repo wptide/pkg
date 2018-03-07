@@ -15,7 +15,7 @@ import (
 
 func mockWriteFile(filename string, data []byte, perm os.FileMode) error {
 	switch filename {
-	case "/tmp/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff-phpcs_phpcompat-detail.json":
+	case "/tmp/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff-phpcs_phpcompatibility-detail.json":
 		return errors.New("something went wrong")
 	default:
 		return ioutil.WriteFile(filename, data, perm)
