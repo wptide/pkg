@@ -82,6 +82,7 @@ func (p *Processor) Process(msg message.Message, result *audit.Result) {
 	}
 
 	// Set some defaults if not defined.
+	// @todo Use ENV.
 	if p.Parallel < 1 {
 		p.Parallel = 1
 	}
@@ -90,12 +91,13 @@ func (p *Processor) Process(msg message.Message, result *audit.Result) {
 		p.Encoding = "utf-8"
 	}
 
+	// @todo Use SQS message with p.* as fallback.
 	cmdName := "phpcs"
 	cmdArgs := []string{
 		"--extensions=php",
-		"--ignore=*/vendor/*,*/node_modules/*",
-		"--standard=" + p.standard(),
-		"--encoding=" + p.Encoding,
+		"--ignore=*/vendor/*,*/node_modules/*",  // @todo Respect SQS
+		"--standard=" + p.standard(),  // @todo Respect SQS
+		"--encoding=" + p.Encoding,  // @todo Respect SQS
 		"--basepath=" + p.FilesPath, // Remove this part from the filenames in PHPCS report.
 		"--report=json",
 		"--report-json=" + p.ReportFilePath,
@@ -104,6 +106,7 @@ func (p *Processor) Process(msg message.Message, result *audit.Result) {
 		"memory_limit=-1", // Leave memory handling up to the system.
 	}
 
+	// @todo this could come from SQS.
 	for _, pair := range p.RuntimeSet {
 		split := strings.Split(pair, " ")
 		if len(split) == 2 {
