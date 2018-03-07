@@ -25,8 +25,8 @@ func mockWriteFile(filename string, data []byte, perm os.FileMode) error {
 func TestPhpCompat_Kind(t *testing.T) {
 	t.Run("Process Kind", func(t *testing.T) {
 		p := PhpCompat{}
-		if got := p.Kind(); got != "phpcs_phpcompat" {
-			t.Errorf("Processor.Kind() = %v, Impossible, this should be phpcs_phpcompat.", got)
+		if got := p.Kind(); got != "phpcs_phpcompatibility" {
+			t.Errorf("Processor.Kind() = %v, Impossible, this should be phpcs_phpcompatibility.", got)
 		}
 	})
 }
@@ -324,8 +324,8 @@ func TestPhpCompat_summaryPath(t *testing.T) {
 					"checksum":   "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 				},
 			},
-			"39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_phpcompat.json",
-			"/tmp/39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_phpcompat.json",
+			"39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_phpcompatibility.json",
+			"/tmp/39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_phpcompatibility.json",
 			false,
 		},
 		{
