@@ -6,6 +6,8 @@
 
 # Test binary, build with `go test -c`
 *.test
+
+# Output of Overalls, specifically when used with Travis CI & Coveralls
 *.coverprofile
 
 # Output of the go coverage tool, specifically when used with LiteIDE
