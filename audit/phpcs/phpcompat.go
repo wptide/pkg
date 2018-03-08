@@ -33,7 +33,7 @@ func (p PhpCompat) Kind() string {
 }
 
 type PhpCompatDetails struct {
-	Totals       map[string]int                       `json:"totals"`
+	Totals   map[string]int                       `json:"totals"`
 	ErrorMap map[string][]string                  `json:"error_map"`
 	Errors   map[string]PhpCompatDetailsViolation `json:"errors"`
 }
@@ -119,7 +119,7 @@ func (p *PhpCompat) Process(msg message.Message, result *audit.Result) {
 					Source:   sniffMessage.Source,
 					Type:     sniffMessage.Type,
 					Severity: sniffMessage.Severity,
-					Files: make(map[string][]FilePosition),
+					Files:    make(map[string][]FilePosition),
 				}
 
 				// Get incompatible versions
