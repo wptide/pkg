@@ -1,0 +1,24 @@
+language: go
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+  slack:
+    rooms:
+      secure: alUyLXA2dwEDcXDLmysi3edu/iA9ZeALmIsX7XBIVn4V4DHtr/VQRP7K1duHvMUfOionbPFbPSYs1cef9ntyC5W/bMPWaqF/7WsjJlsja1Iun4vKiNcHgfUqw5wGK3fNzNadpWFhlQP2vDdMHTYCv217PN+iwbQ25CrwCbIoOhbTx+udQwLjXRxqDPM1bI5aCi+MK+RD/Fya940jFAbXHcBMgvAIKtapFqFLAdKL39RuG7a/iC4GadVhUG5q8FYmJToP4/B1bHLYQnMtiUw65LwKHIMiUKVPRcd02EAQROXq3E8XipY2ENEI7HcxeIHm41u9aZIZkagxRfHD13aLuFGu9xLeADhodE2uMPGYwIEqvS4hohkyQ4vWD8caBx+1Zuxqe5wzkImU0MSWmvpfrNxuGvEVIposEIPTY2K1HSL0PMLiGt3RpvOrfxfhJWDSq6EngDedb1Yj2HAztoh9m3Cau1pfXt6zNMPe0UKc3Uf7X61Rbp2HzfpCl5Ku4k01UA0bCUFvjUeadTP5ffxNXkGwMIl9JqkCNOl0hsZBP8okzorNhxwHAt33PpZXMmNJ2xgU3cdN7UqbVpvw+E35EiPFDEVMLNdBUWaOfp0zdCFP+KugMfreA4X3Q59MAAtj3rC/RuG5vQiK/b1pugPWvZ0owTt6/vXJFm+Ab519c94=
+
+go:
+  - 1.9
+
+install:
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+  - go get github.com/go-playground/overalls
+  - go get -v github.com/Masterminds/glide
+  - cd $GOPATH/src/github.com/Masterminds/glide && go install && cd -
+  - glide install
+
+script:
+  - overalls -project=github.com/wptide/pkg -covermode=count -debug
+  - goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN
