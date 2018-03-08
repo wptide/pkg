@@ -32,6 +32,26 @@ func (p PhpCompat) Kind() string {
 	return "phpcs_phpcompatibility"
 }
 
+type PhpCompatDetails struct {
+	Totals       map[string]int                       `json:"totals"`
+	ErrorMap map[string][]string                  `json:"error_map"`
+	Errors   map[string]PhpCompatDetailsViolation `json:"errors"`
+}
+
+type PhpCompatDetailsViolation struct {
+	Message  string                    `json:"message"`
+	Source   string                    `json:"source"`
+	Type     string                    `json:"type"`
+	Severity int                       `json:"severity"`
+	Versions []string                  `json:"versions"`
+	Files    map[string][]FilePosition `json:"files"`
+}
+
+type FilePosition struct {
+	Line   int `json:"line"`
+	Column int `json:"column"`
+}
+
 // Process runs the PHPCompatiblity post processing and determines the compatible versions.
 //
 // A detailed report is also sent to a storage provider which contains a structure ordered by each violating sniff which gives:
@@ -77,26 +97,59 @@ func (p *PhpCompat) Process(msg message.Message, result *audit.Result) {
 	brokenVersions := []string{}
 
 	// Dynamically creating our struct for JSON output.
-	sources := make(map[string]map[string]interface{})
+	details := &PhpCompatDetails{
+		Totals: map[string]int{
+			"errors":   fullResults.Totals.Errors,
+			"warnings": fullResults.Totals.Warnings,
+		},
+		ErrorMap: make(map[string][]string),
+		Errors:   make(map[string]PhpCompatDetailsViolation),
+	}
 
 	// Iterate files and only get summary data.
 	for filename, data := range fullResults.Files {
 		for _, sniffMessage := range data.Messages {
 
-			if _, ok := sources[sniffMessage.Source]; !ok {
-				sources[sniffMessage.Source] = make(map[string]interface{})
-				sources[sniffMessage.Source]["files"] = make(map[string]interface{})
+			// Create the new Violation if we don't have it already.
+			// This happens only once because we group failures.
+			if _, ok := details.Errors[sniffMessage.Source]; !ok {
+				// Create the object.
+				violation := PhpCompatDetailsViolation{
+					Message:  sniffMessage.Message,
+					Source:   sniffMessage.Source,
+					Type:     sniffMessage.Type,
+					Severity: sniffMessage.Severity,
+					Files: make(map[string][]FilePosition),
+				}
+
+				// Get incompatible versions
 				broken := phpcompat.BreaksVersions(sniffMessage)
+				violation.Versions = broken
+
+				// Add the source to each broken version.
+				for _, version := range broken {
+					details.ErrorMap[version] = append(details.ErrorMap[version], sniffMessage.Source)
+				}
+
 				// Add to broken versions so that we can determine compatibility later.
 				brokenVersions = phpcompat.MergeVersions(brokenVersions, broken)
-				sources[sniffMessage.Source]["breaks"] = broken
+
+				details.Errors[sniffMessage.Source] = violation
 			}
-			sources[sniffMessage.Source]["files"].(map[string]interface{})[filename] = sniffMessage
+
+			// Each violating file needs to be added to the particular violation.
+			details.Errors[sniffMessage.Source].Files[filename] = append(
+				details.Errors[sniffMessage.Source].Files[filename],
+				FilePosition{
+					sniffMessage.Line,
+					sniffMessage.Column,
+				},
+			)
 		}
 	}
 
 	// Will Marshall without error because the sources map gets initialized with `make()`
-	res, _ := json.Marshal(sources)
+	res, _ := json.Marshal(details)
 
 	// Determines where the detailed result will be written.
 	p.resultFile, p.resultPath, err = p.reportPath(r, "detail")
@@ -111,7 +164,7 @@ func (p *PhpCompat) Process(msg message.Message, result *audit.Result) {
 	}
 
 	// Attempt to upload the report file to a storage provider.
-	details, err := p.uploadResults(r)
+	auditDetails, err := p.uploadResults(r)
 	if err != nil {
 		errMsg := "could not write PHPCompatibility details to file store"
 		r[p.Kind()+"Error"] = errors.New(errMsg)
@@ -121,7 +174,7 @@ func (p *PhpCompat) Process(msg message.Message, result *audit.Result) {
 
 	// We don't want to override, so only add the details if there are no details.
 	if auditResults.Details == emptyResult.Details {
-		auditResults.Details = details.Details
+		auditResults.Details = auditDetails.Details
 	}
 
 	// Remove the broken versions from the PHP major versions to get the compatible versions.
