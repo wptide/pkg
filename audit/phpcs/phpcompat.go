@@ -86,7 +86,7 @@ func (p *PhpCompat) Process(msg message.Message, result *audit.Result) {
 			if _, ok := sources[sniffMessage.Source]; !ok {
 				sources[sniffMessage.Source] = make(map[string]interface{})
 				sources[sniffMessage.Source]["files"] = make(map[string]interface{})
-				broken := phpcompat.BreaksVersions(sniffMessage.Source)
+				broken := phpcompat.BreaksVersions(sniffMessage)
 				// Add to broken versions so that we can determine compatibility later.
 				brokenVersions = phpcompat.MergeVersions(brokenVersions, broken)
 				sources[sniffMessage.Source]["breaks"] = broken

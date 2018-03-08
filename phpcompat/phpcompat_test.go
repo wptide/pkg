@@ -3,11 +3,12 @@ package phpcompat
 import (
 	"reflect"
 	"testing"
+	"github.com/wptide/pkg/tide"
 )
 
 func TestBreaksVersions(t *testing.T) {
 	type args struct {
-		code string
+		message tide.PhpcsFilesMessage
 	}
 	tests := []struct {
 		name string
@@ -17,42 +18,42 @@ func TestBreaksVersions(t *testing.T) {
 		{
 			"PHPCompatibility.PHP.NewConstants.ill_illtrpFound",
 			args{
-				"PHPCompatibility.PHP.NewConstants.ill_illtrpFound",
+				testMessages["PHPCompatibility.PHP.NewConstants.ill_illtrpFound"],
 			},
 			[]string{"5.2"},
 		},
 		{
 			"PHPCompatibility.PHP.NewFunctions.random_bytesFound",
 			args{
-				"PHPCompatibility.PHP.NewFunctions.random_bytesFound",
+				testMessages["PHPCompatibility.PHP.NewFunctions.random_bytesFound"],
 			},
 			[]string{"5.2", "5.3", "5.4", "5.5", "5.6"},
 		},
 		{
 			"PHPCompatibility.PHP.ForbiddenNames.constFound",
 			args{
-				"PHPCompatibility.PHP.ForbiddenNames.constFound",
+				testMessages["PHPCompatibility.PHP.ForbiddenNames.constFound"],
 			},
 			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
 		},
 		{
 			"PHPCompatibility.PHP.DeprecatedFunctions.mysqli_send_long_dataDeprecatedRemoved",
 			args{
-				"PHPCompatibility.PHP.DeprecatedFunctions.mysqli_send_long_dataDeprecatedRemoved",
+				testMessages["PHPCompatibility.PHP.DeprecatedFunctions.mysqli_send_long_dataDeprecatedRemoved"],
 			},
 			[]string{"5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
 		},
 		{
 			"PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_cfbDeprecatedRemoved",
 			args{
-				"PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_cfbDeprecatedRemoved",
+				testMessages["PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_cfbDeprecatedRemoved"],
 			},
 			[]string{"7.0", "7.1", "7.2"},
 		},
 		{
 			"PHPCompatibility.PHP.ForbiddenNames.cloneFound",
 			args{
-				"PHPCompatibility.PHP.ForbiddenNames.cloneFound",
+				testMessages["PHPCompatibility.PHP.ForbiddenNames.cloneFound"],
 			},
 			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
 		},
@@ -60,21 +61,29 @@ func TestBreaksVersions(t *testing.T) {
 			// Warnings only, no breaks.
 			"PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated",
 			args{
-				"PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated",
+				testMessages["PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated"],
+			},
+			nil,
+		},
+		{
+			// Another Warning test.
+			"PHPCompatibility.PHP.DeprecatedPHP4StyleConstructors.Found",
+			args{
+				testMessages["PHPCompatibility.PHP.DeprecatedPHP4StyleConstructors.Found"],
 			},
 			nil,
 		},
 		{
 			"Unknown.Code",
 			args{
-				"Unknown.Code",
+				testMessages["Unknown.Code"],
 			},
 			nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := BreaksVersions(tt.args.code); !reflect.DeepEqual(got, tt.want) {
+			if got := BreaksVersions(tt.args.message); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("BreaksVersions() = %v, want %v", got, tt.want)
 			}
 		})

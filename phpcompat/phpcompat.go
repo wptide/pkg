@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/blang/semver"
 	"sort"
+	"github.com/wptide/pkg/tide"
 )
 
 var (
@@ -171,19 +172,15 @@ func GetVersionParts(version, lowIn string) (low, high, majorMinor, reported str
 }
 
 // BreasksVersions takes a PHPCompatibility sniff code and returns the versions that break for that code.
-func BreaksVersions(code string) []string {
+func BreaksVersions(message tide.PhpcsFilesMessage) []string {
 
-	compat, ok := PhpCompatibilityMap[code]
+	compat, err := Parse(message)
 
-	if ! ok {
+	if err != nil || strings.ToLower(message.Type) != "error" {
 		return nil
 	}
 
 	broken := []string{}
-
-	if compat.Breaks == nil {
-		return nil
-	}
 
 	var rangeString string
 	if compat.Breaks.Reported == "all" {

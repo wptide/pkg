@@ -73,17 +73,20 @@ type PhpcsResults struct {
 		Warnings int `json:"warnings,omitempty"`
 	} `json:"totals,omitempty"`
 	Files map[string]struct {
-		Errors   int `json:"errors, omitempty"`
-		Warnings int `json:"warnings,omitempty"`
-		Messages []struct {
-			Message  string `json:"message"`
-			Source   string `json:"source"`
-			Type     string `json:"type"`
-			Line     int    `json:"line"`
-			Column   int    `json:"column"`
-			Severity int    `json:"severity,omitempty"`
-		} `json:"messages,omitempty"`
+		Errors   int                 `json:"errors, omitempty"`
+		Warnings int                 `json:"warnings,omitempty"`
+		Messages []PhpcsFilesMessage `json:"messages,omitempty"`
 	} `json:"files,omitempty"`
+}
+
+type PhpcsFilesMessage struct {
+	Message  string `json:"message"`
+	Source   string `json:"source"`
+	Severity int    `json:"severity,omitempty"`
+	Type     string `json:"type"`
+	Line     int    `json:"line"`
+	Column   int    `json:"column"`
+	Fixable  bool   `json:"fixable"`
 }
 
 type AuditSummary struct {
