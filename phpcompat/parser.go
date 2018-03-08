@@ -217,6 +217,7 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 	}, nil
 }
 
+// getVersions extracts the versions from a message string.
 func getVersions(line string) []string {
 	pattern := `(?i)((\d+\.)+\d+)|(\ball\b)`
 	var re = regexp.MustCompile(pattern)
@@ -238,8 +239,10 @@ func getVersions(line string) []string {
 	return result
 }
 
+// orderMatches orders any errors according to the `verbs` order.
+// The order in the switch is very important! This method
+// ensures its correct.
 func orderMatches(m []string) (matches []string) {
-
 	found := func(value string, matches []string) bool {
 		for _, val := range matches {
 			if val == value {
