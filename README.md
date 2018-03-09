@@ -1,6 +1,6 @@
 # github.com/wptide/pkg
 
-[![Build Status](https://travis-ci.org/wptide/pkg.svg?branch=master)](https://travis-ci.org/wptide/pkg) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://travis-ci.org/wptide/pkg.svg?branch=master)](https://travis-ci.org/wptide/pkg) [![Coverage Status](https://coveralls.io/repos/github/wptide/pkg/badge.svg?branch=master)](https://coveralls.io/github/wptide/pkg?branch=master) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 This repository contains common packages that are used for the development of
 Tide related services.
