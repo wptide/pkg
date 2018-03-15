@@ -121,15 +121,11 @@ func TestCommand_Run(t *testing.T) {
 			&Command{
 				execFunc: mockExecCommand,
 			},
-			funcs{
-				waitFunc: func(cmd *exec.Cmd) error {
-					return errors.New("Wait failed")
-				},
-			},
+			funcs{},
 			args{
-				name: "fail",
+				name: "test-exit",
 			},
-			nil,
+			[]byte("Exit!"),
 			nil,
 			true,
 		},
@@ -153,7 +149,7 @@ func TestCommand_Run(t *testing.T) {
 				tt.c.waitFunc = tt.funcs.waitFunc
 			}
 
-			outBuff, errBuff, err := tt.c.Run(tt.args.name, tt.args.arg...)
+			outBuff, errBuff, err, _ := tt.c.Run(tt.args.name, tt.args.arg...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Command.Run() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -288,6 +284,9 @@ func TestHelperProcess(t *testing.T) {
 	case "test-fail":
 		fmt.Fprintf(os.Stderr, "Failed!")
 		os.Exit(0)
+	case "test-exit":
+		fmt.Fprintf(os.Stdout, "Exit!")
+		os.Exit(22)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %q\n", cmd)
 		os.Exit(2)

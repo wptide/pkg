@@ -81,7 +81,7 @@ func (lh *Lighthouse) process() error {
 	cmdArgs := []string{fmt.Sprintf("https://wp-themes.com/%s", lh.Message.Slug)}
 
 	// Prepare the command and set the stdOut pipe.
-	resultBytes, errorBytes, err := runner.Run(cmdName, cmdArgs...)
+	resultBytes, errorBytes, err, _ := runner.Run(cmdName, cmdArgs...)
 
 	if len(errorBytes) > 0 {
 		return lh.Error("lighthouse command failed: " + string(errorBytes))

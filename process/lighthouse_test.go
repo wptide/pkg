@@ -16,17 +16,17 @@ import (
 
 type mockRunner struct{}
 
-func (m mockRunner) Run(name string, arg ...string) ([]byte, []byte, error) {
+func (m mockRunner) Run(name string, arg ...string) ([]byte, []byte, error, int) {
 
 	switch arg[0] {
 	case "https://wp-themes.com/test":
-		return []byte(exampleReport()), nil, nil
+		return []byte(exampleReport()), nil, nil, 0
 	case "https://wp-themes.com/jsonError":
-		return []byte("this is not json"), nil, nil
+		return []byte("this is not json"), nil, nil, 0
 	case "https://wp-themes.com/error":
-		return nil, []byte("error output"), nil
+		return nil, []byte("error output"), nil, 0
 	default:
-		return nil, nil, errors.New("Something went wrong.")
+		return nil, nil, errors.New("Something went wrong."), 1
 	}
 }
 

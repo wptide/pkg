@@ -6,10 +6,11 @@ import (
 	"sync"
 	"io"
 	"errors"
+	"syscall"
 )
 
 type Runner interface {
-	Run(name string, arg ...string) ([]byte, []byte, error)
+	Run(name string, arg ...string) ([]byte, []byte, error, int)
 }
 
 type Command struct {
@@ -22,7 +23,7 @@ type Command struct {
 	waitFunc   func(*exec.Cmd) (error)
 }
 
-func (c *Command) Run(name string, arg ...string) ([]byte, []byte, error) {
+func (c *Command) Run(name string, arg ...string) ([]byte, []byte, error, int) {
 
 	// Init execFunc if not set. Once.
 	c.once.Do(func() {
@@ -34,18 +35,18 @@ func (c *Command) Run(name string, arg ...string) ([]byte, []byte, error) {
 
 	cmdReader, err := c.stdOutFunc(cmd)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, err, 2
 	}
 
 	errReader, err := c.stdErrFunc(cmd)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, err, 2
 	}
 
 	// Start the command.
 	err = c.startFunc(cmd)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, err, 2
 	}
 
 	// Read stdout pipe.
@@ -57,12 +58,16 @@ func (c *Command) Run(name string, arg ...string) ([]byte, []byte, error) {
 	errorBytes, _ := ioutil.ReadAll(errReader)
 
 	// Wait for command to exit and stdio to be read.
-	err = c.waitFunc(cmd)
-	if err != nil {
-		return nil, nil, err
+	exitCode := 0
+	exitErr := c.waitFunc(cmd)
+	if exitErr, ok := exitErr.(*exec.ExitError); ok {
+		if status, ok := exitErr.Sys().(syscall.WaitStatus); ok {
+			exitCode = status.ExitStatus()
+		}
+		return resultBytes, errorBytes, exitErr, exitCode
 	}
 
-	return resultBytes, errorBytes, nil
+	return resultBytes, errorBytes, nil, exitCode
 }
 
 func (c *Command) PrepareFuncs() {
