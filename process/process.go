@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"github.com/wptide/pkg/message"
-	"github.com/wptide/pkg/audit"
 	"io/ioutil"
 	"os/exec"
 	"os"
@@ -17,19 +16,18 @@ var (
 	execCommand = exec.Command
 
 	// Using ioutil.WriteFile as a variable so that we can mock it in tests.
-	writeFile   = ioutil.WriteFile
+	writeFile = ioutil.WriteFile
 
 	// Using os.Open as a variable so that we can mock it in tests.
-	fileOpen    = os.Open
+	fileOpen = os.Open
 )
-
 
 // All our processes will use this as a base.
 type Process struct {
 	context   context.Context
-	Message   message.Message // Keeps track of the original message.
-	Result    audit.Result    // Passes along a Result object.
-	FilesPath string          // Path of files to audit.
+	Message   message.Message        // Keeps track of the original message.
+	Result    map[string]interface{} // Passes along a Result object.
+	FilesPath string                 // Path of files to audit.
 }
 
 // A default implementation with an error nag. Not required, but serves as an example.
@@ -55,11 +53,11 @@ func (p Process) GetMessage() message.Message {
 	return p.Message
 }
 
-func (p *Process) SetResults(res audit.Result) {
+func (p *Process) SetResults(res map[string]interface{}) {
 	p.Result = res
 }
 
-func (p Process) GetResult() audit.Result {
+func (p Process) GetResult() map[string]interface{} {
 	return p.Result
 }
 
@@ -96,8 +94,8 @@ type Processor interface {
 	SetContext(ctx context.Context)
 	SetMessage(msg message.Message)
 	GetMessage() message.Message
-	SetResults(res audit.Result)
-	GetResult() audit.Result
+	SetResults(res map[string]interface{})
+	GetResult() map[string]interface{}
 	SetFilesPath(path string)
 	GetFilesPath() string
 }
