@@ -59,3 +59,51 @@ func TestProcess_Run(t *testing.T) {
 		})
 	}
 }
+
+func TestProcess_HasAudit(t *testing.T) {
+	type fields struct {
+		context   context.Context
+		Message   message.Message
+		Result    audit.Result
+		FilesPath string
+	}
+	type args struct {
+		kind string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		{
+			"Has Lighthouse",
+			fields{
+				Message:message.Message{
+					Audits: &[]message.Audit{
+						{
+							Type: "lighthouse",
+						},
+					},
+				},
+			},
+			args{
+				"lighthouse",
+			},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Process{
+				context:   tt.fields.context,
+				Message:   tt.fields.Message,
+				Result:    tt.fields.Result,
+				FilesPath: tt.fields.FilesPath,
+			}
+			if got := p.HasAudit(tt.args.kind); got != tt.want {
+				t.Errorf("Process.HasAudit() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

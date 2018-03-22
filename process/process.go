@@ -9,6 +9,7 @@ import (
 	"github.com/wptide/pkg/audit"
 	"io/ioutil"
 	"os/exec"
+	"os"
 )
 
 var (
@@ -17,6 +18,9 @@ var (
 
 	// Using ioutil.WriteFile as a variable so that we can mock it in tests.
 	writeFile   = ioutil.WriteFile
+
+	// Using os.Open as a variable so that we can mock it in tests.
+	fileOpen    = os.Open
 )
 
 
@@ -71,6 +75,19 @@ func (p *Process) CopyFields(proc Processor) {
 	p.SetMessage(proc.GetMessage())
 	p.SetResults(proc.GetResult())
 	p.SetFilesPath(proc.GetFilesPath())
+}
+
+func (p *Process) HasAudit(kind string) bool {
+
+	found := false
+
+	for _, audit := range *p.Message.Audits {
+		if audit.Type == kind {
+			found = true
+		}
+	}
+
+	return found
 }
 
 // Any process needs to implement the Processor interface.

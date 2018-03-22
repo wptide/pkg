@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"github.com/hhatto/gocloc"
 	"strings"
-	"os"
 	"regexp"
 	"fmt"
 	"github.com/wptide/pkg/tide"
@@ -46,6 +45,7 @@ func (info *Info) Run() (<-chan error, error) {
 				if err := info.process(); err != nil {
 					// Pass the error up the error channel.
 					errc <- err
+					// break so that the message doesn't get passed along.
 					break
 				}
 
@@ -79,7 +79,7 @@ func (info *Info) process() error {
 
 	projectType, details, _ := getProjectDetails(path)
 
-	info.Result["info"] = &tide.CodeInfo{
+	info.Result["info"] = tide.CodeInfo{
 		Type:    projectType,
 		Details: details,
 		Cloc:    cloc,
@@ -181,7 +181,7 @@ func extractHeader(filename string) (projectType string, details []tide.InfoDeta
 		"Tags",
 	}
 
-	f, _ := os.Open(filename)
+	f, _ := fileOpen(filename)
 	defer f.Close()
 	b1 := make([]byte, 8192)
 	n1, _ := f.Read(b1)

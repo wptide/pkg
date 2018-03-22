@@ -50,12 +50,23 @@ func (lh *Lighthouse) Run() (<-chan error, error) {
 				// Copy Process fields from `in` process.
 				lh.CopyFields(in)
 
+				// Assume that the rest of the message is also broken.
+				// Don't pass this down the pipe.
+				if lh.Message.Title == "" {
+					errc <- lh.Error("invalid message")
+					break
+				}
+
 				// Run the process.
 				// If processing produces an error send it up the error channel.
-				if err := lh.process(); err != nil {
-					// Pass the error up the error channel.
-					errc <- err
-					break
+				for _, audit := range *lh.Message.Audits {
+					if audit.Type == "lighthouse" {
+						if err := lh.process(); err != nil {
+							// Pass the error up the error channel.
+							errc <- err
+							// Don't break, the message is still useful to other processes.
+						}
+					}
 				}
 
 				// Send process to the out channel.
@@ -93,7 +104,7 @@ func (lh *Lighthouse) process() error {
 		return err
 	}
 
-	auditResult := &tide.AuditResult{}
+	auditResult := tide.AuditResult{}
 
 	// Upload and get full results.
 	log.Log(lh.Message.Title, "Uploading results to remote storage.")
@@ -102,7 +113,6 @@ func (lh *Lighthouse) process() error {
 		return err
 	}
 
-	// @todo Decide if `Details` should only contain results from `reportCategories` and update structure in tide/item.go.
 	if fullResults != nil {
 		auditResult.Full = fullResults.Full
 		auditResult.Details.Type = fullResults.Full.Type
@@ -110,7 +120,7 @@ func (lh *Lighthouse) process() error {
 		auditResult.Details.BucketName = fullResults.Full.BucketName
 	}
 
-	auditResult.Summary = &tide.AuditSummary{
+	auditResult.Summary = tide.AuditSummary{
 		LighthouseSummary: results,
 	}
 
@@ -142,11 +152,7 @@ func (lh Lighthouse) uploadToStorage(buffer []byte) (*tide.AuditResult, error) {
 
 	if err == nil {
 		results = &tide.AuditResult{
-			Full: struct {
-				Type       string `json:"type,omitempty"`
-				Key        string `json:"key,omitempty"`
-				BucketName string `json:"bucket_name,omitempty"`
-			}{
+			Full: tide.AuditDetails{
 				Type:       lh.StorageProvider.Kind(),
 				Key:        storageRef,
 				BucketName: lh.StorageProvider.CollectionRef(),

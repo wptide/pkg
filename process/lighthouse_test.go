@@ -7,11 +7,12 @@ import (
 	"github.com/wptide/pkg/storage"
 	"os"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"github.com/wptide/pkg/shell"
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/audit"
+	"bytes"
+	"github.com/wptide/pkg/log"
 )
 
 type mockRunner struct{}
@@ -20,7 +21,7 @@ func (m mockRunner) Run(name string, arg ...string) ([]byte, []byte, error, int)
 
 	switch arg[0] {
 	case "https://wp-themes.com/test":
-		return []byte(exampleReport()), nil, nil, 0
+		return []byte(exampleLighthouseReport()), nil, nil, 0
 	case "https://wp-themes.com/jsonError":
 		return []byte("this is not json"), nil, nil, 0
 	case "https://wp-themes.com/error":
@@ -30,34 +31,23 @@ func (m mockRunner) Run(name string, arg ...string) ([]byte, []byte, error, int)
 	}
 }
 
-type mockStorage struct{}
-
-func (m mockStorage) Kind() string {
-	return "mock"
-}
-
-func (m mockStorage) CollectionRef() string {
-	return "mock-collection"
-}
-
-func (m mockStorage) UploadFile(filename, reference string) error {
-	return nil
-}
-
-func (m mockStorage) DownloadFile(reference, filename string) error {
-	return nil
-}
-
 func mockWriteFile(filename string, data []byte, perm os.FileMode) error {
+
 	switch filename {
+	case "./testdata/tmp/phpcompatwriteerror-phpcs_phpcompatibility-details.json":
+		fallthrough
 	case "./testdata/tmp/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff-lighthouse-full.json":
 		return errors.New("something went wrong")
 	default:
-		return nil
+		return ioutil.WriteFile(filename, data, perm)
 	}
 }
 
 func TestLighthouse_Run(t *testing.T) {
+
+	b := bytes.Buffer{}
+	log.SetOutput(&b)
+	defer log.SetOutput(os.Stdout)
 
 	// Set out execCommand variable to the mock function.
 	runner = &mockRunner{}
@@ -72,6 +62,20 @@ func TestLighthouse_Run(t *testing.T) {
 	// Need to test with a context.
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
+
+	// Make temp folder and clean.
+	os.MkdirAll("./testdata/tmp", os.ModePerm)
+	defer os.RemoveAll("./testdata/tmp")
+
+	// Make upload folder and clean.
+	os.MkdirAll("./testdata/upload", os.ModePerm)
+	defer os.RemoveAll("./testdata/upload")
+
+	audits := &[]message.Audit{
+		{
+			Type: "lighthouse",
+		},
+	}
 
 	type fields struct {
 		Process         Process
@@ -143,8 +147,9 @@ func TestLighthouse_Run(t *testing.T) {
 				&Info{
 					Process: Process{
 						Message: message.Message{
-							Title: "Test",
-							Slug:  "test",
+							Title:  "Test",
+							Slug:   "test",
+							Audits: audits,
 						},
 						Result: audit.Result{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
@@ -153,6 +158,27 @@ func TestLighthouse_Run(t *testing.T) {
 				},
 			},
 			false,
+			false,
+		},
+		{
+			"Invalid Message",
+			fields{
+				In:              make(<-chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+				TempFolder:      "./testdata/tmp",
+			},
+			[]Processor{
+				&Info{
+					Process: Process{
+						Message: message.Message{},
+						Result: audit.Result{
+							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
+						},
+					},
+				},
+			},
+			true,
 			false,
 		},
 		{
@@ -167,8 +193,9 @@ func TestLighthouse_Run(t *testing.T) {
 				&Info{
 					Process: Process{
 						Message: message.Message{
-							Title: "Test",
-							Slug:  "test",
+							Title:  "Test",
+							Slug:   "test",
+							Audits: audits,
 						},
 						Result: audit.Result{},
 					},
@@ -189,8 +216,9 @@ func TestLighthouse_Run(t *testing.T) {
 				&Info{
 					Process: Process{
 						Message: message.Message{
-							Title: "File Error",
-							Slug:  "test",
+							Title:  "File Error",
+							Slug:   "test",
+							Audits: audits,
 						},
 						Result: audit.Result{
 							"checksum": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
@@ -213,8 +241,9 @@ func TestLighthouse_Run(t *testing.T) {
 				&Info{
 					Process: Process{
 						Message: message.Message{
-							Title: "LH Error",
-							Slug:  "error",
+							Title:  "LH Error",
+							Slug:   "error",
+							Audits: audits,
 						},
 						Result: audit.Result{
 							"checksum": "1234567890",
@@ -237,8 +266,9 @@ func TestLighthouse_Run(t *testing.T) {
 				&Info{
 					Process: Process{
 						Message: message.Message{
-							Title: "LH JSON Error",
-							Slug:  "jsonError",
+							Title:  "LH JSON Error",
+							Slug:   "jsonError",
+							Audits: audits,
 						},
 						Result: audit.Result{
 							"checksum": "1234567890",
@@ -247,6 +277,35 @@ func TestLighthouse_Run(t *testing.T) {
 				},
 			},
 			true,
+			false,
+		},
+		{
+			"Not Lighthouse",
+			fields{
+				In:              make(<-chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+				TempFolder:      "./testdata/tmp",
+			},
+			[]Processor{
+				&Info{
+					Process: Process{
+						Message: message.Message{
+							Title: "Not Lighthouse",
+							Slug:  "Not Lighthouse",
+							Audits: &[]message.Audit{
+								{
+									Type: "phpcs",
+								},
+							},
+						},
+						Result: audit.Result{
+							"checksum": "1234567890",
+						},
+					},
+				},
+			},
+			false,
 			false,
 		},
 	}
@@ -290,67 +349,7 @@ func TestLighthouse_Run(t *testing.T) {
 	}
 }
 
-// TestHelperProcess is the fake command.
-func TestHelperProcess(t *testing.T) {
-
-	// If the helper process var is not set this code should not run.
-	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
-		return
-	}
-	// Exit helper sub routine if nothing else exits.
-	defer os.Exit(0)
-
-	// Get the passed arguments.
-	args := os.Args
-	for len(args) > 0 {
-		if args[0] == "--" {
-			args = args[1:]
-			break
-		}
-		args = args[1:]
-	}
-
-	// If no arguments, write to Stderr and exit
-	if len(args) == 0 {
-		fmt.Fprintf(os.Stderr, "No command\n")
-		os.Exit(2)
-	}
-
-	cmd, args := args[0], args[1:]
-
-	switch cmd {
-
-	case "lh":
-		switch args[0] {
-		case "https://wp-themes.com/error":
-			fmt.Fprintf(os.Stderr, "Error occurred.")
-			os.Exit(1)
-		case "https://wp-themes.com/jsonError":
-			fmt.Fprintf(os.Stdout, "Invalid json.")
-			os.Exit(0)
-		case "https://wp-themes.com/StdoutPipeError":
-			fmt.Fprintf(os.Stderr, "Error occurred.")
-			os.Exit(1)
-		case "https://wp-themes.com/StderrPipeError":
-			fmt.Fprintf(os.Stderr, "Error occurred.")
-			os.Exit(1)
-		case "https://wp-themes.com/StartError":
-			fmt.Fprintf(os.Stderr, "Error occurred.")
-			os.Exit(1)
-		case "https://wp-themes.com/WaitError":
-			fmt.Fprintf(os.Stderr, "Error occurred.")
-			os.Exit(1)
-		default:
-			fmt.Fprintf(os.Stdout, exampleReport())
-			os.Exit(0)
-		}
-	default:
-		fmt.Fprintf(os.Stderr, "Unknown command %q\n", cmd)
-		os.Exit(2)
-	}
-}
-
-func exampleReport() string {
+func exampleLighthouseReport() string {
 	return `{
   "reportCategories": [
     {

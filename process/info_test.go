@@ -9,9 +9,16 @@ import (
 	"github.com/wptide/pkg/audit"
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/tide"
+	"bytes"
+	"os"
+	"github.com/wptide/pkg/log"
 )
 
 func TestInfo_Run(t *testing.T) {
+
+	b := bytes.Buffer{}
+	log.SetOutput(&b)
+	defer log.SetOutput(os.Stdout)
 
 	// Need to test with a context.
 	ctx, cancelFunc := context.WithCancel(context.Background())

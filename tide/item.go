@@ -49,19 +49,9 @@ type ClocResult struct {
 }
 
 type AuditResult struct {
-	Full struct {
-		Type       string `json:"type,omitempty"`
-		Key        string `json:"key,omitempty"`
-		BucketName string `json:"bucket_name,omitempty"`
-	} `json:"full,omitempty"`
-	Details struct {
-		Type       string `json:"type,omitempty"`
-		Key        string `json:"key,omitempty"`
-		BucketName string `json:"bucket_name,omitempty"`
-		*PhpcsResults
-		*LighthouseResults
-	} `json:"details,omitempty"`
-	Summary            *AuditSummary          `json:"summary,omitempty"`
+	Full               AuditDetails           `json:"full,omitempty"`
+	Details            AuditDetails           `json:"details,omitempty"`
+	Summary            AuditSummary           `json:"summary,omitempty"`
 	CompatibleVersions []string               `json:"compatible_versions,omitempty"`
 	Error              string                 `json:"error,omitempty"`
 	Extra              map[string]interface{} `json:"extra,omitempty"`
@@ -87,6 +77,14 @@ type PhpcsFilesMessage struct {
 	Line     int    `json:"line"`
 	Column   int    `json:"column"`
 	Fixable  bool   `json:"fixable"`
+}
+
+type AuditDetails struct {
+	Type       string `json:"type,omitempty"`
+	Key        string `json:"key,omitempty"`
+	BucketName string `json:"bucket_name,omitempty"`
+	*PhpcsResults
+	*LighthouseResults
 }
 
 type AuditSummary struct {

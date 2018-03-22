@@ -44,6 +44,7 @@ func (ig *Ingest) Run() (<-chan error, error) {
 				if err := validateMessage(msg); err != nil {
 					// Pass the error up the error channel.
 					errc <- err
+					// break so that the message doesn't get passed along.
 					break
 				}
 
@@ -55,6 +56,7 @@ func (ig *Ingest) Run() (<-chan error, error) {
 				if err := ig.process(); err != nil {
 					// Pass the error up the error channel.
 					errc <- err
+					// break so that the message doesn't get passed along.
 					break
 				}
 
