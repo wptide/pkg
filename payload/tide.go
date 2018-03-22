@@ -54,36 +54,57 @@ func (t TidePayload) BuildPayload(msg message.Message, data map[string]interface
 
 func fallbackValue(value ...interface{}) interface{} {
 
-	for _, val := range value {
+	for i, val := range value {
 
 		switch val.(type) {
 		case tide.CodeInfo:
 			if val.(tide.CodeInfo).Type != "" {
 				return val.(tide.CodeInfo)
 			}
+			if i == (len(value)-1) {
+				return nil
+			}
 		case int64:
 			if val.(int64) != 0 {
 				return val.(int64)
+			}
+			if i == (len(value)-1) {
+				return int64(0)
 			}
 		case int32:
 			if val.(int32) != 0 {
 				return val.(int32)
 			}
+			if i == (len(value)-1) {
+				return int32(0)
+			}
 		case int:
 			if val.(int) != 0 {
 				return val.(int)
+			}
+			if i == (len(value)-1) {
+				return 0
 			}
 		case string:
 			if val.(string) != "" {
 				return val.(string)
 			}
+			if i == (len(value)-1) {
+				return ""
+			}
 		case float64:
 			if val.(float64) != 0.0 {
 				return val.(float64)
 			}
+			if i == (len(value)-1) {
+				return float64(0.0)
+			}
 		case float32:
 			if val.(float32) != 0.0 {
 				return val.(float32)
+			}
+			if i == (len(value)-1) {
+				return float32(0.0)
 			}
 		default:
 			return val

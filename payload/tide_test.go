@@ -7,6 +7,7 @@ import (
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/tide"
 	"errors"
+	"fmt"
 )
 
 type MockTideClient struct {
@@ -27,6 +28,13 @@ func (m MockTideClient) SendPayload(method, endpoint, data string) (string, erro
 }
 
 func TestTidePayload_BuildPayload(t *testing.T) {
+
+	mockInfo := tide.CodeInfo{
+		"plugin",
+		[]tide.InfoDetails{},
+		map[string]tide.ClocResult{},
+	}
+
 	type fields struct {
 		Client tide.ClientInterface
 	}
@@ -41,7 +49,54 @@ func TestTidePayload_BuildPayload(t *testing.T) {
 		want    []byte
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			"No CodeInfo",
+			fields{
+				&MockTideClient{},
+			},
+			args{},
+			nil,
+			true,
+		},
+		{
+			"No Results",
+			fields{
+				&MockTideClient{},
+			},
+			args{
+				data: map[string]interface{}{
+					"info": mockInfo,
+				},
+			},
+			nil,
+			true,
+		},
+		{
+			"Some Results",
+			fields{
+				&MockTideClient{},
+			},
+			args{
+				data: map[string]interface{}{
+					"info": mockInfo,
+					"phpcs_demo": tide.AuditResult{
+						Full: tide.AuditDetails{
+							Type:       "mock",
+							Key:        "mock",
+							BucketName: "mock",
+						},
+						Details: tide.AuditDetails{
+							Type:       "mock",
+							Key:        "mock",
+							BucketName: "mock",
+						},
+					},
+					"checksum": "abcdefg",
+				},
+			},
+			[]byte(`{"title":"","content":"","version":"","checksum":"abcdefg","visibility":"","project_type":"plugin","source_url":"","source_type":"","code_info":{"type":"plugin","details":[],"cloc":{}},"results":{"phpcs_demo":{"full":{"type":"mock","key":"mock","bucket_name":"mock"},"details":{"type":"mock","key":"mock","bucket_name":"mock"},"summary":{}}}}`),
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -54,6 +109,7 @@ func TestTidePayload_BuildPayload(t *testing.T) {
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
+				fmt.Println(string(got))
 				t.Errorf("TidePayload.BuildPayload() = %v, want %v", got, tt.want)
 			}
 		})
@@ -101,6 +157,16 @@ func Test_fallbackValue(t *testing.T) {
 			"three",
 		},
 		{
+			"Strings Empty",
+			args{
+				[]interface{}{
+					"",
+					"",
+				},
+			},
+			"",
+		},
+		{
 			"int64",
 			args{
 				[]interface{}{
@@ -111,6 +177,16 @@ func Test_fallbackValue(t *testing.T) {
 			int64(4),
 		},
 		{
+			"int64 Empty",
+			args{
+				[]interface{}{
+					int64(0),
+					int64(0),
+				},
+			},
+			int64(0),
+		},
+		{
 			"int32",
 			args{
 				[]interface{}{
@@ -119,6 +195,16 @@ func Test_fallbackValue(t *testing.T) {
 				},
 			},
 			int32(12),
+		},
+		{
+			"int32 Empty",
+			args{
+				[]interface{}{
+					int32(0),
+					int32(0),
+				},
+			},
+			int32(0),
 		},
 		{
 			"int",
@@ -132,6 +218,16 @@ func Test_fallbackValue(t *testing.T) {
 			42,
 		},
 		{
+			"int Empty",
+			args{
+				[]interface{}{
+					0,
+					0,
+				},
+			},
+			0,
+		},
+		{
 			"float64",
 			args{
 				[]interface{}{
@@ -143,6 +239,16 @@ func Test_fallbackValue(t *testing.T) {
 			float64(42.0),
 		},
 		{
+			"float64 Empty",
+			args{
+				[]interface{}{
+					float64(0.0),
+					float64(0.0),
+				},
+			},
+			float64(0.0),
+		},
+		{
 			"float32",
 			args{
 				[]interface{}{
@@ -152,6 +258,16 @@ func Test_fallbackValue(t *testing.T) {
 				},
 			},
 			float32(42.0),
+		},
+		{
+			"float32 Empty",
+			args{
+				[]interface{}{
+					float32(0.0),
+					float32(0.0),
+				},
+			},
+			float32(0.0),
 		},
 		{
 			"Other - default",
@@ -172,6 +288,16 @@ func Test_fallbackValue(t *testing.T) {
 				},
 			},
 			tide.CodeInfo{Type: "plugin"},
+		},
+		{
+			"CodeInfo Empty",
+			args{
+				[]interface{}{
+					tide.CodeInfo{Type: ""},
+					tide.CodeInfo{Type: ""},
+				},
+			},
+			nil,
 		},
 		{
 			"No args",
