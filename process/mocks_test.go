@@ -3,7 +3,7 @@ package process
 import (
 	"os"
 	"io"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 type mockStorage struct{}

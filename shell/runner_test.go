@@ -6,7 +6,7 @@ import (
 	"os"
 	"fmt"
 	"io"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 func mockExecCommand(command string, args ...string) *exec.Cmd {
