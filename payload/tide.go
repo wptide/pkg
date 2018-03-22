@@ -62,12 +62,12 @@ func fallbackValue(value ...interface{}) interface{} {
 				return val.(tide.CodeInfo)
 			}
 		case int64:
-			if val.(int) != 0 {
-				return val.(int)
+			if val.(int64) != 0 {
+				return val.(int64)
 			}
 		case int32:
-			if val.(int) != 0 {
-				return val.(int)
+			if val.(int32) != 0 {
+				return val.(int32)
 			}
 		case int:
 			if val.(int) != 0 {
@@ -77,12 +77,20 @@ func fallbackValue(value ...interface{}) interface{} {
 			if val.(string) != "" {
 				return val.(string)
 			}
+		case float64:
+			if val.(float64) != 0.0 {
+				return val.(float64)
+			}
+		case float32:
+			if val.(float32) != 0.0 {
+				return val.(float32)
+			}
 		default:
 			return val
 		}
 	}
 
-	return value
+	return nil
 }
 
 func (t TidePayload) SendPayload(destination string, payload []byte) ([]byte, error) {

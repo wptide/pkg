@@ -19,8 +19,8 @@ func (m MockTideClient) Authenticate(clientId, clientSecret, authEndpoint string
 
 func (m MockTideClient) SendPayload(method, endpoint, data string) (string, error) {
 
-	if m.apiError {
-		return "", errors.New("API error")
+	if endpoint == "http://test.local/fail" {
+		return "", errors.New("something went wrong")
 	}
 
 	return "", nil
@@ -41,7 +41,7 @@ func TestTidePayload_BuildPayload(t *testing.T) {
 		want    []byte
 		wantErr bool
 	}{
-	// TODO: Add test cases.
+		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -69,7 +69,115 @@ func Test_fallbackValue(t *testing.T) {
 		args args
 		want interface{}
 	}{
-	// TODO: Add test cases.
+		{
+			"Mismatch First Item",
+			args{
+				[]interface{}{
+					"one",
+					2,
+				},
+			},
+			"one",
+		},
+		{
+			"Mismatch Second Item",
+			args{
+				[]interface{}{
+					"",
+					2,
+				},
+			},
+			2,
+		},
+		{
+			"Strings",
+			args{
+				[]interface{}{
+					"",
+					"",
+					"three",
+				},
+			},
+			"three",
+		},
+		{
+			"int64",
+			args{
+				[]interface{}{
+					int64(4),
+					int64(2),
+				},
+			},
+			int64(4),
+		},
+		{
+			"int32",
+			args{
+				[]interface{}{
+					int32(0),
+					int32(12),
+				},
+			},
+			int32(12),
+		},
+		{
+			"int",
+			args{
+				[]interface{}{
+					0,
+					0,
+					42,
+				},
+			},
+			42,
+		},
+		{
+			"float64",
+			args{
+				[]interface{}{
+					float64(0.0),
+					float64(42.0),
+					float64(0.0),
+				},
+			},
+			float64(42.0),
+		},
+		{
+			"float32",
+			args{
+				[]interface{}{
+					float32(0.0),
+					float32(42.0),
+					float32(0.0),
+				},
+			},
+			float32(42.0),
+		},
+		{
+			"Other - default",
+			args{
+				[]interface{}{
+					[]string{"a"},
+					[]string{"b"},
+				},
+			},
+			[]string{"a"},
+		},
+		{
+			"CodeInfo",
+			args{
+				[]interface{}{
+					tide.CodeInfo{Type: ""},
+					tide.CodeInfo{Type: "plugin"},
+				},
+			},
+			tide.CodeInfo{Type: "plugin"},
+		},
+		{
+			"No args",
+			args{},
+			nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -95,7 +203,30 @@ func TestTidePayload_SendPayload(t *testing.T) {
 		want    []byte
 		wantErr bool
 	}{
-	// TODO: Add test cases.
+		{
+			"Successful Send",
+			fields{
+				&MockTideClient{},
+			},
+			args{
+				"http://test.local/endpoint",
+				[]byte(`{"some":"payload"}`),
+			},
+			[]byte(""),
+			false,
+		},
+		{
+			"Failed Send",
+			fields{
+				&MockTideClient{},
+			},
+			args{
+				"http://test.local/fail",
+				[]byte(`{"failed":"payload"}`),
+			},
+			nil,
+			true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

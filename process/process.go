@@ -75,19 +75,6 @@ func (p *Process) CopyFields(proc Processor) {
 	p.SetFilesPath(proc.GetFilesPath())
 }
 
-func (p *Process) HasAudit(kind string) bool {
-
-	found := false
-
-	for _, audit := range *p.Message.Audits {
-		if audit.Type == kind {
-			found = true
-		}
-	}
-
-	return found
-}
-
 // Any process needs to implement the Processor interface.
 type Processor interface {
 	Run() (<-chan error, error)
