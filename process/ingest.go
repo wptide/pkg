@@ -3,7 +3,6 @@ package process
 import (
 	"errors"
 	"github.com/wptide/pkg/message"
-	"github.com/wptide/pkg/audit"
 	"github.com/wptide/pkg/source"
 	"github.com/wptide/pkg/source/zip"
 	"crypto/sha256"
@@ -74,7 +73,7 @@ func (ig *Ingest) Run() (<-chan error, error) {
 
 func (ig *Ingest) process() error {
 
-	ig.Result = make(audit.Result)
+	ig.Result = make(map[string]interface{})
 
 	log.Log(ig.Message.Title, "Ingesting...")
 
