@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/wptide/pkg/audit"
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/tide"
 	"bytes"
@@ -65,7 +63,7 @@ func TestInfo_Run(t *testing.T) {
 					Process: Process{
 						Message:   message.Message{Title: "Test Plugin"},
 						FilesPath: "./testdata/info/plugin",
-						Result:    audit.Result{},
+						Result:    make(map[string]interface{}),
 					},
 				},
 			},
@@ -83,7 +81,7 @@ func TestInfo_Run(t *testing.T) {
 					Process: Process{
 						Message:   message.Message{Title: "Test Theme"},
 						FilesPath: "./testdata/info/theme",
-						Result:    audit.Result{},
+						Result:    make(map[string]interface{}),
 					},
 				},
 			},
@@ -101,7 +99,7 @@ func TestInfo_Run(t *testing.T) {
 					Process: Process{
 						Message:   message.Message{Title: "Test Other"},
 						FilesPath: "./testdata/info/other",
-						Result:    audit.Result{},
+						Result:    make(map[string]interface{}),
 					},
 				},
 			},
@@ -118,7 +116,7 @@ func TestInfo_Run(t *testing.T) {
 				&Ingest{
 					Process: Process{
 						Message: message.Message{Title: "No Files Path"},
-						Result:  audit.Result{},
+						Result:  make(map[string]interface{}),
 					},
 				},
 			},
@@ -136,7 +134,7 @@ func TestInfo_Run(t *testing.T) {
 					Process: Process{
 						Message:   message.Message{Title: "Invalid Path"},
 						FilesPath: "./testdata/info/invalid",
-						Result:    audit.Result{},
+						Result:    make(map[string]interface{}),
 					},
 				},
 			},

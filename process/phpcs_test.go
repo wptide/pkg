@@ -6,7 +6,6 @@ import (
 	"time"
 	"github.com/wptide/pkg/storage"
 	"github.com/wptide/pkg/message"
-	"github.com/wptide/pkg/audit"
 	"errors"
 	"github.com/wptide/pkg/shell"
 	"os"
@@ -227,7 +226,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsWordPress,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 						},
 						FilesPath: "./testdata/info/plugin",
@@ -253,7 +252,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsWordPress,
 						},
-						Result: audit.Result{},
+						Result: make(map[string]interface{}),
 					},
 				},
 			},
@@ -276,7 +275,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsInvalidStandard,
 						},
-						Result: audit.Result{},
+						Result: make(map[string]interface{}),
 					},
 				},
 			},
@@ -299,7 +298,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsWordPress,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 						},
 						FilesPath: "",
@@ -320,7 +319,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsPhpCompatibility,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 						},
 						FilesPath: "./testdata/info/plugin",
@@ -341,7 +340,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsBoth,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 						},
 						FilesPath: "./testdata/info/plugin",
@@ -366,7 +365,7 @@ func TestPhpcs_Run(t *testing.T) {
 								},
 							},
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "1234567890",
 						},
 					},
@@ -386,7 +385,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsWordPress,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "uploaderrorchecksum",
 						},
 						FilesPath: "./testdata/info/plugin",
@@ -419,7 +418,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsWordPress,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "filereadererror",
 						},
 						FilesPath: "./testdata/info/filereadererror",
@@ -440,7 +439,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsPhpCompatibility,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "phpcompatwriteerror",
 						},
 						FilesPath: "./testdata/info/phpcompatwriteerror",
@@ -461,7 +460,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: auditsPhpCompatibility,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "phpcompatuploaderror",
 						},
 						FilesPath: "./testdata/info/phpcompatuploaderror",

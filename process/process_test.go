@@ -4,8 +4,6 @@ import (
 	"context"
 	"reflect"
 	"testing"
-
-	"github.com/wptide/pkg/audit"
 	"github.com/wptide/pkg/message"
 )
 
@@ -24,7 +22,7 @@ func TestProcess_Run(t *testing.T) {
 	type fields struct {
 		context   context.Context
 		Message   message.Message
-		Result    audit.Result
+		Result    map[string]interface{}
 		FilesPath string
 	}
 	tests := []struct {
@@ -64,7 +62,7 @@ func TestProcess_HasAudit(t *testing.T) {
 	type fields struct {
 		context   context.Context
 		Message   message.Message
-		Result    audit.Result
+		Result    map[string]interface{}
 		FilesPath string
 	}
 	type args struct {

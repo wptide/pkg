@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"github.com/wptide/pkg/shell"
 	"github.com/wptide/pkg/message"
-	"github.com/wptide/pkg/audit"
 	"bytes"
 	"github.com/wptide/pkg/log"
 )
@@ -151,7 +150,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: audits,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 						},
 					},
@@ -172,7 +171,7 @@ func TestLighthouse_Run(t *testing.T) {
 				&Info{
 					Process: Process{
 						Message: message.Message{},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 						},
 					},
@@ -197,7 +196,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: audits,
 						},
-						Result: audit.Result{},
+						Result: make(map[string]interface{}),
 					},
 				},
 			},
@@ -220,7 +219,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: audits,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
 						},
 					},
@@ -245,7 +244,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "error",
 							Audits: audits,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "1234567890",
 						},
 					},
@@ -270,7 +269,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "jsonError",
 							Audits: audits,
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "1234567890",
 						},
 					},
@@ -299,7 +298,7 @@ func TestLighthouse_Run(t *testing.T) {
 								},
 							},
 						},
-						Result: audit.Result{
+						Result: map[string]interface{}{
 							"checksum": "1234567890",
 						},
 					},
