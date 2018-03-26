@@ -201,7 +201,7 @@ func TestIngest_process(t *testing.T) {
 			}
 
 			if tt.options.sourceMgr != nil {
-				ig.srcMgr = tt.options.sourceMgr
+				ig.sourceManager = tt.options.sourceMgr
 			}
 
 			ig.Message = tt.message
@@ -345,11 +345,11 @@ func TestIngest_Run(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ig := &Ingest{
-				Process:    tt.fields.Process,
-				In:         tt.fields.In,
-				Out:        tt.fields.Out,
-				TempFolder: tt.fields.TempFolder,
-				srcMgr:     tt.fields.srcMgr,
+				Process:       tt.fields.Process,
+				In:            tt.fields.In,
+				Out:           tt.fields.Out,
+				TempFolder:    tt.fields.TempFolder,
+				sourceManager: tt.fields.srcMgr,
 			}
 
 			ig.SetContext(ctx)

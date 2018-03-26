@@ -12,11 +12,11 @@ import (
 
 // Ingest defines the structure for our Ingest process.
 type Ingest struct {
-	Process                           // Inherits methods from Process.
-	In         <-chan message.Message // Expects a message channel as input.
-	Out        chan Processor         // Send results to an output channel.
-	TempFolder string                 // Path to a temp folder where files will be extracted.
-	srcMgr     source.Source          // Responsible for getting the code to audit.
+	Process                              // Inherits methods from Process.
+	In            <-chan message.Message // Expects a message channel as input.
+	Out           chan Processor         // Send results to an output channel.
+	TempFolder    string                 // Path to a temp folder where files will be extracted.
+	sourceManager source.Source          // Responsible for getting the code to audit.
 }
 
 func (ig *Ingest) Run() (<-chan error, error) {
@@ -80,11 +80,11 @@ func (ig *Ingest) process() error {
 	// Set the source manager based on message.
 	switch source.GetKind(ig.Message.SourceURL) {
 	case "zip":
-		ig.srcMgr = zip.NewZip(ig.Message.SourceURL)
+		ig.sourceManager = zip.NewZip(ig.Message.SourceURL)
 	}
 
 	// Return an error if we don't have a source manager.
-	if ig.srcMgr == nil {
+	if ig.sourceManager == nil {
 		return ig.Error("could not get appropriate source manager to handle ingest")
 	}
 
@@ -96,20 +96,20 @@ func (ig *Ingest) process() error {
 	ig.SetFilesPath(ig.TempFolder + "/audit-" + base64.URLEncoding.EncodeToString(hasher.Sum(nil)))
 
 	// Download/Prepare the files.
-	err := ig.srcMgr.PrepareFiles(ig.GetFilesPath())
+	err := ig.sourceManager.PrepareFiles(ig.GetFilesPath())
 	if err != nil {
 		return err
 	}
 
 	// Project checksum.
-	checksum := ig.srcMgr.GetChecksum()
+	checksum := ig.sourceManager.GetChecksum()
 	if checksum == "" {
 		return ig.Error("could not calculate project checksum")
 	}
 
 	// Populate the result.
 	ig.Result["checksum"] = checksum
-	ig.Result["files"] = ig.srcMgr.GetFiles()
+	ig.Result["files"] = ig.sourceManager.GetFiles()
 
 	log.Log(ig.Message.Title, "Project checksum: `"+checksum+"`")
 
