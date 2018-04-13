@@ -13,6 +13,11 @@ import (
 	"os"
 	"io/ioutil"
 	"encoding/json"
+	"github.com/wptide/pkg/shell"
+)
+
+var (
+	phpcsRunner shell.Runner
 )
 
 // Ingest defines the structure for our Ingest process.
@@ -26,6 +31,10 @@ type Phpcs struct {
 }
 
 func (cs *Phpcs) Run() (<-chan error, error) {
+
+	if phpcsRunner == nil {
+		phpcsRunner = &shell.Command{}
+	}
 
 	if cs.TempFolder == "" {
 		return nil, errors.New("no temp folder provided for phpcs reports")
@@ -67,8 +76,6 @@ func (cs *Phpcs) Run() (<-chan error, error) {
 
 				// Send process to the out channel.
 				cs.Out <- cs
-			case <-cs.context.Done():
-				return
 			}
 		}
 
@@ -143,7 +150,7 @@ func (cs *Phpcs) process(audit message.Audit) error {
 	cmdArgs = append(cmdArgs, "-q")
 
 	//// Prepare the command and set the stdOut pipe.
-	resultBytes, _, err, exitCode := runner.Run(cmdName, cmdArgs...)
+	resultBytes, _, err, exitCode := phpcsRunner.Run(cmdName, cmdArgs...)
 
 	log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
 
@@ -158,8 +165,8 @@ func (cs *Phpcs) process(audit message.Audit) error {
 	// Initialise the result and set the "Full" entry to the uploaded file.
 	auditResults := tide.AuditResult{
 		Full: tide.AuditDetails{
-			Type: fType,
-			Key: fKey,
+			Type:       fType,
+			Key:        fKey,
 			BucketName: fBucket,
 		},
 	}

@@ -61,8 +61,6 @@ func (ig *Ingest) Run() (<-chan error, error) {
 
 				// Send process to the out channel.
 				ig.Out <- ig
-			case <-ig.context.Done():
-				return
 			}
 		}
 

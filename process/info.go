@@ -51,8 +51,6 @@ func (info *Info) Run() (<-chan error, error) {
 
 				// Send process to the out channel.
 				info.Out <- info
-			case <-info.context.Done():
-				return
 			}
 		}
 

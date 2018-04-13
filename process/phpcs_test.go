@@ -283,7 +283,7 @@ func TestPhpcs_Run(t *testing.T) {
 			false,
 		},
 		{
-			"Invalid Item - Standard",
+			"Invalid Item - Standard 2",
 			fields{
 				In:              make(<-chan Processor),
 				Out:             make(chan Processor),
@@ -392,7 +392,7 @@ func TestPhpcs_Run(t *testing.T) {
 					},
 				},
 			},
-			true,
+			false,
 			false,
 		},
 		{
@@ -496,12 +496,16 @@ func TestPhpcs_Run(t *testing.T) {
 			// Sleep a short time delay to give process time to start.
 			time.Sleep(time.Millisecond * 100)
 
+			if tt.wantErrc {
+				time.Sleep(time.Millisecond * 500)
+			}
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Phpcs.Run() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
-			if (len(errc) != 0) != tt.wantErrc {
+			if (len(errc) != 0) && ! tt.wantErrc {
 				e := <-errc
 				t.Errorf("Phpcs.Run() error = %v, wantErrc %v", e, tt.wantErrc)
 				return

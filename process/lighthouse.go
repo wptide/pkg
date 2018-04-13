@@ -71,8 +71,6 @@ func (lh *Lighthouse) Run() (<-chan error, error) {
 
 				// Send process to the out channel.
 				lh.Out <- lh
-			case <-lh.context.Done():
-				return
 			}
 		}
 

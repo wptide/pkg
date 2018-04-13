@@ -3,6 +3,7 @@ package process
 import (
 	"errors"
 	"github.com/wptide/pkg/payload"
+	"fmt"
 )
 
 // Response defines the structure for a Response process.
@@ -47,8 +48,6 @@ func (res *Response) Run() (<-chan error, error) {
 				if res.Out != nil {
 					res.Out <- res
 				}
-			case <-res.context.Done():
-				return
 			}
 		}
 
@@ -82,7 +81,9 @@ func (res *Response) process() error {
 		return err
 	}
 
-	res.Result["response"] = reply
+	res.Result["response"] = string(reply)
+	res.Result["responseMessage"] = fmt.Sprintf("'%s' payload submitted successfully.", payloadType)
+	res.Result["responseSuccess"] = true
 
 	return nil
 }
