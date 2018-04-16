@@ -80,6 +80,14 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 	return nil, nil, errors.New("Something went wrong."), 1
 }
 
+func mockOpen(name string) (*os.File, error) {
+	if strings.Contains(name, "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e") {
+		name = strings.Replace(name, "/tmp/", "/results/", -1)
+	}
+
+	return os.Open(name)
+}
+
 func TestPhpcs_Run(t *testing.T) {
 
 	b := bytes.Buffer{}
@@ -95,6 +103,11 @@ func TestPhpcs_Run(t *testing.T) {
 	writeFile = mockWriteFile
 	// Remember to set it back after the test.
 	defer func() { writeFile = ioutil.WriteFile }()
+
+	// Set open file to mock function.
+	fileOpen = mockOpen
+	// Set it back to os.Open
+	defer func() { fileOpen = os.Open }()
 
 	// Need to test with a context.
 	ctx, cancelFunc := context.WithCancel(context.Background())
