@@ -29,7 +29,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 		ioutil.WriteFile(
 			"./testdata/tmp/39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_wordpress-full.json",
 			[]byte(data),
-			os.ModePerm,
+			0644,
 		)
 
 		return []byte("[TEST] Time: 100ms; Memory: 4Mb"), nil, nil, 0
@@ -41,7 +41,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 		ioutil.WriteFile(
 			"./testdata/tmp/39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_phpcompatibility-full.json",
 			[]byte(data),
-			os.ModePerm,
+			0644,
 		)
 
 		return []byte("[TEST] Time: 50ms; Memory: 4Mb"), nil, nil, 0
