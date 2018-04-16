@@ -405,7 +405,7 @@ func TestPhpcs_Run(t *testing.T) {
 					},
 				},
 			},
-			false,
+			true,
 			false,
 		},
 		{
