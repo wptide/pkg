@@ -11,7 +11,7 @@ import (
 	"github.com/wptide/pkg/shell"
 )
 
-var runner shell.Runner
+var lhRunner shell.Runner
 
 // Ingest defines the structure for our Ingest process.
 type Lighthouse struct {
@@ -23,6 +23,10 @@ type Lighthouse struct {
 }
 
 func (lh *Lighthouse) Run() (<-chan error, error) {
+
+	if lhRunner == nil {
+		lhRunner = &shell.Command{}
+	}
 
 	if lh.TempFolder == "" {
 		return nil, errors.New("no temp folder provided for lighthouse reports")
@@ -90,7 +94,7 @@ func (lh *Lighthouse) process() error {
 	cmdArgs := []string{fmt.Sprintf("https://wp-themes.com/%s", lh.Message.Slug)}
 
 	// Prepare the command and set the stdOut pipe.
-	resultBytes, errorBytes, err, _ := runner.Run(cmdName, cmdArgs...)
+	resultBytes, errorBytes, err, _ := lhRunner.Run(cmdName, cmdArgs...)
 
 	if len(errorBytes) > 0 {
 		return lh.Error("lighthouse command failed: " + string(errorBytes))

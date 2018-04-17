@@ -95,9 +95,9 @@ func TestPhpcs_Run(t *testing.T) {
 	defer log.SetOutput(os.Stdout)
 
 	// Set out execCommand variable to the mock function.
-	runner = &mockPhpcsRunner{}
+	phpcsRunner = &mockPhpcsRunner{}
 	// Remember to set it back after the test.
-	defer func() { runner = &shell.Command{} }()
+	defer func() { phpcsRunner = &shell.Command{} }()
 
 	// Set out execCommand variable to the mock function.
 	writeFile = mockWriteFile
@@ -181,6 +181,7 @@ func TestPhpcs_Run(t *testing.T) {
 		name     string
 		fields   fields
 		procs    []Processor
+		mockRunner bool
 		wantErrc bool
 		wantErr  bool
 	}{
@@ -192,6 +193,7 @@ func TestPhpcs_Run(t *testing.T) {
 				TempFolder:      "./testdata/tmp",
 			},
 			nil,
+			true,
 			false,
 			true,
 		},
@@ -203,6 +205,7 @@ func TestPhpcs_Run(t *testing.T) {
 				TempFolder:      "./testdata/tmp",
 			},
 			nil,
+			true,
 			false,
 			true,
 		},
@@ -214,6 +217,7 @@ func TestPhpcs_Run(t *testing.T) {
 				StorageProvider: &mockStorage{},
 			},
 			nil,
+			true,
 			false,
 			true,
 		},
@@ -225,6 +229,7 @@ func TestPhpcs_Run(t *testing.T) {
 				TempFolder: "./testdata/tmp",
 			},
 			nil,
+			true,
 			false,
 			true,
 		},
@@ -246,6 +251,7 @@ func TestPhpcs_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			false,
 			false,
 		},
@@ -270,6 +276,7 @@ func TestPhpcs_Run(t *testing.T) {
 				},
 			},
 			true,
+			true,
 			false,
 		},
 		{
@@ -292,6 +299,7 @@ func TestPhpcs_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			true,
 			false,
 		},
@@ -319,6 +327,7 @@ func TestPhpcs_Run(t *testing.T) {
 				},
 			},
 			true,
+			true,
 			false,
 		},
 		{
@@ -339,6 +348,7 @@ func TestPhpcs_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			false,
 			false,
 		},
@@ -360,6 +370,7 @@ func TestPhpcs_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			false,
 			false,
 		},
@@ -384,6 +395,7 @@ func TestPhpcs_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			false,
 			false,
 		},
@@ -406,6 +418,7 @@ func TestPhpcs_Run(t *testing.T) {
 				},
 			},
 			true,
+			true,
 			false,
 		},
 		{
@@ -417,6 +430,7 @@ func TestPhpcs_Run(t *testing.T) {
 				TempFolder:      "closeContext",
 			},
 			[]Processor{},
+			true,
 			false,
 			false,
 		},
@@ -439,6 +453,7 @@ func TestPhpcs_Run(t *testing.T) {
 				},
 			},
 			true,
+			true,
 			false,
 		},
 		{
@@ -459,6 +474,7 @@ func TestPhpcs_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			true,
 			false,
 		},
@@ -481,7 +497,20 @@ func TestPhpcs_Run(t *testing.T) {
 				},
 			},
 			true,
+			true,
 			false,
+		},
+		{
+			"No Temp Folder - No mock runner",
+			fields{
+				In:              make(chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+			},
+			nil,
+			false,
+			false,
+			true,
 		},
 	}
 	for _, tt := range tests {
@@ -497,6 +526,14 @@ func TestPhpcs_Run(t *testing.T) {
 			cs.SetContext(ctx)
 			if tt.procs != nil {
 				cs.In = generateProcs(ctx, tt.procs)
+			}
+
+			if ! tt.mockRunner {
+				oldRunner := phpcsRunner
+				phpcsRunner = nil
+				defer func() {
+					phpcsRunner = oldRunner
+				}()
 			}
 
 			var errc <-chan error

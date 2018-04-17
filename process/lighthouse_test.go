@@ -49,9 +49,9 @@ func TestLighthouse_Run(t *testing.T) {
 	defer log.SetOutput(os.Stdout)
 
 	// Set out execCommand variable to the mock function.
-	runner = &mockRunner{}
+	lhRunner = &mockRunner{}
 	// Remember to set it back after the test.
-	defer func() { runner = &shell.Command{} }()
+	defer func() { lhRunner = &shell.Command{} }()
 
 	// Set out execCommand variable to the mock function.
 	writeFile = mockWriteFile
@@ -87,6 +87,7 @@ func TestLighthouse_Run(t *testing.T) {
 		name     string
 		fields   fields
 		procs    []Processor
+		mockRunner bool
 		wantErrc bool
 		wantErr  bool
 	}{
@@ -98,6 +99,7 @@ func TestLighthouse_Run(t *testing.T) {
 				TempFolder:      "./testdata/tmp",
 			},
 			nil,
+			true,
 			false,
 			true,
 		},
@@ -109,6 +111,7 @@ func TestLighthouse_Run(t *testing.T) {
 				TempFolder:      "./testdata/tmp",
 			},
 			nil,
+			true,
 			false,
 			true,
 		},
@@ -120,6 +123,7 @@ func TestLighthouse_Run(t *testing.T) {
 				StorageProvider: &mockStorage{},
 			},
 			nil,
+			true,
 			false,
 			true,
 		},
@@ -131,6 +135,7 @@ func TestLighthouse_Run(t *testing.T) {
 				TempFolder: "./testdata/tmp",
 			},
 			nil,
+			true,
 			false,
 			true,
 		},
@@ -156,6 +161,7 @@ func TestLighthouse_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			false,
 			false,
 		},
@@ -177,6 +183,7 @@ func TestLighthouse_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			true,
 			false,
 		},
@@ -200,6 +207,7 @@ func TestLighthouse_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			true,
 			false,
 		},
@@ -226,6 +234,7 @@ func TestLighthouse_Run(t *testing.T) {
 				},
 			},
 			true,
+			true,
 			false,
 		},
 		{
@@ -251,6 +260,7 @@ func TestLighthouse_Run(t *testing.T) {
 				},
 			},
 			true,
+			true,
 			false,
 		},
 		{
@@ -275,6 +285,7 @@ func TestLighthouse_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			true,
 			false,
 		},
@@ -304,8 +315,21 @@ func TestLighthouse_Run(t *testing.T) {
 					},
 				},
 			},
+			true,
 			false,
 			false,
+		},
+		{
+			"No Temp Folder - No mock runner",
+			fields{
+				In:              make(chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+			},
+			nil,
+			false,
+			false,
+			true,
 		},
 	}
 	for _, tt := range tests {
@@ -322,6 +346,14 @@ func TestLighthouse_Run(t *testing.T) {
 			lh.SetContext(ctx)
 			if tt.procs != nil {
 				lh.In = generateProcs(ctx, tt.procs)
+			}
+
+			if ! tt.mockRunner {
+				oldRunner := lhRunner
+				lhRunner = nil
+				defer func() {
+					lhRunner = oldRunner
+				}()
 			}
 
 			var errc <-chan error
