@@ -21,7 +21,7 @@ type Message struct {
 // @todo: Legacy. Needs to be deprecated over time.
 type Audit struct {
 	Type    string       `json:"type"`
-	Options *AuditOption `json:"options"`
+	Options *AuditOption `json:"options,omitempty"`
 }
 
 // @todo: Legacy. Needs to be deprecated over time.
