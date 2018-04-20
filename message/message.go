@@ -26,11 +26,12 @@ type Audit struct {
 
 // @todo: Legacy. Needs to be deprecated over time.
 type AuditOption struct {
-	Standard   string `json:"standard"`
-	Report     string `json:"report"`
-	Encoding   string `json:"encoding,omitempty"`
-	RuntimeSet string `json:"runtime-set,omitempty"`
-	Ignore     string `json:"ignore,omitempty"`
+	Standard         string `json:"standard"`
+	Report           string `json:"report"`
+	Encoding         string `json:"encoding,omitempty"`
+	RuntimeSet       string `json:"runtime-set,omitempty"`
+	Ignore           string `json:"ignore,omitempty"`
+	StandardOverride string `json:"standard-override"`
 }
 
 type MessageProvider interface {

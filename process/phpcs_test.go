@@ -140,6 +140,17 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 	}
 
+	auditsPhpCompatibilityOverride := &[]message.Audit{
+		{
+			Type: "phpcs",
+			Options: &message.AuditOption{
+				Standard:   "phpcompatibility",
+				RuntimeSet: "testVersion 5.2-",
+				StandardOverride: "mock/override",
+			},
+		},
+	}
+
 	auditsBoth := &[]message.Audit{
 		{
 			Type: "phpcs",
@@ -340,6 +351,28 @@ func TestPhpcs_Run(t *testing.T) {
 							Title:  "Valid Phpcompat",
 							Slug:   "test",
 							Audits: auditsPhpCompatibility,
+						},
+						Result: map[string]interface{}{
+							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
+						},
+						FilesPath: "./testdata/info/plugin",
+					},
+				},
+			},
+			true,
+			false,
+			false,
+		},
+		{
+			"Valid Item - Phpcompatibility Override",
+			validFields,
+			[]Processor{
+				&Info{
+					Process: Process{
+						Message: message.Message{
+							Title:  "Valid Phpcompat",
+							Slug:   "test",
+							Audits: auditsPhpCompatibilityOverride,
 						},
 						Result: map[string]interface{}{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",

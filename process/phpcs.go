@@ -122,11 +122,16 @@ func (cs *Phpcs) process(audit message.Audit) error {
 		encoding = "utf-8"
 	}
 
+	cliStandard := standard
+	if audit.Options.StandardOverride != "" {
+		cliStandard = audit.Options.StandardOverride
+	}
+
 	cmdName := "phpcs"
 	cmdArgs := []string{
 		"--extensions=php",
 		"--ignore=" + audit.Options.Ignore,
-		"--standard=" + standard,
+		"--standard=" + cliStandard,
 		"--encoding=" + encoding,
 		"--basepath=" + path, // Remove this part from the filenames in PHPCS report.
 		"--report=json",
@@ -149,7 +154,7 @@ func (cs *Phpcs) process(audit message.Audit) error {
 	cmdArgs = append(cmdArgs, path)
 	cmdArgs = append(cmdArgs, "-q")
 
-	//// Prepare the command and set the stdOut pipe.
+	// Prepare the command and set the stdOut pipe.
 	resultBytes, _, err, exitCode := phpcsRunner.Run(cmdName, cmdArgs...)
 
 	log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
