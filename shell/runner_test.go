@@ -6,7 +6,6 @@ import (
 	"os"
 	"fmt"
 	"io"
-	"errors"
 )
 
 func mockExecCommand(command string, args ...string) *exec.Cmd {
@@ -40,6 +39,15 @@ func TestCommand_Run(t *testing.T) {
 		wantErr  bool
 	}{
 		{
+			"Default Exec Func - No Command",
+			&Command{},
+			funcs{},
+			args{},
+			nil,
+			nil,
+			true,
+		},
+		{
 			"Run Success",
 			&Command{
 				execFunc: mockExecCommand,
@@ -66,57 +74,6 @@ func TestCommand_Run(t *testing.T) {
 			false,
 		},
 		{
-			"StdOut fail",
-			&Command{
-				execFunc: mockExecCommand,
-			},
-			funcs{
-				stdOutFunc: func(cmd *exec.Cmd) (io.ReadCloser, error) {
-					return nil, errors.New("Stdout Pipe Failed.")
-				},
-			},
-			args{
-				name: "fail",
-			},
-			nil,
-			nil,
-			true,
-		},
-		{
-			"StdErr fail",
-			&Command{
-				execFunc: mockExecCommand,
-			},
-			funcs{
-				stdErrFunc: func(cmd *exec.Cmd) (io.ReadCloser, error) {
-					return nil, errors.New("Stderr Pipe Failed.")
-				},
-			},
-			args{
-				name: "fail",
-			},
-			nil,
-			nil,
-			true,
-		},
-		{
-			"Start fail",
-			&Command{
-				execFunc: mockExecCommand,
-			},
-			funcs{
-				startFunc: func(cmd *exec.Cmd) error {
-					return errors.New("Start failed")
-				},
-			},
-			args{
-				name: "fail",
-			},
-			nil,
-			nil,
-			true,
-		},
-		{
 			"Wait fail",
 			&Command{
 				execFunc: mockExecCommand,
@@ -133,22 +90,6 @@ func TestCommand_Run(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			if tt.funcs.stdOutFunc != nil {
-				tt.c.stdOutFunc = tt.funcs.stdOutFunc
-			}
-
-			if tt.funcs.stdErrFunc != nil {
-				tt.c.stdErrFunc = tt.funcs.stdErrFunc
-			}
-
-			if tt.funcs.startFunc != nil {
-				tt.c.startFunc = tt.funcs.startFunc
-			}
-
-			if tt.funcs.waitFunc != nil {
-				tt.c.waitFunc = tt.funcs.waitFunc
-			}
-
 			outBuff, errBuff, err, _ := tt.c.Run(tt.args.name, tt.args.arg...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Command.Run() error = %v, wantErr %v", err, tt.wantErr)
@@ -160,91 +101,6 @@ func TestCommand_Run(t *testing.T) {
 			if string(errBuff) != string(tt.wantErrB) {
 				t.Errorf("Command.Run() errBuff = %v, want %v", string(errBuff), string(tt.wantErrB))
 			}
-		})
-	}
-}
-
-func TestCommand_PrepareFuncs(t *testing.T) {
-	tests := []struct {
-		name    string
-		c       *Command
-		command string
-		wantErr bool
-	}{
-		{
-			"Commands fail",
-			&Command{},
-			"",
-			true,
-		},
-		{
-			"Commands success",
-			&Command{},
-			"test-success",
-			false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			tt.c.PrepareFuncs()
-
-			var cmd *exec.Cmd = nil
-			if tt.command != "" {
-				cmd = mockExecCommand(tt.command)
-			}
-
-			if _, err := tt.c.stdOutFunc(cmd); (err != nil) != tt.wantErr {
-				t.Errorf("Command.stdOutFunc() err: %v", err)
-			}
-
-			if _, err := tt.c.stdErrFunc(cmd); (err != nil) != tt.wantErr {
-				t.Errorf("Command.stdErrFunc() err: %v", err)
-			}
-
-			if err := tt.c.startFunc(cmd); (err != nil) != tt.wantErr {
-				t.Errorf("Command.startFunc() err: %v", err)
-			}
-
-			if err := tt.c.waitFunc(cmd); (err != nil) != tt.wantErr {
-				t.Errorf("Command.waitFunc() err: %v", err)
-			}
-		})
-	}
-}
-
-func TestCommand_SetExecFunc(t *testing.T) {
-	type args struct {
-		execFunc func(name string, arg ...string) *exec.Cmd
-	}
-	tests := []struct {
-		name    string
-		c       *Command
-		args    args
-		wantErr bool
-	}{
-		{
-			"Nil func",
-			&Command{},
-			args{},
-			true,
-		},
-		{
-			"Valid func",
-			&Command{},
-			args{
-				exec.Command,
-			},
-			false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.c.SetExecFunc(tt.args.execFunc)
-			if (tt.c.execFunc == nil) != tt.wantErr {
-				t.Errorf("Command.SetExecFunc() expects a valid %v", "func(name string, arg ...string) *exec.Cmd")
-			}
-
 		})
 	}
 }
