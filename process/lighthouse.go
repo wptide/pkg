@@ -22,31 +22,28 @@ type Lighthouse struct {
 	StorageProvider storage.StorageProvider // Storage provider to upload reports to.
 }
 
-func (lh *Lighthouse) Run() (<-chan error, error) {
+func (lh *Lighthouse) Run(errc *chan error) error {
 
 	if lhRunner == nil {
 		lhRunner = &shell.Command{}
 	}
 
 	if lh.TempFolder == "" {
-		return nil, errors.New("no temp folder provided for lighthouse reports")
+		return errors.New("no temp folder provided for lighthouse reports")
 	}
 
 	if lh.StorageProvider == nil {
-		return nil, errors.New("no storage provider for lighthouse reports")
+		return errors.New("no storage provider for lighthouse reports")
 	}
 
 	if lh.In == nil {
-		return nil, errors.New("requires a previous process")
+		return errors.New("requires a previous process")
 	}
 	if lh.Out == nil {
-		return nil, errors.New("requires a next process")
+		return errors.New("requires a next process")
 	}
 
-	errc := make(chan error, 1)
-
 	go func() {
-		defer close(errc)
 		for {
 			select {
 			case in := <-lh.In:
@@ -57,8 +54,8 @@ func (lh *Lighthouse) Run() (<-chan error, error) {
 				// Assume that the rest of the message is also broken.
 				// Don't pass this down the pipe.
 				if lh.Message.Title == "" {
-					errc <- lh.Error("invalid message")
-					break
+					*errc <- errors.New("Lighthouse Error: " + lh.Error("invalid message").Error())
+					continue
 				}
 
 				// Run the process.
@@ -67,7 +64,7 @@ func (lh *Lighthouse) Run() (<-chan error, error) {
 					if audit.Type == "lighthouse" {
 						if err := lh.process(); err != nil {
 							// Pass the error up the error channel.
-							errc <- err
+							*errc <- errors.New("Lighthouse Error: " + err.Error())
 							// Don't break, the message is still useful to other processes.
 						}
 					}
@@ -80,7 +77,7 @@ func (lh *Lighthouse) Run() (<-chan error, error) {
 
 	}()
 
-	return errc, nil
+	return nil
 }
 
 func (lh *Lighthouse) process() error {

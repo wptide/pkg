@@ -30,31 +30,28 @@ type Phpcs struct {
 	StorageProvider storage.StorageProvider // Storage provider to upload reports to.
 }
 
-func (cs *Phpcs) Run() (<-chan error, error) {
+func (cs *Phpcs) Run(errc *chan error) error {
 
 	if phpcsRunner == nil {
 		phpcsRunner = &shell.Command{}
 	}
 
 	if cs.TempFolder == "" {
-		return nil, errors.New("no temp folder provided for phpcs reports")
+		return errors.New("no temp folder provided for phpcs reports")
 	}
 
 	if cs.StorageProvider == nil {
-		return nil, errors.New("no storage provider for phpcs reports")
+		return errors.New("no storage provider for phpcs reports")
 	}
 
 	if cs.In == nil {
-		return nil, errors.New("requires a previous process")
+		return errors.New("requires a previous process")
 	}
 	if cs.Out == nil {
-		return nil, errors.New("requires a next process")
+		return errors.New("requires a next process")
 	}
 
-	errc := make(chan error, 1)
-
 	go func() {
-		defer close(errc)
 		for {
 			select {
 			case in := <-cs.In:
@@ -68,7 +65,7 @@ func (cs *Phpcs) Run() (<-chan error, error) {
 					if audit.Type == "phpcs" {
 						if err := cs.process(audit); err != nil {
 							// Pass the error up the error channel.
-							errc <- err
+							*errc <- errors.New("PHPCS Error: " + err.Error())
 							// Don't break, the message is still useful to other processes.
 						}
 					}
@@ -81,7 +78,7 @@ func (cs *Phpcs) Run() (<-chan error, error) {
 
 	}()
 
-	return errc, nil
+	return nil
 }
 
 func (cs *Phpcs) process(audit message.Audit) error {

@@ -15,20 +15,17 @@ type Response struct {
 	Payloaders map[string]payload.Payloader // A map of "Payloader"s for different services.
 }
 
-func (res *Response) Run() (<-chan error, error) {
+func (res *Response) Run(errc *chan error) error {
 
 	if res.In == nil {
-		return nil, errors.New("requires a previous process")
+		return errors.New("requires a previous process")
 	}
 
 	if len(res.Payloaders) == 0 {
-		return nil, errors.New("need to provide at least one payload manager")
+		return errors.New("need to provide at least one payload manager")
 	}
 
-	errc := make(chan error, 1)
-
 	go func() {
-		defer close(errc)
 		for {
 			select {
 			case in := <-res.In:
@@ -40,7 +37,7 @@ func (res *Response) Run() (<-chan error, error) {
 				// If processing produces an error send it up the error channel.
 				if err := res.process(); err != nil {
 					// Pass the error up the error channel.
-					errc <- err
+					*errc <- errors.New("Response Error: " + err.Error())
 					// Don't break, the message is still useful to other processes.
 				}
 
@@ -53,7 +50,7 @@ func (res *Response) Run() (<-chan error, error) {
 
 	}()
 
-	return errc, nil
+	return nil
 }
 
 func (res *Response) process() error {

@@ -4,7 +4,6 @@ package pipe
 import (
 	"context"
 	"errors"
-	"sync"
 	"github.com/wptide/pkg/process"
 )
 
@@ -61,63 +60,15 @@ func (p *Pipe) AddProcesses(procs ...process.Processor) error {
 }
 
 // Run iterates over the processes slice and starts each process.
-func (p *Pipe) Run() error {
+func (p *Pipe) Run(errc *chan error) error {
 	defer p.cancelFunc()
 
 	for _, proc := range p.processes {
-		errc, err := proc.Run()
-		if err != nil {
-			return err
-		}
-		p.errors = append(p.errors, errc)
-	}
-
-	return p.wait()
-}
-
-// wait ranges over all the error channels which causes the pipe to block until all processes are completed.
-// Based on https://medium.com/statuscode/pipeline-patterns-in-go-a37bb3a7e61d.
-func (p Pipe) wait() error {
-	errc := p.mergeErrors()
-
-	for err := range errc {
+		err := proc.Run(errc)
 		if err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-// mergeErrors merges multiple channels of errors.
-// Based on https://blog.golang.org/pipelines.
-// Based on https://medium.com/statuscode/pipeline-patterns-in-go-a37bb3a7e61d.
-func (p Pipe) mergeErrors() <-chan error {
-	var wg sync.WaitGroup
-
-	out := make(chan error, len(p.errors))
-
-	// Create output function.
-	output := func(ce <-chan error) {
-
-		if len(ce) > 0 {
-			for err := range ce {
-				out <- err
-			}
-		}
-		wg.Done()
-	}
-
-	wg.Add(len(p.errors))
-	for _, err := range p.errors {
-		go output(err)
-	}
-
-	// Drain the error channel.
-	go func() {
-		wg.Wait()
-		close(out)
-	}()
-
-	return out
 }

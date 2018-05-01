@@ -569,11 +569,21 @@ func TestPhpcs_Run(t *testing.T) {
 				}()
 			}
 
-			var errc <-chan error
 			var err error
+			var chanError error
+			errc := make(chan error)
 
 			go func() {
-				errc, err = cs.Run()
+				for {
+					select {
+					case e := <-errc:
+						chanError = e
+					}
+				}
+			}()
+
+			go func() {
+				err = cs.Run(&errc)
 			}()
 
 			// Sleep a short time delay to give process time to start.
@@ -588,10 +598,8 @@ func TestPhpcs_Run(t *testing.T) {
 				return
 			}
 
-			if (len(errc) != 0) && ! tt.wantErrc {
-				e := <-errc
-				t.Errorf("Phpcs.Run() error = %v, wantErrc %v", e, tt.wantErrc)
-				return
+			if (chanError != nil) != tt.wantErrc {
+				t.Errorf("Phpcs.Run() errorChan = %v, wantErrc %v", chanError, tt.wantErrc)
 			}
 		})
 	}

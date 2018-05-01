@@ -355,11 +355,21 @@ func TestLighthouse_Run(t *testing.T) {
 				}()
 			}
 
-			var errc <-chan error
 			var err error
+			var chanError error
+			errc := make(chan error)
 
 			go func() {
-				errc, err = lh.Run()
+				for {
+					select {
+					case e := <-errc:
+						chanError = e
+					}
+				}
+			}()
+
+			go func() {
+				err = lh.Run(&errc)
 			}()
 
 			// Sleep a short time delay to give process time to start.
@@ -370,10 +380,8 @@ func TestLighthouse_Run(t *testing.T) {
 				return
 			}
 
-			if (len(errc) != 0) != tt.wantErrc {
-				e := <-errc
-				t.Errorf("Lighthouse.Run() error = %v, wantErrc %v", e, tt.wantErrc)
-				return
+			if (chanError != nil) != tt.wantErrc {
+				t.Errorf("Lighthouse.Run() errorChan = %v, wantErrc %v", chanError, tt.wantErrc)
 			}
 		})
 	}

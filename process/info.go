@@ -19,19 +19,16 @@ type Info struct {
 }
 
 // Run executes the process in the pipeline.
-func (info *Info) Run() (<-chan error, error) {
+func (info *Info) Run(errc *chan error) error {
 
 	if info.In == nil {
-		return nil, errors.New("requires a previous process")
+		return errors.New("requires a previous process")
 	}
 	if info.Out == nil {
-		return nil, errors.New("requires a next process")
+		return errors.New("requires a next process")
 	}
 
-	errc := make(chan error, 1)
-
 	go func() {
-		defer close(errc)
 
 		for {
 			select {
@@ -44,9 +41,9 @@ func (info *Info) Run() (<-chan error, error) {
 				// If processing produces an error send it up the error channel.
 				if err := info.process(); err != nil {
 					// Pass the error up the error channel.
-					errc <- err
-					// break so that the message doesn't get passed along.
-					break
+					*errc <- errors.New("Info Error: " + err.Error())
+					// continue so that the message doesn't get passed along.
+					continue
 				}
 
 				// Send process to the out channel.
@@ -56,7 +53,7 @@ func (info *Info) Run() (<-chan error, error) {
 
 	}()
 
-	return errc, nil
+	return nil
 }
 
 // process runs the actual code for this process.

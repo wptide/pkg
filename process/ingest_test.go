@@ -195,6 +195,7 @@ func TestIngest_process(t *testing.T) {
 			ig := &Ingest{
 				TempFolder: "./testdata/tmp",
 			}
+			ig.Result = make(map[string]interface{})
 
 			if tt.options.tempFolder != "" {
 				ig.TempFolder = tt.options.tempFolder
@@ -357,11 +358,21 @@ func TestIngest_Run(t *testing.T) {
 				ig.In = generateMessages(tt.messages)
 			}
 
-			var errc <-chan error
 			var err error
+			var chanError error
+			errc := make(chan error)
 
 			go func() {
-				errc, err = ig.Run()
+				for {
+					select {
+					case e := <-errc:
+						chanError = e
+					}
+				}
+			}()
+
+			go func() {
+				err = ig.Run(&errc)
 			}()
 
 			// Sleep a short time delay to give process time to start.
@@ -377,10 +388,8 @@ func TestIngest_Run(t *testing.T) {
 				<-ig.Out
 			}
 
-			if (len(errc) != 0) != tt.wantErrc {
-				e := <-errc
-				t.Errorf("Ingest.Run() error = %v, wantErrc %v", e, tt.wantErrc)
-				return
+			if (chanError != nil) != tt.wantErrc {
+				t.Errorf("Info.Run() errorChan = %v, wantErrc %v", chanError, tt.wantErrc)
 			}
 		})
 	}

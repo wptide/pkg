@@ -200,11 +200,21 @@ func TestResponse_Run(t *testing.T) {
 				tc.In = generateProcs(ctx, tt.procs)
 			}
 
-			var errc <-chan error
 			var err error
+			var chanError error
+			errc := make(chan error)
 
 			go func() {
-				errc, err = tc.Run()
+				for {
+					select {
+					case e := <-errc:
+						chanError = e
+					}
+				}
+			}()
+
+			go func() {
+				err = tc.Run(&errc)
 			}()
 
 			// Sleep a short time delay to give process time to start.
@@ -215,10 +225,8 @@ func TestResponse_Run(t *testing.T) {
 				return
 			}
 
-			if (len(errc) != 0) != tt.wantErrc {
-				e := <-errc
-				t.Errorf("Response.Run() error = %v, wantErrc %v", e, tt.wantErrc)
-				return
+			if (chanError != nil) != tt.wantErrc {
+				t.Errorf("Response.Run() errorChan = %v, wantErrc %v", chanError, tt.wantErrc)
 			}
 		})
 	}

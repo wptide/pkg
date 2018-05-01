@@ -19,32 +19,33 @@ type Ingest struct {
 	sourceManager source.Source          // Responsible for getting the code to audit.
 }
 
-func (ig *Ingest) Run() (<-chan error, error) {
+func (ig *Ingest) Run(errc *chan error) error {
 	// If we don't have a temp folder, then we need a fatal.
 	if ig.TempFolder == "" {
-		return nil, errors.New("no temp folder provided for processes")
+		return errors.New("no temp folder provided for processes")
 	}
 	if ig.In == nil {
-		return nil, errors.New("no message channel to ingest")
+		return errors.New("no message channel to ingest")
 	}
 	if ig.Out == nil {
-		return nil, errors.New("requires a next process")
+		return errors.New("requires a next process")
 	}
 
-	errc := make(chan error, 1)
-
 	go func() {
-		defer close(errc)
 		for {
 			select {
 			case msg := <-ig.In:
 
+				// Init the Result object.
+				ig.Result = make(map[string]interface{})
+
 				// If message is invalid, skip it, but keep listening on the channel.
 				if err := validateMessage(msg); err != nil {
 					// Pass the error up the error channel.
-					errc <- err
-					// break so that the message doesn't get passed along.
-					break
+					*errc <- errors.New("Ingest Error: " + err.Error())
+
+					// continue so that the message doesn't get passed along.
+					continue
 				}
 
 				// Get the original message.
@@ -54,9 +55,10 @@ func (ig *Ingest) Run() (<-chan error, error) {
 				// If processing produces an error send it up the error channel.
 				if err := ig.process(); err != nil {
 					// Pass the error up the error channel.
-					errc <- err
-					// break so that the message doesn't get passed along.
-					break
+					*errc <- errors.New("Ingest Error: " + err.Error())
+
+					// continue so that the message doesn't get passed along.
+					continue
 				}
 
 				// Send process to the out channel.
@@ -66,12 +68,10 @@ func (ig *Ingest) Run() (<-chan error, error) {
 
 	}()
 
-	return errc, nil
+	return nil
 }
 
 func (ig *Ingest) process() error {
-
-	ig.Result = make(map[string]interface{})
 
 	log.Log(ig.Message.Title, "Ingesting...")
 
