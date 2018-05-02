@@ -32,10 +32,6 @@ type Phpcs struct {
 
 func (cs *Phpcs) Run(errc *chan error) error {
 
-	if phpcsRunner == nil {
-		phpcsRunner = &shell.Command{}
-	}
-
 	if cs.TempFolder == "" {
 		return errors.New("no temp folder provided for phpcs reports")
 	}
@@ -84,6 +80,10 @@ func (cs *Phpcs) Run(errc *chan error) error {
 func (cs *Phpcs) Do(audit message.Audit) error {
 
 	log.Log(cs.Message.Title, "Running PHPCS Audit...")
+
+	if phpcsRunner == nil {
+		phpcsRunner = defaultRunner
+	}
 
 	result := *cs.Result
 

@@ -96,8 +96,12 @@ func TestPhpcs_Run(t *testing.T) {
 
 	// Set out execCommand variable to the mock function.
 	phpcsRunner = &mockPhpcsRunner{}
+	defaultRunner = &mockPhpcsRunner{}
 	// Remember to set it back after the test.
-	defer func() { phpcsRunner = &shell.Command{} }()
+	defer func() {
+		phpcsRunner = &shell.Command{}
+		defaultRunner = &shell.Command{}
+	}()
 
 	// Set out execCommand variable to the mock function.
 	writeFile = mockWriteFile
@@ -144,8 +148,8 @@ func TestPhpcs_Run(t *testing.T) {
 		{
 			Type: "phpcs",
 			Options: &message.AuditOption{
-				Standard:   "phpcompatibility",
-				RuntimeSet: "testVersion 5.2-",
+				Standard:         "phpcompatibility",
+				RuntimeSet:       "testVersion 5.2-",
 				StandardOverride: "mock/override",
 			},
 		},
@@ -189,12 +193,12 @@ func TestPhpcs_Run(t *testing.T) {
 	}
 
 	tests := []struct {
-		name     string
-		fields   fields
-		procs    []Processor
+		name       string
+		fields     fields
+		procs      []Processor
 		mockRunner bool
-		wantErrc bool
-		wantErr  bool
+		wantErrc   bool
+		wantErr    bool
 	}{
 		{
 			"Invalid In channel",
@@ -544,6 +548,28 @@ func TestPhpcs_Run(t *testing.T) {
 			false,
 			false,
 			true,
+		},
+		{
+			"Valid Item - Default Runner",
+			validFields,
+			[]Processor{
+				&Info{
+					Process: Process{
+						Message: message.Message{
+							Title:  "Valid Phpcompat",
+							Slug:   "test",
+							Audits: auditsPhpCompatibility,
+						},
+						Result: &Result{
+							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
+						},
+						FilesPath: "./testdata/info/plugin",
+					},
+				},
+			},
+			false,
+			false,
+			false,
 		},
 	}
 	for _, tt := range tests {
