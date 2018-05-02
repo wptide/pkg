@@ -35,7 +35,7 @@ func (res *Response) Run(errc *chan error) error {
 
 				// Run the process.
 				// If processing produces an error send it up the error channel.
-				if err := res.process(); err != nil {
+				if err := res.Do(); err != nil {
 					// Pass the error up the error channel.
 					*errc <- errors.New("Response Error: " + err.Error())
 					// Don't break, the message is still useful to other processes.
@@ -53,7 +53,9 @@ func (res *Response) Run(errc *chan error) error {
 	return nil
 }
 
-func (res *Response) process() error {
+func (res *Response) Do() error {
+
+	result := *res.Result
 
 	payloadType := res.Message.PayloadType
 	if payloadType == "" {
@@ -68,19 +70,21 @@ func (res *Response) process() error {
 		return errors.New("Could not find a valid payload generator for task")
 	}
 
-	payload, err := payloader.BuildPayload(res.Message, res.Result)
+	p, err := payloader.BuildPayload(res.Message, result)
 	if err != nil {
 		return err
 	}
 
-	reply, err := payloader.SendPayload(res.Message.ResponseAPIEndpoint, payload)
+	reply, err := payloader.SendPayload(res.Message.ResponseAPIEndpoint, p)
 	if err != nil {
 		return err
 	}
 
-	res.Result["response"] = string(reply)
-	res.Result["responseMessage"] = fmt.Sprintf("'%s' payload submitted successfully.", payloadType)
-	res.Result["responseSuccess"] = true
+	result["response"] = string(reply)
+	result["responseMessage"] = fmt.Sprintf("'%s' payload submitted successfully.", payloadType)
+	result["responseSuccess"] = true
+
+	res.Result = &result
 
 	return nil
 }

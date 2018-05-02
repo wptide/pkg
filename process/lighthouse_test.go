@@ -154,7 +154,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: audits,
 						},
-						Result: map[string]interface{}{
+						Result: &Result{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 						},
 					},
@@ -176,7 +176,7 @@ func TestLighthouse_Run(t *testing.T) {
 				&Info{
 					Process: Process{
 						Message: message.Message{},
-						Result: map[string]interface{}{
+						Result: &Result{
 							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 						},
 					},
@@ -202,7 +202,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: audits,
 						},
-						Result: make(map[string]interface{}),
+						Result: &Result{},
 					},
 				},
 			},
@@ -226,7 +226,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "test",
 							Audits: audits,
 						},
-						Result: map[string]interface{}{
+						Result: &Result{
 							"checksum": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
 						},
 					},
@@ -252,7 +252,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "error",
 							Audits: audits,
 						},
-						Result: map[string]interface{}{
+						Result: &Result{
 							"checksum": "1234567890",
 						},
 					},
@@ -278,7 +278,7 @@ func TestLighthouse_Run(t *testing.T) {
 							Slug:   "jsonError",
 							Audits: audits,
 						},
-						Result: map[string]interface{}{
+						Result: &Result{
 							"checksum": "1234567890",
 						},
 					},
@@ -308,7 +308,7 @@ func TestLighthouse_Run(t *testing.T) {
 								},
 							},
 						},
-						Result: map[string]interface{}{
+						Result: &Result{
 							"checksum": "1234567890",
 						},
 					},
@@ -329,6 +329,32 @@ func TestLighthouse_Run(t *testing.T) {
 			false,
 			false,
 			true,
+		},
+		{
+			"Valid Item - No mock runner",
+			fields{
+				In:              make(<-chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+				TempFolder:      "./testdata/tmp",
+			},
+			[]Processor{
+				&Info{
+					Process: Process{
+						Message: message.Message{
+							Title:  "Test",
+							Slug:   "test",
+							Audits: audits,
+						},
+						Result: &Result{
+							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
+						},
+					},
+				},
+			},
+			false,
+			false,
+			false,
 		},
 	}
 	for _, tt := range tests {

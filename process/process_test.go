@@ -22,7 +22,7 @@ func TestProcess_Run(t *testing.T) {
 	type fields struct {
 		context   context.Context
 		Message   message.Message
-		Result    map[string]interface{}
+		Result    *Result
 		FilesPath string
 	}
 	tests := []struct {

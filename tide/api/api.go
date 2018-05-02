@@ -74,7 +74,7 @@ func (c Client) SendPayload(method, endpoint, data string) (string, error) {
 	}
 
 	if ( resp.StatusCode < 200 || resp.StatusCode > 299 ) {
-		return "", errors.New("Unexpected status code.")
+		return "", errors.New("Unexpected status code: " + resp.Status)
 	}
 	defer resp.Body.Close()
 

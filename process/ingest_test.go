@@ -195,7 +195,7 @@ func TestIngest_process(t *testing.T) {
 			ig := &Ingest{
 				TempFolder: "./testdata/tmp",
 			}
-			ig.Result = make(map[string]interface{})
+			ig.Result = &Result{}
 
 			if tt.options.tempFolder != "" {
 				ig.TempFolder = tt.options.tempFolder
@@ -206,8 +206,8 @@ func TestIngest_process(t *testing.T) {
 			}
 
 			ig.Message = tt.message
-			if err := ig.process(); (err != nil) != tt.wantErr {
-				t.Errorf("Ingest.process() error = %v, wantErr %v", err, tt.wantErr)
+			if err := ig.Do(); (err != nil) != tt.wantErr {
+				t.Errorf("Ingest.Do() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

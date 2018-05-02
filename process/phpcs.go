@@ -25,7 +25,7 @@ type Phpcs struct {
 	Process                                 // Inherits methods from Process.
 	In              <-chan Processor        // Expects a processor channel as input.
 	Out             chan Processor          // Send results to an output channel.
-	Config          map[string]interface{}  // Additional config.
+	Config          Result  // Additional config.
 	TempFolder      string                  // Path to a temp folder where reports will be generated.
 	StorageProvider storage.StorageProvider // Storage provider to upload reports to.
 }
@@ -63,7 +63,7 @@ func (cs *Phpcs) Run(errc *chan error) error {
 				// If processing produces an error send it up the error channel.
 				for _, audit := range *cs.Message.Audits {
 					if audit.Type == "phpcs" {
-						if err := cs.process(audit); err != nil {
+						if err := cs.Do(audit); err != nil {
 							// Pass the error up the error channel.
 							*errc <- errors.New("PHPCS Error: " + err.Error())
 							// Don't break, the message is still useful to other processes.
@@ -81,16 +81,18 @@ func (cs *Phpcs) Run(errc *chan error) error {
 	return nil
 }
 
-func (cs *Phpcs) process(audit message.Audit) error {
+func (cs *Phpcs) Do(audit message.Audit) error {
 
 	log.Log(cs.Message.Title, "Running PHPCS Audit...")
+
+	result := *cs.Result
 
 	standard := audit.Options.Standard
 	if standard == "" {
 		return errors.New("could not determine standard for report")
 	}
 
-	checksum, ok := cs.Result["checksum"].(string)
+	checksum, ok := result["checksum"].(string)
 	if ! ok {
 		return errors.New("could not determine checksum")
 	}
@@ -230,7 +232,8 @@ func (cs *Phpcs) process(audit message.Audit) error {
 		}
 	}
 
-	cs.Result[kind] = auditResults
+	result[kind] = auditResults
+	cs.Result = &result
 
 	log.Log(cs.Message.Title, fmt.Sprintf("phpcs (%s) process completed with exit code: %d\n", standard, exitCode))
 

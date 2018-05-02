@@ -23,11 +23,6 @@ type Lighthouse struct {
 }
 
 func (lh *Lighthouse) Run(errc *chan error) error {
-
-	if lhRunner == nil {
-		lhRunner = &shell.Command{}
-	}
-
 	if lh.TempFolder == "" {
 		return errors.New("no temp folder provided for lighthouse reports")
 	}
@@ -62,7 +57,7 @@ func (lh *Lighthouse) Run(errc *chan error) error {
 				// If processing produces an error send it up the error channel.
 				for _, audit := range *lh.Message.Audits {
 					if audit.Type == "lighthouse" {
-						if err := lh.process(); err != nil {
+						if err := lh.Do(); err != nil {
 							// Pass the error up the error channel.
 							*errc <- errors.New("Lighthouse Error: " + err.Error())
 							// Don't break, the message is still useful to other processes.
@@ -80,8 +75,13 @@ func (lh *Lighthouse) Run(errc *chan error) error {
 	return nil
 }
 
-func (lh *Lighthouse) process() error {
+func (lh *Lighthouse) Do() error {
 	log.Log(lh.Message.Title, "Running Lighthouse Audit...")
+
+
+	if lhRunner == nil {
+		lhRunner = &shell.Command{}
+	}
 
 	var results *tide.LighthouseSummary
 
@@ -89,7 +89,7 @@ func (lh *Lighthouse) process() error {
 	cmdArgs := []string{
 		"--no-update-notifier",
 		"--quiet",
-		"--chrome-flags=\"--headless --disable-gpu --no-sandbox\"",
+		`--chrome-flags="--headless --disable-gpu --no-sandbox"`,
 		"--output=json",
 		"--output-path=stdout",
 		fmt.Sprintf("https://wp-themes.com/%s", lh.Message.Slug),
@@ -128,7 +128,9 @@ func (lh *Lighthouse) process() error {
 		LighthouseSummary: results,
 	}
 
-	lh.Result["lighthouse"] = auditResult
+	result := *lh.Result
+	result["lighthouse"] = auditResult
+	lh.Result = &result
 
 	log.Log(lh.Message.Title, "Lighthouse process complete.")
 
@@ -139,7 +141,8 @@ func (lh Lighthouse) uploadToStorage(buffer []byte) (*tide.AuditResult, error) {
 
 	var results *tide.AuditResult
 
-	checksum, checksumOk := lh.Result["checksum"].(string)
+	result := *lh.Result
+	checksum, checksumOk := result["checksum"].(string)
 	if ! checksumOk {
 		return nil, errors.New("there was no checksum to be used for filenames")
 	}

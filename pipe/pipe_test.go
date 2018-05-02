@@ -30,13 +30,13 @@ func (m mockProcess) Run(errc *chan error) error {
 	return nil
 }
 
-func (m mockProcess) SetContext(ctx context.Context)        {}
-func (m mockProcess) SetMessage(msg message.Message)        {}
-func (m mockProcess) GetMessage() message.Message           { return message.Message{} }
-func (m mockProcess) SetResults(res map[string]interface{}) {}
-func (m mockProcess) GetResult() map[string]interface{}     { return nil }
-func (m mockProcess) SetFilesPath(path string)              {}
-func (m mockProcess) GetFilesPath() string                  { return "" }
+func (m mockProcess) SetContext(ctx context.Context) {}
+func (m mockProcess) SetMessage(msg message.Message) {}
+func (m mockProcess) GetMessage() message.Message    { return message.Message{} }
+func (m mockProcess) SetResults(res *process.Result) {}
+func (m mockProcess) GetResult() *process.Result     { return nil }
+func (m mockProcess) SetFilesPath(path string)       {}
+func (m mockProcess) GetFilesPath() string           { return "" }
 
 func TestNew(t *testing.T) {
 	tests := []struct {

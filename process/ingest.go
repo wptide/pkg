@@ -37,7 +37,7 @@ func (ig *Ingest) Run(errc *chan error) error {
 			case msg := <-ig.In:
 
 				// Init the Result object.
-				ig.Result = make(map[string]interface{})
+				ig.Result = &Result{}
 
 				// If message is invalid, skip it, but keep listening on the channel.
 				if err := validateMessage(msg); err != nil {
@@ -53,7 +53,7 @@ func (ig *Ingest) Run(errc *chan error) error {
 
 				// Run the process.
 				// If processing produces an error send it up the error channel.
-				if err := ig.process(); err != nil {
+				if err := ig.Do(); err != nil {
 					// Pass the error up the error channel.
 					*errc <- errors.New("Ingest Error: " + err.Error())
 
@@ -71,7 +71,7 @@ func (ig *Ingest) Run(errc *chan error) error {
 	return nil
 }
 
-func (ig *Ingest) process() error {
+func (ig *Ingest) Do() error {
 
 	log.Log(ig.Message.Title, "Ingesting...")
 
@@ -106,8 +106,11 @@ func (ig *Ingest) process() error {
 	}
 
 	// Populate the result.
-	ig.Result["checksum"] = checksum
-	ig.Result["files"] = ig.sourceManager.GetFiles()
+	result := *ig.Result
+	result["checksum"] = checksum
+	result["files"] = ig.sourceManager.GetFiles()
+	result["filesPath"] = ig.GetFilesPath()
+	ig.Result = &result
 
 	log.Log(ig.Message.Title, "Project checksum: `"+checksum+"`")
 

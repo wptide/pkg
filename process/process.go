@@ -22,11 +22,13 @@ var (
 	fileOpen = os.Open
 )
 
+type Result map[string]interface{}
+
 // All our processes will use this as a base.
 type Process struct {
 	context   context.Context
 	Message   message.Message        // Keeps track of the original message.
-	Result    map[string]interface{} // Passes along a Result object.
+	Result    *Result // Passes along a Result object.
 	FilesPath string                 // Path of files to audit.
 }
 
@@ -53,11 +55,11 @@ func (p Process) GetMessage() message.Message {
 	return p.Message
 }
 
-func (p *Process) SetResults(res map[string]interface{}) {
+func (p *Process) SetResults(res *Result) {
 	p.Result = res
 }
 
-func (p Process) GetResult() map[string]interface{} {
+func (p Process) GetResult() *Result {
 	return p.Result
 }
 
@@ -81,8 +83,8 @@ type Processor interface {
 	SetContext(ctx context.Context)
 	SetMessage(msg message.Message)
 	GetMessage() message.Message
-	SetResults(res map[string]interface{})
-	GetResult() map[string]interface{}
+	SetResults(res *Result)
+	GetResult() *Result
 	SetFilesPath(path string)
 	GetFilesPath() string
 }

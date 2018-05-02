@@ -63,7 +63,7 @@ func TestInfo_Run(t *testing.T) {
 					Process: Process{
 						Message:   message.Message{Title: "Test Plugin"},
 						FilesPath: "./testdata/info/plugin",
-						Result:    make(map[string]interface{}),
+						Result:    &Result{},
 					},
 				},
 			},
@@ -81,7 +81,7 @@ func TestInfo_Run(t *testing.T) {
 					Process: Process{
 						Message:   message.Message{Title: "Test Theme"},
 						FilesPath: "./testdata/info/theme",
-						Result:    make(map[string]interface{}),
+						Result:    &Result{},
 					},
 				},
 			},
@@ -99,7 +99,26 @@ func TestInfo_Run(t *testing.T) {
 					Process: Process{
 						Message:   message.Message{Title: "Test Other"},
 						FilesPath: "./testdata/info/other",
-						Result:    make(map[string]interface{}),
+						Result:    &Result{},
+					},
+				},
+			},
+			false,
+			false,
+		},
+		{
+			"Theme - filesPath in Result",
+			fields{
+				In:  make(<-chan Processor),
+				Out: make(chan Processor),
+			},
+			[]Processor{
+				&Ingest{
+					Process: Process{
+						Message:   message.Message{Title: "Test Theme"},
+						Result:    &Result{
+							"filesPath": "./testdata/info/theme",
+						},
 					},
 				},
 			},
@@ -116,7 +135,7 @@ func TestInfo_Run(t *testing.T) {
 				&Ingest{
 					Process: Process{
 						Message: message.Message{Title: "No Files Path"},
-						Result:  make(map[string]interface{}),
+						Result:  &Result{},
 					},
 				},
 			},
@@ -134,7 +153,7 @@ func TestInfo_Run(t *testing.T) {
 					Process: Process{
 						Message:   message.Message{Title: "Invalid Path"},
 						FilesPath: "./testdata/info/invalid",
-						Result:    make(map[string]interface{}),
+						Result:    &Result{},
 					},
 				},
 			},

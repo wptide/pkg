@@ -15,7 +15,7 @@ import (
 
 type MockPayloader struct{}
 
-func (m MockPayloader) BuildPayload(msg message.Message, data map[string]interface{}) ([]byte, error) {
+func (m MockPayloader) BuildPayload(msg message.Message, data map[string]interface {}) ([]byte, error) {
 
 	if msg.Slug == "buildFail" {
 		return nil, errors.New("something went wrong")
@@ -93,7 +93,7 @@ func TestResponse_Run(t *testing.T) {
 							Title:       "Test",
 							PayloadType: "mock",
 						},
-						Result: make(map[string]interface{}),
+						Result: &Result{},
 					},
 				},
 			},
@@ -114,7 +114,7 @@ func TestResponse_Run(t *testing.T) {
 							Title:       "Test",
 							PayloadType: "unknown",
 						},
-						Result: make(map[string]interface{}),
+						Result: &Result{},
 					},
 				},
 			},
@@ -134,7 +134,7 @@ func TestResponse_Run(t *testing.T) {
 						Message: message.Message{
 							Title: "Test",
 						},
-						Result: make(map[string]interface{}),
+						Result: &Result{},
 					},
 				},
 			},
@@ -156,7 +156,7 @@ func TestResponse_Run(t *testing.T) {
 							Slug:        "buildFail",
 							PayloadType: "mock",
 						},
-						Result: make(map[string]interface{}),
+						Result: &Result{},
 					},
 				},
 			},
@@ -178,7 +178,7 @@ func TestResponse_Run(t *testing.T) {
 							PayloadType: "mock",
 							ResponseAPIEndpoint: "http://test.local/sendfail",
 						},
-						Result: make(map[string]interface{}),
+						Result: &Result{},
 					},
 				},
 			},

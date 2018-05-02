@@ -39,7 +39,7 @@ func (info *Info) Run(errc *chan error) error {
 
 				// Run the process.
 				// If processing produces an error send it up the error channel.
-				if err := info.process(); err != nil {
+				if err := info.Do(); err != nil {
 					// Pass the error up the error channel.
 					*errc <- errors.New("Info Error: " + err.Error())
 					// continue so that the message doesn't get passed along.
@@ -57,16 +57,23 @@ func (info *Info) Run(errc *chan error) error {
 }
 
 // process runs the actual code for this process.
-func (info *Info) process() error {
+func (info *Info) Do() error {
+
+	result := *info.Result
 
 	log.Log(info.Message.Title, "Processing CodeInfo")
+
+	// Try to get filesPath from results first.
+	if path, ok := result["filesPath"].(string); ok {
+		info.SetFilesPath(path)
+	}
 
 	if info.GetFilesPath() == "" {
 		return errors.New("could not determine files path")
 	}
 
 	path := info.GetFilesPath() + "/unzipped"
-	//
+
 	cloc, err := getCloc(path)
 	if err != nil {
 		return err
@@ -74,11 +81,12 @@ func (info *Info) process() error {
 
 	projectType, details, _ := getProjectDetails(path)
 
-	info.Result["info"] = tide.CodeInfo{
+	result["info"] = tide.CodeInfo{
 		Type:    projectType,
 		Details: details,
 		Cloc:    cloc,
 	}
+	info.Result = &result
 
 	log.Log(info.Message.Title, "Project is `"+projectType+"`")
 
