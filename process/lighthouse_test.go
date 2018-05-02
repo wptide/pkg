@@ -49,8 +49,12 @@ func TestLighthouse_Run(t *testing.T) {
 
 	// Set out execCommand variable to the mock function.
 	lhRunner = &mockRunner{}
+	defaultRunner = &mockRunner{}
 	// Remember to set it back after the test.
-	defer func() { lhRunner = &shell.Command{} }()
+	defer func() {
+		lhRunner = &shell.Command{}
+		defaultRunner = &shell.Command{}
+	}()
 
 	// Set out execCommand variable to the mock function.
 	writeFile = mockWriteFile
@@ -83,12 +87,12 @@ func TestLighthouse_Run(t *testing.T) {
 		StorageProvider storage.StorageProvider
 	}
 	tests := []struct {
-		name     string
-		fields   fields
-		procs    []Processor
+		name       string
+		fields     fields
+		procs      []Processor
 		mockRunner bool
-		wantErrc bool
-		wantErr  bool
+		wantErrc   bool
+		wantErr    bool
 	}{
 		{
 			"Invalid In channel",
@@ -331,7 +335,7 @@ func TestLighthouse_Run(t *testing.T) {
 			true,
 		},
 		{
-			"Valid Item - No mock runner",
+			"Valid Item - Use default runner",
 			fields{
 				In:              make(<-chan Processor),
 				Out:             make(chan Processor),

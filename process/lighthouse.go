@@ -11,7 +11,10 @@ import (
 	"github.com/wptide/pkg/shell"
 )
 
-var lhRunner shell.Runner
+var (
+	lhRunner shell.Runner
+	defaultRunner shell.Runner = &shell.Command{}
+)
 
 // Ingest defines the structure for our Ingest process.
 type Lighthouse struct {
@@ -80,7 +83,7 @@ func (lh *Lighthouse) Do() error {
 
 
 	if lhRunner == nil {
-		lhRunner = &shell.Command{}
+		lhRunner = defaultRunner
 	}
 
 	var results *tide.LighthouseSummary
