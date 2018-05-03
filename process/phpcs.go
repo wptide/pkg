@@ -87,6 +87,11 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 
 	result := *cs.Result
 
+	// Try to get filesPath from results first.
+	if path, ok := result["filesPath"].(string); ok {
+		cs.SetFilesPath(path)
+	}
+
 	standard := audit.Options.Standard
 	if standard == "" {
 		return errors.New("could not determine standard for report")

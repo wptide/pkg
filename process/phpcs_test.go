@@ -571,6 +571,28 @@ func TestPhpcs_Run(t *testing.T) {
 			false,
 			false,
 		},
+		{
+			"Valid Item - filesPath Result",
+			validFields,
+			[]Processor{
+				&Info{
+					Process: Process{
+						Message: message.Message{
+							Title:  "Valid Phpcompat",
+							Slug:   "test",
+							Audits: auditsPhpCompatibility,
+						},
+						Result: &Result{
+							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
+							"filesPath": "./testdata/info/plugin",
+						},
+					},
+				},
+			},
+			true,
+			false,
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
