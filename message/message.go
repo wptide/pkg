@@ -24,8 +24,8 @@ type Audit struct {
 }
 
 type AuditOption struct {
-	Standard         string `json:"standard"`
-	Report           string `json:"report"`
+	Standard         string `json:"standard,omitempty"`
+	Report           string `json:"report,omitempty"`
 	Encoding         string `json:"encoding,omitempty"`
 	RuntimeSet       string `json:"runtime-set,omitempty"`
 	Ignore           string `json:"ignore,omitempty"`
