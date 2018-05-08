@@ -7,16 +7,19 @@ type ResultSet struct {
 }
 
 type Item struct {
-	Title       string                 `json:"title"`
-	Description string                 `json:"content"`
-	Version     string                 `json:"version"`
-	Checksum    string                 `json:"checksum"`
-	Visibility  string                 `json:"visibility"`
-	ProjectType string                 `json:"project_type"`
-	SourceUrl   string                 `json:"source_url"`
-	SourceType  string                 `json:"source_type"`
-	CodeInfo    CodeInfo               `json:"code_info,omitempty"`
-	Results     map[string]AuditResult `json:"results,omitempty"`
+	Title         string                 `json:"title"`
+	Description   string                 `json:"content"`
+	Version       string                 `json:"version"`
+	Checksum      string                 `json:"checksum"`
+	Visibility    string                 `json:"visibility"`
+	ProjectType   string                 `json:"project_type"`
+	SourceUrl     string                 `json:"source_url"`
+	SourceType    string                 `json:"source_type"`
+	CodeInfo      CodeInfo               `json:"code_info,omitempty"`
+	Results       map[string]AuditResult `json:"results,omitempty"`
+	Standards     []string               `json:"standards,omitempty"`      // Will potentially be overriden in API and should not be relied upon.
+	RequestClient string                 `json:"request_client,omitempty"` // Will be converted to a user.
+	Project       []string               `json:"project,omitempty"`        // Has to be an array of string because of how taxonomies work in WordPress.
 }
 
 type CodeInfo struct {
@@ -49,19 +52,9 @@ type ClocResult struct {
 }
 
 type AuditResult struct {
-	Full struct {
-		Type       string `json:"type,omitempty"`
-		Key        string `json:"key,omitempty"`
-		BucketName string `json:"bucket_name,omitempty"`
-	} `json:"full,omitempty"`
-	Details struct {
-		Type       string `json:"type,omitempty"`
-		Key        string `json:"key,omitempty"`
-		BucketName string `json:"bucket_name,omitempty"`
-		*PhpcsResults
-		*LighthouseResults
-	} `json:"details,omitempty"`
-	Summary            *AuditSummary          `json:"summary,omitempty"`
+	Full               AuditDetails           `json:"full,omitempty"`
+	Details            AuditDetails           `json:"details,omitempty"`
+	Summary            AuditSummary           `json:"summary,omitempty"`
 	CompatibleVersions []string               `json:"compatible_versions,omitempty"`
 	Error              string                 `json:"error,omitempty"`
 	Extra              map[string]interface{} `json:"extra,omitempty"`
@@ -87,6 +80,14 @@ type PhpcsFilesMessage struct {
 	Line     int    `json:"line"`
 	Column   int    `json:"column"`
 	Fixable  bool   `json:"fixable"`
+}
+
+type AuditDetails struct {
+	Type       string `json:"type,omitempty"`
+	Key        string `json:"key,omitempty"`
+	BucketName string `json:"bucket_name,omitempty"`
+	*PhpcsResults
+	*LighthouseResults
 }
 
 type AuditSummary struct {

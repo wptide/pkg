@@ -1,8 +1,8 @@
 hash: f28830622a1f00b5bbbbc44e0533cb44139ed0ea6411ea68e2e5c2ac854cd8b7
-updated: 2018-03-01T09:51:08.178064862+11:00
+updated: 2018-03-22T15:55:01.78295176+11:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 9a79087b1148376f4dd860c188c948479e2def3b
+  version: 0a302e6abb548c4a4d22cde8eab1693ee498f202
   subpackages:
   - aws
   - aws/awserr
@@ -20,6 +20,7 @@ imports:
   - aws/request
   - aws/session
   - aws/signer/v4
+  - internal/sdkio
   - internal/sdkrand
   - internal/shareddefaults
   - private/protocol
@@ -38,7 +39,7 @@ imports:
 - name: github.com/blang/semver
   version: 2ee87856327ba09384cabd113bc6b5d174e9ec0f
 - name: github.com/go-ini/ini
-  version: 32e4be5f41bb918afb6e37c07426e2ddbcb6647e
+  version: 6ecc596bd756a16c6e93e4ef9225ecdb9f54ed2c
 - name: github.com/hhatto/gocloc
   version: 7b315f8ae7054b69fbbe05c61fb5b2e645c368f3
 - name: github.com/jmespath/go-jmespath
