@@ -88,16 +88,11 @@ func (lh *Lighthouse) Do() error {
 
 	var results *tide.LighthouseSummary
 
-	cmdName := "lighthouse"
-	cmdArgs := []string{
-		"--no-update-notifier",
-		"--quiet",
-		`--chrome-flags="--headless --disable-gpu --no-sandbox"`,
-		"--output=json",
-		"--output-path=stdout",
-		fmt.Sprintf("https://wp-themes.com/%s", lh.Message.Slug),
-	}
-
+	// Note: This assumes the shell script `lh` is in $PATH and contains the following command:
+	// `lighthouse --quiet --chrome-flags="--headless --disable-gpu --no-sandbox" --output=json --output-path=stdout $@`
+	cmdName := "lh"
+	cmdArgs := []string{fmt.Sprintf("https://wp-themes.com/%s", lh.Message.Slug)}
+	
 	// Prepare the command and set the stdOut pipe.
 	resultBytes, errorBytes, err, _ := lhRunner.Run(cmdName, cmdArgs...)
 
