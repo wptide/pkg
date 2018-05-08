@@ -49,7 +49,10 @@ func (t TidePayload) BuildPayload(msg message.Message, data map[string]interface
 		Results:       results,
 		Standards:     msg.Standards,
 		RequestClient: msg.RequestClient,
-		Project:       []string{msg.Slug},
+	}
+
+	if msg.Slug != "" {
+		payloadItem.Project = []string{msg.Slug}
 	}
 
 	return json.Marshal(payloadItem)

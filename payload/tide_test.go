@@ -94,7 +94,36 @@ func TestTidePayload_BuildPayload(t *testing.T) {
 					"checksum": "abcdefg",
 				},
 			},
-			[]byte(`{"title":"","content":"","version":"","checksum":"abcdefg","visibility":"","project_type":"plugin","source_url":"","source_type":"","code_info":{"type":"plugin","details":[],"cloc":{}},"results":{"phpcs_demo":{"full":{"type":"mock","key":"mock","bucket_name":"mock"},"details":{"type":"mock","key":"mock","bucket_name":"mock"},"summary":{}}},"project":[""]}`),
+			[]byte(`{"title":"","content":"","version":"","checksum":"abcdefg","visibility":"","project_type":"plugin","source_url":"","source_type":"","code_info":{"type":"plugin","details":[],"cloc":{}},"results":{"phpcs_demo":{"full":{"type":"mock","key":"mock","bucket_name":"mock"},"details":{"type":"mock","key":"mock","bucket_name":"mock"},"summary":{}}}}`),
+			false,
+		},
+		{
+			"Some Results - With Project Defined",
+			fields{
+				&MockTideClient{},
+			},
+			args{
+				data: map[string]interface{}{
+					"info": mockInfo,
+					"phpcs_demo": tide.AuditResult{
+						Full: tide.AuditDetails{
+							Type:       "mock",
+							Key:        "mock",
+							BucketName: "mock",
+						},
+						Details: tide.AuditDetails{
+							Type:       "mock",
+							Key:        "mock",
+							BucketName: "mock",
+						},
+					},
+					"checksum": "abcdefg",
+				},
+				msg: message.Message{
+					Slug: "project-one",
+				},
+			},
+			[]byte(`{"title":"","content":"","version":"","checksum":"abcdefg","visibility":"","project_type":"plugin","source_url":"","source_type":"","code_info":{"type":"plugin","details":[],"cloc":{}},"results":{"phpcs_demo":{"full":{"type":"mock","key":"mock","bucket_name":"mock"},"details":{"type":"mock","key":"mock","bucket_name":"mock"},"summary":{}}},"project":["project-one"]}`),
 			false,
 		},
 	}
