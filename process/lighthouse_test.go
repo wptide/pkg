@@ -17,7 +17,7 @@ import (
 type mockRunner struct{}
 
 func (m mockRunner) Run(name string, arg ...string) ([]byte, []byte, error, int) {
-	switch arg[5] {
+	switch arg[0] {
 	case "https://wp-themes.com/test":
 		return []byte(exampleLighthouseReport()), nil, nil, 0
 	case "https://wp-themes.com/jsonError":

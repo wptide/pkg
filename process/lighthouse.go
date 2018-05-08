@@ -92,7 +92,7 @@ func (lh *Lighthouse) Do() error {
 	// `lighthouse --quiet --chrome-flags="--headless --disable-gpu --no-sandbox" --output=json --output-path=stdout $@`
 	cmdName := "lh"
 	cmdArgs := []string{fmt.Sprintf("https://wp-themes.com/%s", lh.Message.Slug)}
-	
+
 	// Prepare the command and set the stdOut pipe.
 	resultBytes, errorBytes, err, _ := lhRunner.Run(cmdName, cmdArgs...)
 
