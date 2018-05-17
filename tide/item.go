@@ -83,9 +83,9 @@ type PhpcsFilesMessage struct {
 }
 
 type AuditDetails struct {
-	Type       string `json:"type,omitempty"`
-	Key        string `json:"key,omitempty"`
-	BucketName string `json:"bucket_name,omitempty"`
+	Type     string `json:"type,omitempty"`
+	FileName string `json:"filename,omitempty"`
+	Path     string `json:"path,omitempty"`
 	*PhpcsResults
 	*LighthouseResults
 }

@@ -166,7 +166,7 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	// We already have a reference to the report file, so lets upload and get the storage reference in a result.
 	log.Log(cs.Message.Title, "Uploading "+standard+" results to remote storage.")
 
-	fType, fKey, fBucket, err := cs.uploadToStorage(filepath, filename)
+	fType, fFileName, fPath, err := cs.uploadToStorage(filepath, filename)
 	if err != nil {
 		return err
 	}
@@ -174,9 +174,9 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	// Initialise the result and set the "Full" entry to the uploaded file.
 	auditResults := tide.AuditResult{
 		Full: tide.AuditDetails{
-			Type:       fType,
-			Key:        fKey,
-			BucketName: fBucket,
+			Type:     fType,
+			FileName: fFileName,
+			Path:     fPath,
 		},
 	}
 
@@ -212,15 +212,15 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 			return err
 		}
 
-		fType, fKey, fBucket, err := cs.uploadToStorage(fpath, fname)
+		fType, fFileName, fPath, err := cs.uploadToStorage(fpath, fname)
 		if err != nil {
 			return err
 		}
 
 		auditResults.Details = tide.AuditDetails{
-			Type:       fType,
-			Key:        fKey,
-			BucketName: fBucket,
+			Type:     fType,
+			FileName: fFileName,
+			Path:     fPath,
 		}
 
 		auditResults.CompatibleVersions = compatibleVersions
@@ -231,9 +231,9 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	empty := tide.AuditResult{}.Details
 	if auditResults.Details == empty {
 		auditResults.Details = tide.AuditDetails{
-			Type:       auditResults.Full.Type,
-			Key:        auditResults.Full.Key,
-			BucketName: auditResults.Full.BucketName,
+			Type:     auditResults.Full.Type,
+			FileName: auditResults.Full.FileName,
+			Path:     auditResults.Full.Path,
 		}
 	}
 
@@ -245,14 +245,14 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	return nil
 }
 
-func (cs Phpcs) uploadToStorage(filepath, filename string) (fType, fKey, fBucket string, err error) {
+func (cs Phpcs) uploadToStorage(filepath, filename string) (fType, fFileName, fPath string, err error) {
 	err = cs.StorageProvider.UploadFile(filepath, filename)
 
 	if err == nil {
 		fType = cs.StorageProvider.Kind()
-		fKey = filename
-		fBucket = cs.StorageProvider.CollectionRef()
+		fFileName = filename
+		fPath = cs.StorageProvider.CollectionRef()
 	}
 
-	return fType, fKey, fBucket, err
+	return fType, fFileName, fPath, err
 }
