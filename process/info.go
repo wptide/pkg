@@ -189,15 +189,17 @@ func extractHeader(filename string) (projectType string, details []tide.InfoDeta
 	b1 := make([]byte, 8192)
 	n1, _ := f.Read(b1)
 
-	isStyleCSS, _ := regexp.Match(`(style.css)$`, []byte(filename))
+	isStyleCSS, _ := regexp.Match(`(\/style.css)$`, []byte(filename))
 
 	if n1 > 0 {
+
+		fileHeader := strings.Replace(string(b1), "\r\n", "\n", -1)
 
 		validHeader := false
 		for _, field := range headerFields {
 			pattern := fmt.Sprintf("%s:.*", field)
 			re := regexp.MustCompile(pattern)
-			value := strings.Replace(re.FindString(string(b1)), field+":", "", -1)
+			value := strings.Replace(re.FindString(fileHeader), field+":", "", -1)
 			if len(value) > 0 {
 
 				fieldname := field
