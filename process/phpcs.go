@@ -110,7 +110,7 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	path := cs.GetFilesPath() + "/unzipped"
 
 	kind := strings.ToLower(audit.Type) + "_" + strings.ToLower(standard)
-	filename := checksum + "-" + kind + "-full.json"
+	filename := checksum + "-" + kind + "-raw.json"
 	pathPrefix := strings.TrimRight(cs.TempFolder, "/") + "/"
 	filepath := pathPrefix + filename
 
@@ -171,9 +171,9 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 		return err
 	}
 
-	// Initialise the result and set the "Full" entry to the uploaded file.
+	// Initialise the result and set the "Raw" entry to the uploaded file.
 	auditResults := tide.AuditResult{
-		Full: tide.AuditDetails{
+		Raw: tide.AuditDetails{
 			Type:     fType,
 			FileName: fFileName,
 			Path:     fPath,
@@ -196,15 +196,14 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	summary := phpcs.GetPhpcsSummary(*phpcsResults)
 	auditResults.Summary = tide.AuditSummary{PhpcsSummary: summary}
 
-	// Get PHPCompatibility
+	// Only PHPCompatibility provides parsed results.
 	// @todo Abstract this later.
-
 	if kind == "phpcs_phpcompatibility" {
 		compatibleVersions, compatResults := phpcs.GetPhpcsCompatibility(*phpcsResults)
 
 		resultsJson, _ := json.Marshal(compatResults)
 
-		fname := checksum + "-" + kind + "-details.json"
+		fname := checksum + "-" + kind + "-parsed.json"
 		fpath := pathPrefix + fname
 
 		err = writeFile(fpath, resultsJson, os.ModePerm)
@@ -217,24 +216,13 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 			return err
 		}
 
-		auditResults.Details = tide.AuditDetails{
+		auditResults.Parsed = tide.AuditDetails{
 			Type:     fType,
 			FileName: fFileName,
 			Path:     fPath,
 		}
 
 		auditResults.CompatibleVersions = compatibleVersions
-	}
-
-	// Only PHPCompatibility provides processed details, so if details
-	// are not available, make it the same as full.
-	empty := tide.AuditResult{}.Details
-	if auditResults.Details == empty {
-		auditResults.Details = tide.AuditDetails{
-			Type:     auditResults.Full.Type,
-			FileName: auditResults.Full.FileName,
-			Path:     auditResults.Full.Path,
-		}
 	}
 
 	result[kind] = auditResults

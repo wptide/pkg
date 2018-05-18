@@ -52,8 +52,8 @@ type ClocResult struct {
 }
 
 type AuditResult struct {
-	Full               AuditDetails           `json:"full,omitempty"`
-	Details            AuditDetails           `json:"details,omitempty"`
+	Raw                AuditDetails           `json:"raw,omitempty"`
+	Parsed             AuditDetails           `json:"parsed,omitempty"`
 	Summary            AuditSummary           `json:"summary,omitempty"`
 	CompatibleVersions []string               `json:"compatible_versions,omitempty"`
 	Error              string                 `json:"error,omitempty"`

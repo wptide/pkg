@@ -20,9 +20,9 @@ func (m mockStorage) CollectionRef() string {
 func (m mockStorage) UploadFile(filename, reference string) error {
 
 	switch reference {
-	case "phpcompatuploaderror-phpcs_phpcompatibility-details.json":
+	case "phpcompatuploaderror-phpcs_phpcompatibility-parsed.json":
 		fallthrough
-	case "uploaderrorchecksum-phpcs_wordpress-full.json":
+	case "uploaderrorchecksum-phpcs_wordpress-raw.json":
 		return errors.New("Upload error!")
 	}
 

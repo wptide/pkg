@@ -110,16 +110,13 @@ func (lh *Lighthouse) Do() error {
 
 	// Upload and get full results.
 	log.Log(lh.Message.Title, "Uploading results to remote storage.")
-	fullResults, err := lh.uploadToStorage(resultBytes)
+	rawResults, err := lh.uploadToStorage(resultBytes)
 	if err != nil {
 		return err
 	}
 
-	if fullResults != nil {
-		auditResult.Full = fullResults.Full
-		auditResult.Details.Type = fullResults.Full.Type
-		auditResult.Details.FileName = fullResults.Full.FileName
-		auditResult.Details.Path = fullResults.Full.Path
+	if rawResults != nil {
+		auditResult.Raw = rawResults.Raw
 	}
 
 	auditResult.Summary = tide.AuditSummary{
@@ -145,7 +142,7 @@ func (lh Lighthouse) uploadToStorage(buffer []byte) (*tide.AuditResult, error) {
 		return nil, errors.New("there was no checksum to be used for filenames")
 	}
 
-	storageRef := checksum + "-lighthouse-full.json"
+	storageRef := checksum + "-lighthouse-raw.json"
 	filename := strings.TrimRight(lh.TempFolder, "/") + "/" + storageRef
 
 	err := writeFile(filename, buffer, 0644)
@@ -157,7 +154,7 @@ func (lh Lighthouse) uploadToStorage(buffer []byte) (*tide.AuditResult, error) {
 
 	if err == nil {
 		results = &tide.AuditResult{
-			Full: tide.AuditDetails{
+			Raw: tide.AuditDetails{
 				Type:     lh.StorageProvider.Kind(),
 				FileName: storageRef,
 				Path:     lh.StorageProvider.CollectionRef(),

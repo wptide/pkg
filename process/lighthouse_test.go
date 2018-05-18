@@ -32,9 +32,9 @@ func (m mockRunner) Run(name string, arg ...string) ([]byte, []byte, error, int)
 func mockWriteFile(filename string, data []byte, perm os.FileMode) error {
 
 	switch filename {
-	case "./testdata/tmp/phpcompatwriteerror-phpcs_phpcompatibility-details.json":
+	case "./testdata/tmp/phpcompatwriteerror-phpcs_phpcompatibility-parsed.json":
 		fallthrough
-	case "./testdata/tmp/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff-lighthouse-full.json":
+	case "./testdata/tmp/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff-lighthouse-raw.json":
 		return errors.New("something went wrong")
 	default:
 		return ioutil.WriteFile(filename, data, perm)
