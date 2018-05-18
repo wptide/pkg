@@ -46,7 +46,7 @@ func (t TidePayload) BuildPayload(msg message.Message, data map[string]interface
 		SourceUrl:     msg.SourceURL,
 		SourceType:    msg.SourceType,
 		CodeInfo:      codeInfo,
-		Results:       results,
+		Reports:       results,
 		Standards:     msg.Standards,
 		RequestClient: msg.RequestClient,
 	}

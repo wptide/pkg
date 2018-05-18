@@ -16,7 +16,7 @@ type Item struct {
 	SourceUrl     string                 `json:"source_url"`
 	SourceType    string                 `json:"source_type"`
 	CodeInfo      CodeInfo               `json:"code_info,omitempty"`
-	Results       map[string]AuditResult `json:"results,omitempty"`
+	Reports       map[string]AuditResult `json:"reports,omitempty"`
 	Standards     []string               `json:"standards,omitempty"`      // Will potentially be overriden in API and should not be relied upon.
 	RequestClient string                 `json:"request_client,omitempty"` // Will be converted to a user.
 	Project       []string               `json:"project,omitempty"`        // Has to be an array of string because of how taxonomies work in WordPress.
