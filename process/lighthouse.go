@@ -118,8 +118,8 @@ func (lh *Lighthouse) Do() error {
 	if fullResults != nil {
 		auditResult.Full = fullResults.Full
 		auditResult.Details.Type = fullResults.Full.Type
-		auditResult.Details.Key = fullResults.Full.Key
-		auditResult.Details.BucketName = fullResults.Full.BucketName
+		auditResult.Details.FileName = fullResults.Full.FileName
+		auditResult.Details.Path = fullResults.Full.Path
 	}
 
 	auditResult.Summary = tide.AuditSummary{
@@ -158,9 +158,9 @@ func (lh Lighthouse) uploadToStorage(buffer []byte) (*tide.AuditResult, error) {
 	if err == nil {
 		results = &tide.AuditResult{
 			Full: tide.AuditDetails{
-				Type:       lh.StorageProvider.Kind(),
-				Key:        storageRef,
-				BucketName: lh.StorageProvider.CollectionRef(),
+				Type:     lh.StorageProvider.Kind(),
+				FileName: storageRef,
+				Path:     lh.StorageProvider.CollectionRef(),
 			},
 		}
 	}

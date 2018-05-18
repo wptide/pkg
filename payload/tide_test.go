@@ -81,20 +81,20 @@ func TestTidePayload_BuildPayload(t *testing.T) {
 					"info": mockInfo,
 					"phpcs_demo": tide.AuditResult{
 						Full: tide.AuditDetails{
-							Type:       "mock",
-							Key:        "mock",
-							BucketName: "mock",
+							Type:     "mock",
+							FileName: "mock",
+							Path:     "mock",
 						},
 						Details: tide.AuditDetails{
-							Type:       "mock",
-							Key:        "mock",
-							BucketName: "mock",
+							Type:     "mock",
+							FileName: "mock",
+							Path:     "mock",
 						},
 					},
 					"checksum": "abcdefg",
 				},
 			},
-			[]byte(`{"title":"","content":"","version":"","checksum":"abcdefg","visibility":"","project_type":"plugin","source_url":"","source_type":"","code_info":{"type":"plugin","details":[],"cloc":{}},"reports":{"phpcs_demo":{"full":{"type":"mock","key":"mock","bucket_name":"mock"},"details":{"type":"mock","key":"mock","bucket_name":"mock"},"summary":{}}}}`),
+			[]byte(`{"title":"","content":"","version":"","checksum":"abcdefg","visibility":"","project_type":"plugin","source_url":"","source_type":"","code_info":{"type":"plugin","details":[],"cloc":{}},"reports":{"phpcs_demo":{"full":{"type":"mock","filename":"mock","path":"mock"},"details":{"type":"mock","filename":"mock","path":"mock"},"summary":{}}}}`),
 			false,
 		},
 		{
@@ -107,14 +107,14 @@ func TestTidePayload_BuildPayload(t *testing.T) {
 					"info": mockInfo,
 					"phpcs_demo": tide.AuditResult{
 						Full: tide.AuditDetails{
-							Type:       "mock",
-							Key:        "mock",
-							BucketName: "mock",
+							Type:     "mock",
+							FileName: "mock",
+							Path:     "mock",
 						},
 						Details: tide.AuditDetails{
-							Type:       "mock",
-							Key:        "mock",
-							BucketName: "mock",
+							Type:     "mock",
+							FileName: "mock",
+							Path:     "mock",
 						},
 					},
 					"checksum": "abcdefg",
@@ -123,7 +123,7 @@ func TestTidePayload_BuildPayload(t *testing.T) {
 					Slug: "project-one",
 				},
 			},
-			[]byte(`{"title":"","content":"","version":"","checksum":"abcdefg","visibility":"","project_type":"plugin","source_url":"","source_type":"","code_info":{"type":"plugin","details":[],"cloc":{}},"reports":{"phpcs_demo":{"full":{"type":"mock","key":"mock","bucket_name":"mock"},"details":{"type":"mock","key":"mock","bucket_name":"mock"},"summary":{}}},"project":["project-one"]}`),
+			[]byte(`{"title":"","content":"","version":"","checksum":"abcdefg","visibility":"","project_type":"plugin","source_url":"","source_type":"","code_info":{"type":"plugin","details":[],"cloc":{}},"reports":{"phpcs_demo":{"full":{"type":"mock","filename":"mock","path":"mock"},"details":{"type":"mock","filename":"mock","path":"mock"},"summary":{}}},"project":["project-one"]}`),
 			false,
 		},
 	}
