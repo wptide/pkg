@@ -11,7 +11,8 @@ var (
 )
 
 type Provider struct {
-	path string
+	serverPath string
+	localPath  string
 }
 
 func (p Provider) Kind() string {
@@ -19,24 +20,25 @@ func (p Provider) Kind() string {
 }
 
 func (p Provider) CollectionRef() string {
-	return p.path
+	return p.localPath
 }
 
 func (p Provider) UploadFile(filename, reference string) error {
 	// Copy to "uploads" folder.
-	dest := p.path + "/" + reference
+	dest := p.serverPath + "/" + reference
 	return copyFile(filename, dest)
 }
 
 func (p Provider) DownloadFile(reference, filename string) error {
 	// Copy from "uploads" folder.
-	src := p.path + "/" + reference
+	src := p.serverPath + "/" + reference
 	return copyFile(src, filename)
 }
 
-func NewLocalStorage(storagePath string) *Provider {
+func NewLocalStorage(storagePath string, localPath string) *Provider {
 	return &Provider{
 		storagePath,
+		localPath,
 	}
 }
 

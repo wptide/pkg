@@ -24,8 +24,9 @@ func TestProvider_CollectionRef(t *testing.T) {
 			"Collection Reference",
 			Provider{
 				"./testdata",
+				"subdir",
 			},
-			"./testdata",
+			"subdir",
 		},
 	}
 	for _, tt := range tests {
@@ -52,6 +53,7 @@ func TestProvider_UploadFile(t *testing.T) {
 			"Test Upload - upload.txt",
 			Provider{
 				"./testdata/dest_bucket",
+				"subdir",
 			},
 			args{
 				"./testdata/source_bucket/upload.txt",
@@ -63,6 +65,7 @@ func TestProvider_UploadFile(t *testing.T) {
 			"Test Upload Bucket Error",
 			Provider{
 				"./testdata/dest_bucket",
+				"subdir",
 			},
 			args{
 				"does_not_exist.txt",
@@ -74,6 +77,7 @@ func TestProvider_UploadFile(t *testing.T) {
 			"Test File Create Error",
 			Provider{
 				"./testdata/test_bucket",
+				"subdir",
 			},
 			args{
 				"./testdata/source_bucket/upload.txt",
@@ -106,6 +110,7 @@ func TestProvider_DownloadFile(t *testing.T) {
 			"Test Upload - upload.txt",
 			Provider{
 				"./testdata/dest_bucket",
+				"subdir",
 			},
 			args{
 				"upload.txt",
@@ -125,7 +130,8 @@ func TestProvider_DownloadFile(t *testing.T) {
 
 func TestNewLocalStorage(t *testing.T) {
 	type args struct {
-		storagePath string
+		serverPath string
+		localPath string
 	}
 	tests := []struct {
 		name string
@@ -136,15 +142,17 @@ func TestNewLocalStorage(t *testing.T) {
 			"Create Provider",
 			args{
 				"./testdata/dest_bucket",
+				"subdir",
 			},
 			&Provider{
 				"./testdata/dest_bucket",
+				"subdir",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewLocalStorage(tt.args.storagePath); !reflect.DeepEqual(got, tt.want) {
+			if got := NewLocalStorage(tt.args.serverPath, tt.args.localPath); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewLocalStorage() = %v, want %v", got, tt.want)
 			}
 		})
