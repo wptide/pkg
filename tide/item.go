@@ -100,9 +100,9 @@ type PhpcsSummary struct {
 		Errors   int `json:"errors"`
 		Warnings int `json:"warnings"`
 	} `json:"files,omitempty"`
-	FilesCount    int `json:"files_count,omitempty"`
-	ErrorsCount   int `json:"errors_count,omitempty"`
-	WarningsCount int `json:"warnings_count,omitempty"`
+	FilesCount    int `json:"files_count"`
+	ErrorsCount   int `json:"errors_count"`
+	WarningsCount int `json:"warnings_count"`
 }
 
 // @todo Define this later
