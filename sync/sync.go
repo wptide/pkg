@@ -16,4 +16,5 @@ type Dispatcher interface {
 type UpdateChecker interface {
 	UpdateCheck(project wporg.RepoProject) bool
 	RecordUpdate(project wporg.RepoProject) error
+	GetLastUpdated() (*wporg.RepoProject, error)
 }
