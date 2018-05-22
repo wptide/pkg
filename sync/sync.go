@@ -2,6 +2,7 @@ package sync
 
 import (
 	"github.com/wptide/pkg/wporg"
+	"time"
 )
 
 // Dispatcher describes an interface for dispatching RepoProjects to
@@ -16,5 +17,15 @@ type Dispatcher interface {
 type UpdateChecker interface {
 	UpdateCheck(project wporg.RepoProject) bool
 	RecordUpdate(project wporg.RepoProject) error
-	GetLastUpdated() (*wporg.RepoProject, error)
+}
+
+// Syncer records and retrieves the last sync times
+type SyncChecker interface {
+	SetSyncTime(event, projectType string, t time.Time)
+	GetSyncTime(event, projectType string) time.Time
+}
+
+type UpdateSyncChecker interface {
+	UpdateChecker
+	SyncChecker
 }
