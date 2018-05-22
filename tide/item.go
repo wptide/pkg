@@ -109,7 +109,7 @@ type PhpcsSummary struct {
 type LighthouseResults struct{}
 
 type LighthouseSummary struct {
-	Categories []LighthouseCategory `json:"categories,omitempty"`
+	Categories map[string]LighthouseCategory `json:"categories,omitempty"`
 }
 
 type LighthouseCategory struct {
