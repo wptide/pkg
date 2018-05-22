@@ -109,12 +109,11 @@ type PhpcsSummary struct {
 type LighthouseResults struct{}
 
 type LighthouseSummary struct {
-	ReportCategories []LighthouseCategory `json:"reportCategories,omitempty"`
+	Categories []LighthouseCategory `json:"categories,omitempty"`
 }
 
 type LighthouseCategory struct {
-	Name        string  `json:"name"`
-	Weight      float32 `json:"weight"`
+	Title       string  `json:"title"`
 	Description string  `json:"description"`
 	Id          string  `json:"id"`
 	Score       float32 `json:"score"`
