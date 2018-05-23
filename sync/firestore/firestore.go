@@ -11,22 +11,19 @@ import (
 )
 
 var (
-	defaultClient *firestore.Client
-	setData       = setDoc
-	getData       = getDoc
-	mutex         = sync.Mutex{}
+	mutex = sync.Mutex{}
 )
 
 type FirestoreSync struct {
-	c        *firestore.Client
 	ctx      context.Context
+	client   ClientInterface
 	rootPath string
 }
 
 func (f FirestoreSync) UpdateCheck(project wporg.RepoProject) bool {
 	key := fmt.Sprintf("%s/%s/%s", f.rootPath, project.Type, project.Slug)
 
-	data := getData(f.ctx, key, f.c)
+	data := f.client.GetDoc(key)
 	record, err := itop(data)
 	if err != nil {
 		return true
@@ -41,14 +38,17 @@ func (f FirestoreSync) RecordUpdate(project wporg.RepoProject) error {
 	key := fmt.Sprintf("%s/%s/%s", f.rootPath, project.Type, project.Slug)
 
 	data, _ := ptoi(project)
-	return setData(f.ctx, key, f.c, data)
+
+	return f.client.SetDoc(key, data)
 }
 
 func (f FirestoreSync) SetSyncTime(event, projectType string, t time.Time) {
 	key := fmt.Sprintf("%s-sync-%s", projectType, event)
-	data := getData(f.ctx, f.rootPath, f.c)
+
+	data := f.client.GetDoc(f.rootPath)
+
 	data[key] = t.UnixNano()
-	setData(f.ctx, f.rootPath, f.c, data)
+	f.client.SetDoc(f.rootPath, data)
 }
 
 func (f FirestoreSync) GetSyncTime(event, projectType string) time.Time {
@@ -56,11 +56,11 @@ func (f FirestoreSync) GetSyncTime(event, projectType string) time.Time {
 
 	var t time.Time
 
-	data := getData(f.ctx, f.rootPath, f.c)
+	data := f.client.GetDoc(f.rootPath)
 	timestamp, ok := data[key].(int64)
 
 	if !ok {
-		t, _ = time.Parse(wporg.TimeFormat, "1970-01-01 12:00am MST")
+		t, _ = time.Parse(wporg.TimeFormat, "1970-01-01 12:00am UTC")
 	} else {
 		t = time.Unix(0, timestamp)
 	}
@@ -70,6 +70,7 @@ func (f FirestoreSync) GetSyncTime(event, projectType string) time.Time {
 
 // itop converts a Firestore record into a wporg.RepoProject.
 func itop(data map[string]interface{}) (wporg.RepoProject, error) {
+
 	var project wporg.RepoProject
 	var cErr error
 	if temp, err := json.Marshal(data); err == nil {
@@ -89,15 +90,25 @@ func ptoi(project wporg.RepoProject) (map[string]interface{}, error) {
 	return data, cErr
 }
 
+// New creates a new FirestoreSync (UpdateSyncChecker) with a default client
+// using Firestore.
 func New(ctx context.Context, projectId string, rootDocPath string) *FirestoreSync {
-	if defaultClient == nil {
-		c, _ := firestore.NewClient(ctx, projectId)
-		defaultClient = c
+
+	fireClient, _ := firestore.NewClient(ctx, projectId)
+	client := Client{
+		Firestore: fireClient,
+		Ctx:       ctx,
 	}
 
+	return NewWithClient(ctx, projectId, rootDocPath, client)
+}
+
+// New creates a new FirestoreSync (UpdateSyncChecker) with a provided ClientInterface client.
+// Note: Use this one for the tests with a mock ClientInterface.
+func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client ClientInterface) *FirestoreSync {
 	return &FirestoreSync{
 		ctx:      ctx,
-		c:        defaultClient,
+		client:   client,
 		rootPath: rootDocPath,
 	}
 }
