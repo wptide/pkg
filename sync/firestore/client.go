@@ -18,12 +18,14 @@ type Client struct {
 }
 
 func (c Client) GetDoc(path string) map[string]interface{} {
-	doc, _ := c.getDocRef(path)
-	return c.getDocData(doc)
+	doc := c.getDoc(path)
+	docRef, _ := c.getDocRef(doc)
+	return c.getDocData(docRef)
 }
 
 func (c Client) SetDoc(path string, data map[string]interface{}) error {
-	_, err := c.Firestore.Doc(path).Set(c.Ctx, data)
+	doc := c.getDoc(path)
+	_, err := doc.Set(c.Ctx, data)
 	return err
 }
 
@@ -36,8 +38,12 @@ func (c Client) Close() error {
 	return c.Firestore.Close()
 }
 
-func (c Client) getDocRef(path string) (*firestore.DocumentSnapshot, error) {
-	return c.Firestore.Doc(path).Get(c.Ctx)
+func (c Client) getDoc(path string) *firestore.DocumentRef {
+	return c.Firestore.Doc(path)
+}
+
+func (c Client) getDocRef(doc *firestore.DocumentRef) (*firestore.DocumentSnapshot, error) {
+	return doc.Get(c.Ctx)
 }
 
 func (c Client) getDocData(ss *firestore.DocumentSnapshot) map[string]interface{} {
