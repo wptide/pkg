@@ -22,6 +22,8 @@ func (m mockClient) GetDoc(path string) map[string]interface{} {
 		return map[string]interface{}{
 			"mock-sync-start": int64(1526956796534182580),
 		}
+	case "test/set-sync-time-error":
+		return nil
 	case "test/get-sync-time-err":
 		return nil
 	case "test/update-check-error/plugin/test-project":
@@ -177,11 +179,24 @@ func TestFirestoreSync_SetSyncTime(t *testing.T) {
 		args   args
 	}{
 		{
-			"Get Time - No Error",
+			"Set Time - No Error",
 			fields{
 				context.Background(),
 				&mockClient{},
 				"test/set-sync-time",
+			},
+			args{
+				"start",
+				"mock",
+				time.Now(),
+			},
+		},
+		{
+			"Set Time - Error",
+			fields{
+				context.Background(),
+				&mockClient{},
+				"test/set-sync-time-error",
 			},
 			args{
 				"start",

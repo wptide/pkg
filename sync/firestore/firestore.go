@@ -46,10 +46,13 @@ func (f FirestoreSync) SetSyncTime(event, projectType string, t time.Time) {
 	key := fmt.Sprintf("%s-sync-%s", projectType, event)
 
 	data := f.client.GetDoc(f.rootPath)
-
+	if len(data) == 0 {
+		data = make(map[string]interface{})
+	}
 	data[key] = t.UnixNano()
 	f.client.SetDoc(f.rootPath, data)
 }
+
 
 func (f FirestoreSync) GetSyncTime(event, projectType string) time.Time {
 	key := fmt.Sprintf("%s-sync-%s", projectType, event)
