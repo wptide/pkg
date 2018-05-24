@@ -1,11 +1,12 @@
 package: github.com/wptide/pkg
 import:
 - package: cloud.google.com/go
-  version: v0.22.0
+  version: v0.23.0
   subpackages:
+  - firestore
   - storage
 - package: github.com/aws/aws-sdk-go
-  version: v1.13.50
+  version: v1.13.54
   subpackages:
   - aws
   - aws/awserr
