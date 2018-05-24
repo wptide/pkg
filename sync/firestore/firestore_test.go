@@ -47,6 +47,10 @@ func (m mockClient) Close() error {
 	return nil
 }
 
+func (m mockClient) Authenticated() bool {
+	return true
+}
+
 func TestFirestoreSync_UpdateCheck(t *testing.T) {
 	type fields struct {
 		ctx      context.Context
@@ -107,7 +111,7 @@ func TestFirestoreSync_UpdateCheck(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
+			f, _ := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
 			if got := f.UpdateCheck(tt.args.project); got != tt.want {
 				t.Errorf("FirestoreSync.UpdateCheck() = %v, want %v", got, tt.want)
 			}
@@ -154,7 +158,7 @@ func TestFirestoreSync_RecordUpdate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
+			f, _ := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
 			if err := f.RecordUpdate(tt.args.project); (err != nil) != tt.wantErr {
 				t.Errorf("FirestoreSync.RecordUpdate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -207,7 +211,7 @@ func TestFirestoreSync_SetSyncTime(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
+			f, _ := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
 			f.SetSyncTime(tt.args.event, tt.args.projectType, tt.args.t)
 		})
 	}
@@ -259,7 +263,7 @@ func TestFirestoreSync_GetSyncTime(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
+			f, _ := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
 
 			if got := f.GetSyncTime(tt.args.event, tt.args.projectType); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FirestoreSync.GetSyncTime() = %v, want %v", got, tt.want)
@@ -393,7 +397,7 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := New(tt.args.ctx, tt.args.projectId, tt.args.rootDocPath); reflect.TypeOf(got) != tt.want {
+			if got, _ := New(tt.args.ctx, tt.args.projectId, tt.args.rootDocPath); reflect.TypeOf(got) != tt.want {
 				t.Errorf("New() = %v, want %v", reflect.TypeOf(got), tt.want)
 			}
 		})
@@ -425,7 +429,7 @@ func TestNewWithClient(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewWithClient(tt.args.ctx, tt.args.projectId, tt.args.rootDocPath, tt.args.client); reflect.TypeOf(got) != tt.want {
+			if got, _ := NewWithClient(tt.args.ctx, tt.args.projectId, tt.args.rootDocPath, tt.args.client); reflect.TypeOf(got) != tt.want {
 				t.Errorf("NewWithClient() = %v, want %v", reflect.TypeOf(got), tt.want)
 			}
 		})

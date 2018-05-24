@@ -9,6 +9,7 @@ type ClientInterface interface {
 	GetDoc(path string) map[string]interface{}
 	SetDoc(path string, data map[string]interface{}) error
 	AddDoc(collection string, data map[string]interface{}) error
+	Authenticated() bool
 	Close() error
 }
 
@@ -48,4 +49,8 @@ func (c Client) getDocRef(doc *firestore.DocumentRef) (*firestore.DocumentSnapsh
 
 func (c Client) getDocData(ss *firestore.DocumentSnapshot) map[string]interface{} {
 	return ss.Data()
+}
+
+func (c Client) Authenticated() bool {
+	return c.Firestore != nil
 }

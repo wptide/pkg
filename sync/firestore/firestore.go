@@ -8,6 +8,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"sync"
 	"encoding/json"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -53,7 +54,6 @@ func (f FirestoreSync) SetSyncTime(event, projectType string, t time.Time) {
 	f.client.SetDoc(f.rootPath, data)
 }
 
-
 func (f FirestoreSync) GetSyncTime(event, projectType string) time.Time {
 	key := fmt.Sprintf("%s-sync-%s", projectType, event)
 
@@ -95,7 +95,7 @@ func ptoi(project wporg.RepoProject) (map[string]interface{}, error) {
 
 // New creates a new FirestoreSync (UpdateSyncChecker) with a default client
 // using Firestore.
-func New(ctx context.Context, projectId string, rootDocPath string) *FirestoreSync {
+func New(ctx context.Context, projectId string, rootDocPath string) (*FirestoreSync, error) {
 
 	fireClient, _ := firestore.NewClient(ctx, projectId)
 	client := Client{
@@ -108,10 +108,14 @@ func New(ctx context.Context, projectId string, rootDocPath string) *FirestoreSy
 
 // New creates a new FirestoreSync (UpdateSyncChecker) with a provided ClientInterface client.
 // Note: Use this one for the tests with a mock ClientInterface.
-func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client ClientInterface) *FirestoreSync {
+func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client ClientInterface) (*FirestoreSync, error) {
+	if ! client.Authenticated() {
+		return nil, errors.New("Could not authenticate sync client.")
+	}
+
 	return &FirestoreSync{
 		ctx:      ctx,
 		client:   client,
 		rootPath: rootDocPath,
-	}
+	}, nil
 }
