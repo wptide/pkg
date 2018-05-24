@@ -8,7 +8,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"sync"
 	"encoding/json"
-	"github.com/pkg/errors"
+	"errors"
 )
 
 var (
