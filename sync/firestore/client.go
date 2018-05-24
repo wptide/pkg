@@ -26,7 +26,8 @@ func (c Client) GetDoc(path string) map[string]interface{} {
 
 func (c Client) SetDoc(path string, data map[string]interface{}) error {
 	doc := c.getDoc(path)
-	_, err := doc.Set(c.Ctx, data)
+	// firestore.MergeAll "causes all the field paths ... to be overwritten." avoiding redundant read ops.
+	_, err := doc.Set(c.Ctx, data, firestore.MergeAll)
 	return err
 }
 

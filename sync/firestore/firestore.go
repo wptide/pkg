@@ -46,11 +46,10 @@ func (f FirestoreSync) RecordUpdate(project wporg.RepoProject) error {
 func (f FirestoreSync) SetSyncTime(event, projectType string, t time.Time) {
 	key := fmt.Sprintf("%s-sync-%s", projectType, event)
 
-	data := f.client.GetDoc(f.rootPath)
-	if len(data) == 0 {
-		data = make(map[string]interface{})
-	}
+	data := make(map[string]interface{})
 	data[key] = t.UnixNano()
+
+	// Data will be merged by the client automatically.
 	f.client.SetDoc(f.rootPath, data)
 }
 
