@@ -39,7 +39,11 @@ func (m mockClient) SetDoc(path string, data map[string]interface{}) error {
 	return nil
 }
 
-func (m mockClient) AddDoc(collection string, data map[string]interface{}) error {
+func (m mockClient) AddDoc(collection string, data interface{}) error {
+	return nil
+}
+
+func (m mockClient) DeleteDoc(path string) error {
 	return nil
 }
 
@@ -49,6 +53,10 @@ func (m mockClient) Close() error {
 
 func (m mockClient) Authenticated() bool {
 	return true
+}
+
+func (m mockClient) QueryItems(collection string, conditions []Condition, ordering []Order, limit int, updateFunc UpdateFunc) ([]interface{}, error) {
+	return nil, nil
 }
 
 func TestFirestoreSync_UpdateCheck(t *testing.T) {
