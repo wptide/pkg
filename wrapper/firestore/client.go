@@ -36,15 +36,13 @@ type Client struct {
 }
 
 func (c Client) GetDoc(path string) map[string]interface{} {
-	doc := c.getDoc(path)
-	docRef, _ := c.getDocRef(doc)
+	docRef, _ := c.Firestore.Doc(path).Get(c.Ctx)
 	return c.getDocData(docRef)
 }
 
 func (c Client) SetDoc(path string, data map[string]interface{}) error {
-	doc := c.getDoc(path)
 	// firestore.MergeAll "causes all the field paths ... to be overwritten." avoiding redundant read ops.
-	_, err := doc.Set(c.Ctx, data, firestore.MergeAll)
+	_, err := c.Firestore.Doc(path).Set(c.Ctx, data, firestore.MergeAll)
 	return err
 }
 
@@ -57,15 +55,10 @@ func (c Client) Close() error {
 	return c.Firestore.Close()
 }
 
-func (c Client) getDoc(path string) *firestore.DocumentRef {
-	return c.Firestore.Doc(path)
-}
-
-func (c Client) getDocRef(doc *firestore.DocumentRef) (*firestore.DocumentSnapshot, error) {
-	return doc.Get(c.Ctx)
-}
-
 func (c Client) getDocData(ss *firestore.DocumentSnapshot) map[string]interface{} {
+	if ss == nil {
+		return nil
+	}
 	return ss.Data()
 }
 
