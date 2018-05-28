@@ -113,19 +113,23 @@ func itom(data map[string]interface{}) *QueueMessage {
 	return msg
 }
 
-// generateMessages generates a new QueueMessage given *message.Message.
-func generateMessage(in *message.Message) *QueueMessage {
+// generateMessages generates a new interface map given *message.Message.
+func generateMessage(in *message.Message) map[string]interface{} {
 
-	msg := &QueueMessage{
-		Created:        time.Now().UnixNano(),
-		Lock:           int64(0),
-		Message:        in,
-		Retries:        int64(RetryAttemps),
-		Status:         "pending",
-		RetryAvailable: true,
+	// Convert the struct into an interface map.
+	var msgMap map[string]interface{}
+	msg, _ := json.Marshal(in)
+	json.Unmarshal(msg, &msgMap)
+
+	// Return the QueueMessage as an interface map.
+	return map[string]interface{}{
+		"created":         time.Now().UnixNano(),
+		"lock":            int64(0),
+		"retries":         int64(RetryAttemps),
+		"message":         msgMap,
+		"status":          "pending",
+		"retry_available": true,
 	}
-
-	return msg
 }
 
 // New creates a new FirestoreSync (UpdateSyncChecker) with a default client
