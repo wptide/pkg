@@ -1,7 +1,7 @@
 package firestore
 
 import (
-	"github.com/wptide/pkg/sync/firestore"
+	fsClient "github.com/wptide/pkg/wrapper/firestore"
 	"errors"
 	"github.com/wptide/pkg/message"
 )
@@ -35,7 +35,7 @@ func (m mockClient) Close() error {
 	return nil
 }
 
-func (m mockClient) QueryItems(collection string, conditions []firestore.Condition, ordering []firestore.Order, limit int, updateFunc firestore.UpdateFunc) ([]interface{}, error) {
+func (m mockClient) QueryItems(collection string, conditions []fsClient.Condition, ordering []fsClient.Order, limit int, updateFunc fsClient.UpdateFunc) ([]interface{}, error) {
 
 	simpleMessage := func(retries int, id string) []interface{} {
 		docData := map[string]interface{}{

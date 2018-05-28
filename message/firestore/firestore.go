@@ -2,7 +2,7 @@ package firestore
 
 import (
 	"github.com/wptide/pkg/message"
-	syncFirestore "github.com/wptide/pkg/sync/firestore"
+	fsClient "github.com/wptide/pkg/wrapper/firestore"
 	"context"
 	"errors"
 	"cloud.google.com/go/firestore"
@@ -27,7 +27,7 @@ type QueueMessage struct {
 // FirestoreProvider implements the MessageProvider interface.
 type FirestoreProvider struct {
 	ctx      context.Context
-	client   syncFirestore.ClientInterface
+	client   fsClient.ClientInterface
 	c        *firestore.Client
 	rootPath string
 }
@@ -46,12 +46,12 @@ func (fs FirestoreProvider) GetNextMessage() (*message.Message, error) {
 		// Collection to get the message from.
 		fs.rootPath,
 		// Conditions provided to the client query.
-		[]syncFirestore.Condition{
+		[]fsClient.Condition{
 			{"retry_available", "==", true},
 			{"lock", "<", time.Now().UnixNano()},
 		},
 		// Order parameters for the results.
-		[]syncFirestore.Order{
+		[]fsClient.Order{
 			{"lock", "asc"},
 			{"created", "asc"},
 		},
@@ -133,7 +133,7 @@ func generateMessage(in *message.Message) *QueueMessage {
 func New(ctx context.Context, projectId string, rootDocPath string) (*FirestoreProvider, error) {
 
 	fireClient, _ := firestore.NewClient(ctx, projectId)
-	client := syncFirestore.Client{
+	client := fsClient.Client{
 		Firestore: fireClient,
 		Ctx:       ctx,
 	}
@@ -143,7 +143,7 @@ func New(ctx context.Context, projectId string, rootDocPath string) (*FirestoreP
 
 // New creates a new FirestoreSync (UpdateSyncChecker) with a provided ClientInterface client.
 // Note: Use this one for the tests with a mock ClientInterface.
-func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client syncFirestore.ClientInterface) (*FirestoreProvider, error) {
+func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client fsClient.ClientInterface) (*FirestoreProvider, error) {
 	if ! client.Authenticated() {
 		return nil, errors.New("Could not authenticate sync client.")
 	}
