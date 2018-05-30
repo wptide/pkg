@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
+	fsClient "github.com/wptide/pkg/wrapper/firestore"
 	"github.com/wptide/pkg/wporg"
 )
 
@@ -39,7 +39,11 @@ func (m mockClient) SetDoc(path string, data map[string]interface{}) error {
 	return nil
 }
 
-func (m mockClient) AddDoc(collection string, data map[string]interface{}) error {
+func (m mockClient) AddDoc(collection string, data interface{}) error {
+	return nil
+}
+
+func (m mockClient) DeleteDoc(path string) error {
 	return nil
 }
 
@@ -51,10 +55,14 @@ func (m mockClient) Authenticated() bool {
 	return true
 }
 
+func (m mockClient) QueryItems(collection string, conditions []fsClient.Condition, ordering []fsClient.Order, limit int, updateFunc fsClient.UpdateFunc) ([]interface{}, error) {
+	return nil, nil
+}
+
 func TestFirestoreSync_UpdateCheck(t *testing.T) {
 	type fields struct {
 		ctx      context.Context
-		client   ClientInterface
+		client   fsClient.ClientInterface
 		rootPath string
 	}
 	type args struct {
@@ -122,7 +130,7 @@ func TestFirestoreSync_UpdateCheck(t *testing.T) {
 func TestFirestoreSync_RecordUpdate(t *testing.T) {
 	type fields struct {
 		ctx      context.Context
-		client   ClientInterface
+		client   fsClient.ClientInterface
 		rootPath string
 	}
 	type args struct {
@@ -169,7 +177,7 @@ func TestFirestoreSync_RecordUpdate(t *testing.T) {
 func TestFirestoreSync_SetSyncTime(t *testing.T) {
 	type fields struct {
 		ctx      context.Context
-		client   ClientInterface
+		client   fsClient.ClientInterface
 		rootPath string
 	}
 	type args struct {
@@ -221,7 +229,7 @@ func TestFirestoreSync_GetSyncTime(t *testing.T) {
 
 	type fields struct {
 		ctx      context.Context
-		client   ClientInterface
+		client   fsClient.ClientInterface
 		rootPath string
 	}
 	type args struct {
@@ -409,7 +417,7 @@ func TestNewWithClient(t *testing.T) {
 		ctx         context.Context
 		projectId   string
 		rootDocPath string
-		client      ClientInterface
+		client      fsClient.ClientInterface
 	}
 	tests := []struct {
 		name string

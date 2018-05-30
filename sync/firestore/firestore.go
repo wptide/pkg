@@ -9,6 +9,7 @@ import (
 	"sync"
 	"encoding/json"
 	"errors"
+	fsClient "github.com/wptide/pkg/wrapper/firestore"
 )
 
 var (
@@ -17,7 +18,7 @@ var (
 
 type FirestoreSync struct {
 	ctx      context.Context
-	client   ClientInterface
+	client   fsClient.ClientInterface
 	rootPath string
 }
 
@@ -46,11 +47,10 @@ func (f FirestoreSync) RecordUpdate(project wporg.RepoProject) error {
 func (f FirestoreSync) SetSyncTime(event, projectType string, t time.Time) {
 	key := fmt.Sprintf("%s-sync-%s", projectType, event)
 
-	data := f.client.GetDoc(f.rootPath)
-	if len(data) == 0 {
-		data = make(map[string]interface{})
-	}
+	data := make(map[string]interface{})
 	data[key] = t.UnixNano()
+
+	// Data will be merged by the client automatically.
 	f.client.SetDoc(f.rootPath, data)
 }
 
@@ -98,7 +98,7 @@ func ptoi(project wporg.RepoProject) (map[string]interface{}, error) {
 func New(ctx context.Context, projectId string, rootDocPath string) (*FirestoreSync, error) {
 
 	fireClient, _ := firestore.NewClient(ctx, projectId)
-	client := Client{
+	client := fsClient.Client{
 		Firestore: fireClient,
 		Ctx:       ctx,
 	}
@@ -108,7 +108,7 @@ func New(ctx context.Context, projectId string, rootDocPath string) (*FirestoreS
 
 // New creates a new FirestoreSync (UpdateSyncChecker) with a provided ClientInterface client.
 // Note: Use this one for the tests with a mock ClientInterface.
-func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client ClientInterface) (*FirestoreSync, error) {
+func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client fsClient.ClientInterface) (*FirestoreSync, error) {
 	if ! client.Authenticated() {
 		return nil, errors.New("Could not authenticate sync client.")
 	}
