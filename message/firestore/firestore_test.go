@@ -193,10 +193,24 @@ func TestFirestoreProvider_Close(t *testing.T) {
 			},
 			false,
 		},
+		{
+			"Close() - No client",
+			fields{
+				context.Background(),
+				nil,
+				"",
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fs, _ := NewWithClient(tt.fields.ctx,"", tt.fields.rootPath, tt.fields.client)
+			fs := &FirestoreProvider{
+				ctx:      tt.fields.ctx,
+				client:   tt.fields.client,
+				rootPath: tt.fields.rootPath,
+			}
+
 			if err := fs.Close(); (err != nil) != tt.wantErr {
 				t.Errorf("FirestoreProvider.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
