@@ -125,7 +125,7 @@ func TestPhpcs_Run(t *testing.T) {
 	os.MkdirAll("./testdata/upload", os.ModePerm)
 	defer os.RemoveAll("./testdata/upload")
 
-	auditsWordPress := &[]message.Audit{
+	auditsWordPress := []*message.Audit{
 		{
 			Type: "phpcs",
 			Options: &message.AuditOption{
@@ -134,7 +134,7 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 	}
 
-	auditsPhpCompatibility := &[]message.Audit{
+	auditsPhpCompatibility := []*message.Audit{
 		{
 			Type: "phpcs",
 			Options: &message.AuditOption{
@@ -144,7 +144,7 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 	}
 
-	auditsPhpCompatibilityOverride := &[]message.Audit{
+	auditsPhpCompatibilityOverride := []*message.Audit{
 		{
 			Type: "phpcs",
 			Options: &message.AuditOption{
@@ -155,7 +155,7 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 	}
 
-	auditsBoth := &[]message.Audit{
+	auditsBoth := []*message.Audit{
 		{
 			Type: "phpcs",
 			Options: &message.AuditOption{
@@ -170,7 +170,7 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 	}
 
-	auditsInvalidStandard := &[]message.Audit{
+	auditsInvalidStandard := []*message.Audit{
 		{
 			Type:    "phpcs",
 			Options: &message.AuditOption{},
@@ -420,7 +420,7 @@ func TestPhpcs_Run(t *testing.T) {
 						Message: message.Message{
 							Title: "Not PHPCS",
 							Slug:  "Not PHPCS",
-							Audits: &[]message.Audit{
+							Audits: []*message.Audit{
 								{
 									Type: "lighthouse",
 								},

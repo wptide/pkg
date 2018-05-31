@@ -15,7 +15,7 @@ type Message struct {
 	ExternalRef         *string `json:"external_ref,omitempty"`
 	// @todo: Legacy fields. Need to deprecate over time.
 	Standards []string `json:"standards,omitempty"`
-	Audits    *[]Audit `json:"audits,omitempty"`
+	Audits    []*Audit `json:"audits,omitempty"`
 }
 
 type Audit struct {

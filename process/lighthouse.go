@@ -58,7 +58,7 @@ func (lh *Lighthouse) Run(errc *chan error) error {
 
 				// Run the process.
 				// If processing produces an error send it up the error channel.
-				for _, audit := range *lh.Message.Audits {
+				for _, audit := range lh.Message.Audits {
 					if audit.Type == "lighthouse" {
 						if err := lh.Do(); err != nil {
 							// Pass the error up the error channel.
