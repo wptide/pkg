@@ -8,23 +8,28 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
 	"encoding/json"
 	"github.com/wptide/pkg/message"
+	wrapper "github.com/wptide/pkg/wrapper/mongo"
 )
 
 type MockClient struct {
 	collection string
 }
 
-func (m MockClient) Database(string) DataLayer {
+func (m MockClient) Database(string) wrapper.DataLayer {
 	return &MockDatabase{
 		collection: m.collection,
 	}
+}
+
+func (m MockClient) Close() error {
+	return nil
 }
 
 type MockDatabase struct {
 	collection string
 }
 
-func (m MockDatabase) Collection(name string) CollectionLayer {
+func (m MockDatabase) Collection(name string) wrapper.CollectionLayer {
 	return &MockCollection{
 		collection: m.collection,
 	}
@@ -34,15 +39,15 @@ type MockCollection struct {
 	collection string
 }
 
-func (m MockCollection) InsertOne(ctx context.Context, document interface{}, opts ...options.InsertOneOptioner) (InsertOneResultLayer, error) {
+func (m MockCollection) InsertOne(ctx context.Context, document interface{}, opts ...options.InsertOneOptioner) (wrapper.InsertOneResultLayer, error) {
 	return nil, nil
 }
 
-func (m MockCollection) FindOne(ctx context.Context, filter interface{}, opts ...options.FindOneOptioner) DocumentResultLayer {
+func (m MockCollection) FindOne(ctx context.Context, filter interface{}, opts ...options.FindOneOptioner) wrapper.DocumentResultLayer {
 
 	switch m.collection {
 	case "test-no-records":
-		return &MongoDocumentResult{
+		return &wrapper.MongoDocumentResult{
 			&mongo.DocumentResult{},
 		}
 	default:
@@ -51,12 +56,12 @@ func (m MockCollection) FindOne(ctx context.Context, filter interface{}, opts ..
 		}
 	}
 }
-func (m MockCollection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...options.FindOneAndUpdateOptioner) DocumentResultLayer {
+func (m MockCollection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...options.FindOneAndUpdateOptioner) wrapper.DocumentResultLayer {
 	return &MockDocumentResult{
 		collection: m.collection + "-update",
 	}
 }
-func (m MockCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...options.FindOneAndDeleteOptioner) DocumentResultLayer {
+func (m MockCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...options.FindOneAndDeleteOptioner) wrapper.DocumentResultLayer {
 	return nil
 }
 

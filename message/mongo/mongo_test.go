@@ -2,17 +2,42 @@ package mongo
 
 import (
 	"context"
+	"fmt"
+	"net"
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/wptide/pkg/message"
+	wrapper "github.com/wptide/pkg/wrapper/mongo"
 )
+
+func testServer(t *testing.T, handler func(net.Conn)) (func() error, string) {
+	ln, _ := net.Listen("tcp", "127.0.0.1:0")
+
+	go func() {
+		for {
+			// Listen for an incoming connection.
+			server, err := ln.Accept()
+			if err != nil {
+				fmt.Println("Error accepting: ", err.Error())
+				os.Exit(1)
+			}
+			// Handle connections in a new goroutine.
+			if handler != nil {
+				go handler(server)
+			}
+		}
+	}()
+
+	return ln.Close, ln.Addr().String()
+}
 
 func TestMongoProvider_SendMessage(t *testing.T) {
 	type fields struct {
 		ctx        context.Context
-		client     Client
+		client     wrapper.Client
 		database   string
 		collection string
 	}
@@ -54,7 +79,7 @@ func TestMongoProvider_SendMessage(t *testing.T) {
 func TestMongoProvider_GetNextMessage(t *testing.T) {
 	type fields struct {
 		ctx        context.Context
-		client     Client
+		client     wrapper.Client
 		database   string
 		collection string
 	}
@@ -88,7 +113,7 @@ func TestMongoProvider_GetNextMessage(t *testing.T) {
 				"test-valid-message",
 			},
 			&message.Message{
-				Title: "Plugin One",
+				Title:       "Plugin One",
 				ExternalRef: &[]string{"abcdef123456789009876364"}[0],
 			},
 			false,
@@ -104,7 +129,7 @@ func TestMongoProvider_GetNextMessage(t *testing.T) {
 				"test-valid-message-no-retry",
 			},
 			&message.Message{
-				Title: "Plugin One",
+				Title:       "Plugin One",
 				ExternalRef: &[]string{"abcdef123456789009876364"}[0],
 			},
 			false,
@@ -155,7 +180,7 @@ func TestMongoProvider_GetNextMessage(t *testing.T) {
 func TestMongoProvider_DeleteMessage(t *testing.T) {
 	type fields struct {
 		ctx        context.Context
-		client     Client
+		client     wrapper.Client
 		database   string
 		collection string
 	}
@@ -248,6 +273,39 @@ func TestNew(t *testing.T) {
 			}
 			if reflect.TypeOf(got) != tt.want {
 				t.Errorf("New() = %v, want %v", reflect.TypeOf(got), tt.want)
+			}
+		})
+	}
+}
+
+func TestMongoProvider_Close(t *testing.T) {
+	type fields struct {
+		ctx        context.Context
+		client     wrapper.Client
+		database   string
+		collection string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			"Close()",
+			fields{
+				context.Background(),
+				&MockClient{},
+				"test-db",
+				"test-col",
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m, _ := NewWithClient(tt.fields.ctx, tt.fields.database, tt.fields.collection, tt.fields.client)
+			if err := m.Close(); (err != nil) != tt.wantErr {
+				t.Errorf("MongoProvider.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -2,14 +2,14 @@ package mongo
 
 import (
 	"context"
+	"fmt"
+	"net"
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/mongodb/mongo-go-driver/core/options"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"net"
-	"fmt"
-	"os"
 )
 
 func testServer(t *testing.T, handler func(net.Conn)) (func() error, string) {
@@ -82,7 +82,7 @@ func TestNewMongoClient(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewMongoClient(tt.args.user, tt.args.pass, tt.args.host, tt.args.opts)
+			got, err := NewMongoClient(context.Background(), tt.args.user, tt.args.pass, tt.args.host, tt.args.opts)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewMongoClient() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -360,6 +360,42 @@ func TestMongoDocumentResult_Decode(t *testing.T) {
 			res := make(map[string]interface{})
 			if err := d.Decode(res); (err != nil) != tt.wantErr {
 				t.Errorf("MongoDocumentResult.Decode() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestMongoClient_Close(t *testing.T) {
+
+	_, host := testServer(t, nil)
+	client, _ := mongo.NewClient("mongodb://" + host)
+
+	type fields struct {
+		ctx    context.Context
+		Client *mongo.Client
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			"Close()",
+			fields{
+				context.Background(),
+				client,
+			},
+			true, // Can't close it because it never started.
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mc := MongoClient{
+				ctx:    tt.fields.ctx,
+				Client: tt.fields.Client,
+			}
+			if err := mc.Close(); (err != nil) != tt.wantErr {
+				t.Errorf("MongoClient.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

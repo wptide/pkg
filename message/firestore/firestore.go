@@ -28,7 +28,6 @@ type QueueMessage struct {
 type FirestoreProvider struct {
 	ctx      context.Context
 	client   fsClient.ClientInterface
-	c        *firestore.Client
 	rootPath string
 }
 
@@ -99,6 +98,14 @@ func (fs FirestoreProvider) GetNextMessage() (*message.Message, error) {
 // Delete a Document from Firestore.
 func (fs FirestoreProvider) DeleteMessage(ref *string) error {
 	return fs.client.DeleteDoc(fmt.Sprintf("%s/%s", fs.rootPath, *ref))
+}
+
+// Close the Firestore client.
+func (fs FirestoreProvider) Close() error {
+	if fs.client != nil {
+		return fs.client.Close()
+	}
+	return nil
 }
 
 // itom converts a Firestore Document into a QueueMessage.

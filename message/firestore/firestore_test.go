@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/wptide/pkg/message"
+	fsClient "github.com/wptide/pkg/wrapper/firestore"
 )
 
 func TestFirestoreProvider_SendMessage(t *testing.T) {
@@ -167,6 +168,37 @@ func TestNew(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("New() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFirestoreProvider_Close(t *testing.T) {
+	type fields struct {
+		ctx      context.Context
+		client   fsClient.ClientInterface
+		rootPath string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			"Close()",
+			fields{
+				context.Background(),
+				&mockClient{},
+				"",
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fs, _ := NewWithClient(tt.fields.ctx,"", tt.fields.rootPath, tt.fields.client)
+			if err := fs.Close(); (err != nil) != tt.wantErr {
+				t.Errorf("FirestoreProvider.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

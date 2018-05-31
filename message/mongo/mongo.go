@@ -8,6 +8,7 @@ import (
 	"time"
 	"errors"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	wrapper "github.com/wptide/pkg/wrapper/mongo"
 )
 
 const RetryAttemps = 3
@@ -15,7 +16,7 @@ const LockDuration time.Duration = time.Minute * 5
 
 type MongoProvider struct {
 	ctx        context.Context
-	client     Client
+	client     wrapper.Client
 	database   string
 	collection string
 }
@@ -111,6 +112,11 @@ func (m MongoProvider) DeleteMessage(ref *string) error {
 	return nil
 }
 
+// Close the MongoDB client.
+func (m MongoProvider) Close() error {
+	return m.client.Close()
+}
+
 func generateMessage(in *message.Message) map[string]interface{} {
 
 	// Convert the struct into an interface map.
@@ -130,7 +136,7 @@ func generateMessage(in *message.Message) map[string]interface{} {
 }
 
 func New(ctx context.Context, user string, pass string, host string, db string, collection string, opts *mongo.ClientOptions) (*MongoProvider, error) {
-	client, err := NewMongoClient(user, pass, host, opts)
+	client, err := wrapper.NewMongoClient(ctx, user, pass, host, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +144,7 @@ func New(ctx context.Context, user string, pass string, host string, db string, 
 	return NewWithClient(ctx, db, collection, client)
 }
 
-func NewWithClient(ctx context.Context, db string, collection string, client Client) (*MongoProvider, error) {
+func NewWithClient(ctx context.Context, db string, collection string, client wrapper.Client) (*MongoProvider, error) {
 	return &MongoProvider{
 		ctx:        ctx,
 		client:     client,

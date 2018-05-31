@@ -10,6 +10,7 @@ import (
 type Dispatcher interface {
 	Dispatch(project wporg.RepoProject) error
 	Init() error
+	Close() error
 }
 
 // UpdateChecker describes an interface to determine and record the currency

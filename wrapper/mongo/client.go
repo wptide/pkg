@@ -8,14 +8,16 @@ import (
 )
 
 type Client interface {
+	Close() error
 	Database(string) DataLayer
 }
 
 type MongoClient struct {
+	ctx context.Context
 	*mongo.Client
 }
 
-func NewMongoClient(user string, pass string, host string, opts *mongo.ClientOptions) (Client, error) {
+func NewMongoClient(ctx context.Context, user string, pass string, host string, opts *mongo.ClientOptions) (Client, error) {
 
 	var creds string
 
@@ -28,11 +30,18 @@ func NewMongoClient(user string, pass string, host string, opts *mongo.ClientOpt
 	}
 
 	client, err := mongo.NewClientWithOptions("mongodb://"+creds+host, opts)
-	return &MongoClient{client}, err
+	if err == nil {
+		client.Connect(ctx)
+	}
+	return &MongoClient{ctx, client}, err
 }
 
 func (mc MongoClient) Database(name string) DataLayer {
 	return &MongoDatabase{Database: mc.Client.Database(name)}
+}
+
+func (mc MongoClient) Close() error {
+	return mc.Client.Disconnect(mc.ctx)
 }
 
 type DataLayer interface {

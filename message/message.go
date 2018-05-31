@@ -36,4 +36,5 @@ type MessageProvider interface {
 	SendMessage(msg *Message) error
 	GetNextMessage() (*Message, error)
 	DeleteMessage(ref *string) error
+	Close() error
 }
