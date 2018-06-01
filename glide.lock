@@ -1,5 +1,5 @@
-hash: d51741b14a9fa42428cd2495cf5c7df6dd48e6798475de96edc97c4f96ac5b5e
-updated: 2018-05-31T09:13:51.194855431+10:00
+hash: 470dc91138277e09cbe4cdfd1b8d710942bf4383d49df9c07b57d8a85ff00454
+updated: 2018-06-01T12:43:03.875400176+10:00
 imports:
 - name: cloud.google.com/go
   version: 0fd7230b2a7505833d5f69b75cbd6c9582401479
@@ -17,7 +17,7 @@ imports:
   - internal/version
   - storage
 - name: github.com/aws/aws-sdk-go
-  version: 398d14696895d68a3409bb3ccb1cfe8abc2d4376
+  version: 827e7eac8c2680d5bdea7bc3ef29c596eabe1eae
   subpackages:
   - aws
   - aws/awserr
@@ -76,14 +76,17 @@ imports:
 - name: github.com/jmespath/go-jmespath
   version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
 - name: github.com/mongodb/mongo-go-driver
-  version: 29a4d7d5b648e5b0b60e03e3bd71c11703f0c203
+  version: de03a35e8661ae6df623f41ec8f616ffd8ef6131
   subpackages:
   - bson
   - bson/builder
   - bson/decimal
   - bson/elements
+  - bson/internal/jsonparser
   - bson/objectid
-  - core/addr
+  - bson/parser
+  - bson/parser/ast
+  - core/address
   - core/auth
   - core/auth/internal/gssapi
   - core/command
@@ -91,7 +94,7 @@ imports:
   - core/connstring
   - core/description
   - core/dispatch
-  - core/options
+  - core/option
   - core/readconcern
   - core/readpref
   - core/result

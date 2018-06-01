@@ -6,7 +6,7 @@ import:
   - firestore
   - storage
 - package: github.com/aws/aws-sdk-go
-  version: v1.13.57
+  version: v1.13.59
   subpackages:
   - aws
   - aws/awserr
@@ -21,10 +21,11 @@ import:
   version: v3.5.1
 - package: github.com/hhatto/gocloc
 - package: github.com/mongodb/mongo-go-driver
-  version: v0.0.5
+  version: v0.0.6
   subpackages:
+  - bson
   - bson/objectid
-  - core/options
+  - core/option
   - mongo
 testImport:
 - package: firebase.google.com/go
