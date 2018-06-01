@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mongodb/mongo-go-driver/core/options"
+	"github.com/mongodb/mongo-go-driver/core/option"
 	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
@@ -177,7 +177,7 @@ func TestMongoCollection_InsertOne(t *testing.T) {
 	type args struct {
 		ctx      context.Context
 		document interface{}
-		opts     []options.InsertOneOptioner
+		opts     []option.InsertOneOptioner
 	}
 	tests := []struct {
 		name    string
@@ -222,7 +222,7 @@ func TestMongoCollection_FindOne(t *testing.T) {
 	type args struct {
 		ctx    context.Context
 		filter interface{}
-		opts   []options.FindOneOptioner
+		opts   []option.FindOneOptioner
 	}
 	tests := []struct {
 		name   string
@@ -262,7 +262,7 @@ func TestMongoCollection_FindOneAndUpdate(t *testing.T) {
 		ctx    context.Context
 		filter interface{}
 		update interface{}
-		opts   []options.FindOneAndUpdateOptioner
+		opts   []option.FindOneAndUpdateOptioner
 	}
 	tests := []struct {
 		name   string
@@ -302,7 +302,7 @@ func TestMongoCollection_FindOneAndDelete(t *testing.T) {
 	type args struct {
 		ctx    context.Context
 		filter interface{}
-		opts   []options.FindOneAndDeleteOptioner
+		opts   []option.FindOneAndDeleteOptioner
 	}
 	tests := []struct {
 		name   string
@@ -357,8 +357,8 @@ func TestMongoDocumentResult_Decode(t *testing.T) {
 			d := MongoDocumentResult{
 				DocumentResult: tt.fields.DocumentResult,
 			}
-			res := make(map[string]interface{})
-			if err := d.Decode(res); (err != nil) != tt.wantErr {
+
+			if _, err := d.Decode(); (err != nil) != tt.wantErr {
 				t.Errorf("MongoDocumentResult.Decode() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
 	wrapper "github.com/wptide/pkg/wrapper/mongo"
+	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 const RetryAttemps = 3
@@ -39,19 +40,16 @@ func (m MongoProvider) GetNextMessage() (*message.Message, error) {
 	}
 
 	//sort by 'created' ASC. DESC takes `-1` for the second argument.
-	sort, _ := mongo.Opt.Sort(map[string]interface{}{
-		"created": int32(1),
-	})
+	sort, _ := mongo.Opt.Sort(bson.NewDocument(bson.EC.Int32("created", 1)))
 
-	var ptr interface{}
+	result := collection.FindOne(m.ctx, filter, sort)
+	qm, err := ResultToQueueMessage(result)
+	if err != nil {
+		return nil, err
 
-	collection.FindOne(context.Background(), filter, sort).Decode(&ptr)
-	item, ok := ptr.(map[string]interface{})
-	if !ok {
-		return nil, errors.New("No matching documents.")
 	}
 
-	itemID := item["_id"].(objectid.ObjectID)
+	itemID, _ := objectid.FromHex(*qm.Message.ExternalRef)
 
 	// Lock and update.
 	filter = map[string]interface{}{
@@ -60,12 +58,11 @@ func (m MongoProvider) GetNextMessage() (*message.Message, error) {
 
 	// Get retries.
 	retryAvailable := true
-	retries := item["retries"].(int64) - 1
+	retries := qm.Retries - 1
 	if (retries <= 0) {
 		retryAvailable = false
 	}
 
-	//
 	// Update data.
 	updateData := map[string]interface{}{
 		"$set": map[string]interface{}{
@@ -76,27 +73,12 @@ func (m MongoProvider) GetNextMessage() (*message.Message, error) {
 	}
 
 	// Update item and get new reference.
-	var updatePtr interface{}
-	collection.FindOneAndUpdate(context.Background(), filter, updateData).Decode(&updatePtr)
-
-	updatedItem, ok := updatePtr.(map[string]interface{})
-	if !ok {
+	uqm, err := ResultToQueueMessage(collection.FindOneAndUpdate(context.Background(), filter, updateData))
+	if err != nil {
 		return nil, errors.New("MongoDB: Could not set lock on item.")
 	}
 
-	var msg *message.Message
-
-	messageRaw, ok := updatedItem["message"].(map[string]interface{})
-	if ! ok {
-		return nil, errors.New("MongoDB: Could not retrieve message.")
-	}
-
-	messageJson, _ := json.Marshal(messageRaw)
-	json.Unmarshal(messageJson, &msg)
-
-	msg.ExternalRef = &[]string{itemID.Hex()}[0]
-
-	return msg, nil
+	return uqm.Message, nil
 }
 
 func (m MongoProvider) DeleteMessage(ref *string) error {
@@ -133,6 +115,26 @@ func generateMessage(in *message.Message) map[string]interface{} {
 		"status":          "pending",
 		"retry_available": true,
 	}
+}
+
+func ResultToQueueMessage(layer wrapper.DocumentResultLayer) (*message.QueueMessage, error) {
+
+	elem, _ := layer.Decode()
+	raw, _ := elem.MarshalBSON()
+	js, err := bson.ToExtJSON(false, raw)
+
+	if err != nil || js == "{}" {
+		return nil, errors.New("No document found.")
+	}
+
+	extRef := elem.Lookup("_id").ObjectID().Hex()
+
+	var qm *message.QueueMessage
+	json.Unmarshal([]byte(js), &qm)
+
+	qm.Message.ExternalRef = &[]string{extRef}[0]
+
+	return qm, nil
 }
 
 func New(ctx context.Context, user string, pass string, host string, db string, collection string, opts *mongo.ClientOptions) (*MongoProvider, error) {

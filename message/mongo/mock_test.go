@@ -1,14 +1,14 @@
 package mongo
 
 import (
-	"github.com/mongodb/mongo-go-driver/core/options"
+	"github.com/mongodb/mongo-go-driver/core/option"
 	"context"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"reflect"
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	wrapper "github.com/wptide/pkg/wrapper/mongo"
 	"encoding/json"
 	"github.com/wptide/pkg/message"
-	wrapper "github.com/wptide/pkg/wrapper/mongo"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"errors"
 )
 
 type MockClient struct {
@@ -39,29 +39,27 @@ type MockCollection struct {
 	collection string
 }
 
-func (m MockCollection) InsertOne(ctx context.Context, document interface{}, opts ...options.InsertOneOptioner) (wrapper.InsertOneResultLayer, error) {
+func (m MockCollection) InsertOne(ctx context.Context, document interface{}, opts ...option.InsertOneOptioner) (wrapper.InsertOneResultLayer, error) {
 	return nil, nil
 }
 
-func (m MockCollection) FindOne(ctx context.Context, filter interface{}, opts ...options.FindOneOptioner) wrapper.DocumentResultLayer {
+func (m MockCollection) FindOne(ctx context.Context, filter interface{}, opts ...option.FindOneOptioner) wrapper.DocumentResultLayer {
 
 	switch m.collection {
 	case "test-no-records":
-		return &wrapper.MongoDocumentResult{
-			&mongo.DocumentResult{},
-		}
+		return &MockDocumentResult{}
 	default:
 		return &MockDocumentResult{
 			collection: m.collection,
 		}
 	}
 }
-func (m MockCollection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...options.FindOneAndUpdateOptioner) wrapper.DocumentResultLayer {
+func (m MockCollection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...option.FindOneAndUpdateOptioner) wrapper.DocumentResultLayer {
 	return &MockDocumentResult{
 		collection: m.collection + "-update",
 	}
 }
-func (m MockCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...options.FindOneAndDeleteOptioner) wrapper.DocumentResultLayer {
+func (m MockCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...option.FindOneAndDeleteOptioner) wrapper.DocumentResultLayer {
 	return nil
 }
 
@@ -69,86 +67,54 @@ type MockDocumentResult struct {
 	collection string
 }
 
-func (d MockDocumentResult) Decode(v interface{}) error {
+func (d MockDocumentResult) Decode() (*bson.Document, error) {
+
+	var document *bson.Document
+
 	switch d.collection {
 
 	case "test-valid-message-update":
 		fallthrough
 	case "test-valid-message":
-
-		msgJson, _ := json.Marshal(&message.Message{
+		msg := generateMessage(&message.Message{
 			Title: "Plugin One",
 		})
-		var msg map[string]interface{}
-		json.Unmarshal(msgJson, &msg)
+		msgJson, _ := json.Marshal(msg)
 
+		doc, err := bson.ParseExtJSONObject(string(msgJson))
 		id, _ := objectid.FromHex("abcdef123456789009876364")
-		obj := map[string]interface{}{
-			"_id":             id,
-			"retry_available": true,
-			"lock":            int64(0),
-			"created":         int64(0),
-			"retries":         int64(3),
-			"message":         msg,
-		}
-		reflect.ValueOf(v).Elem().Set(reflect.ValueOf(obj))
+		doc.Append(bson.EC.ObjectID("_id", id))
+		return doc, err
 
 	case "test-valid-message-no-retry-update":
 		fallthrough
 	case "test-valid-message-no-retry":
-		msgJson, _ := json.Marshal(&message.Message{
+		msg := generateMessage(&message.Message{
 			Title: "Plugin One",
 		})
-		var msg map[string]interface{}
-		json.Unmarshal(msgJson, &msg)
+		msg["retries"] = int64(0)
+		msgJson, _ := json.Marshal(msg)
 
+		doc, err := bson.ParseExtJSONObject(string(msgJson))
 		id, _ := objectid.FromHex("abcdef123456789009876364")
-		obj := map[string]interface{}{
-			"_id":             id,
-			"retry_available": true,
-			"lock":            int64(0),
-			"created":         int64(0),
-			"retries":         int64(0),
-			"message":         msg,
-		}
-		reflect.ValueOf(v).Elem().Set(reflect.ValueOf(obj))
+		doc.Append(bson.EC.ObjectID("_id", id))
+		return doc, err
 
 	case "test-lock-fail-update":
-		obj := "failed!"
-		reflect.ValueOf(v).Elem().Set(reflect.ValueOf(obj))
+		return nil, errors.New("something went wrong")
+
 	case "test-lock-fail":
-		msgJson, _ := json.Marshal(&message.Message{
+		msg := generateMessage(&message.Message{
 			Title: "Plugin One",
 		})
-		var msg map[string]interface{}
-		json.Unmarshal(msgJson, &msg)
+		msgJson, _ := json.Marshal(msg)
 
+		doc, err := bson.ParseExtJSONObject(string(msgJson))
 		id, _ := objectid.FromHex("abcdef123456789009876364")
-		obj := map[string]interface{}{
-			"_id":             id,
-			"retry_available": true,
-			"lock":            int64(0),
-			"created":         int64(0),
-			"retries":         int64(0),
-			"message":         msg,
-		}
-		reflect.ValueOf(v).Elem().Set(reflect.ValueOf(obj))
-
-	case "test-message-fail-update":
-		fallthrough
-	case "test-message-fail":
-		id, _ := objectid.FromHex("abcdef123456789009876364")
-		obj := map[string]interface{}{
-			"_id":             id,
-			"retry_available": true,
-			"lock":            int64(0),
-			"created":         int64(0),
-			"retries":         int64(0),
-			"message":         false,
-		}
-		reflect.ValueOf(v).Elem().Set(reflect.ValueOf(obj))
+		doc.Append(bson.EC.ObjectID("_id", id))
+		return doc, err
 
 	}
 
-	return nil
+	return document, nil
 }

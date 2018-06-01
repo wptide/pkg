@@ -14,16 +14,6 @@ import (
 const RetryAttemps = 3
 const LockDuration time.Duration = time.Minute * 5
 
-// QueueMessage defines the schema for how messages are stored in Firestore.
-type QueueMessage struct {
-	Created        int64            `json:"created" firestore:"created"`
-	Lock           int64            `json:"lock" firestore:"lock"`
-	Message        *message.Message `json:"message" firestore:"message"`
-	Retries        int64            `json:"retries" firestore:"retries"`
-	Status         string           `json:"status" firestore:"status"`
-	RetryAvailable bool             `json:"retry_available" firestore:"retry_available"`
-}
-
 // FirestoreProvider implements the MessageProvider interface.
 type FirestoreProvider struct {
 	ctx      context.Context
@@ -109,9 +99,9 @@ func (fs FirestoreProvider) Close() error {
 }
 
 // itom converts a Firestore Document into a QueueMessage.
-func itom(data map[string]interface{}) *QueueMessage {
+func itom(data map[string]interface{}) *message.QueueMessage {
 
-	var msg *QueueMessage
+	var msg *message.QueueMessage
 
 	if temp, err := json.Marshal(data); err == nil {
 		json.Unmarshal(temp, &msg)

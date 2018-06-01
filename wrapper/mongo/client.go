@@ -2,9 +2,10 @@ package mongo
 
 import (
 	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/core/option"
 	"context"
-	"github.com/mongodb/mongo-go-driver/core/options"
 	"errors"
+	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 type Client interface {
@@ -57,17 +58,17 @@ func (d MongoDatabase) Collection(name string) CollectionLayer {
 }
 
 type CollectionLayer interface {
-	InsertOne(ctx context.Context, document interface{}, opts ...options.InsertOneOptioner) (InsertOneResultLayer, error)
-	FindOne(ctx context.Context, filter interface{}, opts ...options.FindOneOptioner) DocumentResultLayer
-	FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...options.FindOneAndUpdateOptioner) DocumentResultLayer
-	FindOneAndDelete(ctx context.Context, filter interface{}, opts ...options.FindOneAndDeleteOptioner) DocumentResultLayer
+	InsertOne(ctx context.Context, document interface{}, opts ...option.InsertOneOptioner) (InsertOneResultLayer, error)
+	FindOne(ctx context.Context, filter interface{}, opts ...option.FindOneOptioner) DocumentResultLayer
+	FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...option.FindOneAndUpdateOptioner) DocumentResultLayer
+	FindOneAndDelete(ctx context.Context, filter interface{}, opts ...option.FindOneAndDeleteOptioner) DocumentResultLayer
 }
 
 type MongoCollection struct {
 	*mongo.Collection
 }
 
-func (c MongoCollection) InsertOne(ctx context.Context, document interface{}, opts ...options.InsertOneOptioner) (InsertOneResultLayer, error) {
+func (c MongoCollection) InsertOne(ctx context.Context, document interface{}, opts ...option.InsertOneOptioner) (InsertOneResultLayer, error) {
 	var insertResult *MongoInsertOneResult
 	var err error
 
@@ -84,7 +85,7 @@ func (c MongoCollection) InsertOne(ctx context.Context, document interface{}, op
 	return insertResult, err
 }
 
-func (c MongoCollection) FindOne(ctx context.Context, filter interface{}, opts ...options.FindOneOptioner) DocumentResultLayer {
+func (c MongoCollection) FindOne(ctx context.Context, filter interface{}, opts ...option.FindOneOptioner) DocumentResultLayer {
 	var docResult *MongoDocumentResult
 
 	// Recover on panic() from mongo driver.
@@ -98,12 +99,12 @@ func (c MongoCollection) FindOne(ctx context.Context, filter interface{}, opts .
 	return docResult
 }
 
-func (c MongoCollection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...options.FindOneAndUpdateOptioner) DocumentResultLayer {
+func (c MongoCollection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...option.FindOneAndUpdateOptioner) DocumentResultLayer {
 	// No need to panic check. Fails gracefully.
 	return &MongoDocumentResult{c.Collection.FindOneAndUpdate(ctx, filter, update, opts...)}
 }
 
-func (c MongoCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...options.FindOneAndDeleteOptioner) DocumentResultLayer {
+func (c MongoCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...option.FindOneAndDeleteOptioner) DocumentResultLayer {
 	var docResult *MongoDocumentResult
 
 	// Recover on panic() from mongo driver.
@@ -124,13 +125,15 @@ type MongoInsertOneResult struct {
 }
 
 type DocumentResultLayer interface {
-	Decode(v interface{}) error
+	Decode() (*bson.Document, error)
 }
 
 type MongoDocumentResult struct {
 	*mongo.DocumentResult
 }
 
-func (d MongoDocumentResult) Decode(v interface{}) error {
-	return d.DocumentResult.Decode(v)
+func (d MongoDocumentResult) Decode() (*bson.Document, error) {
+	elem := bson.NewDocument()
+	err := d.DocumentResult.Decode(elem)
+	return elem, err
 }

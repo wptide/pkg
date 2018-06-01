@@ -1,5 +1,15 @@
 package message
 
+// QueueMessage defines how messages are stored in a document store.
+type QueueMessage struct {
+	Created        int64    `json:"created" firestore:"created"`
+	Lock           int64    `json:"lock" firestore:"lock"`
+	Message        *Message `json:"message" firestore:"message"`
+	Retries        int64    `json:"retries" firestore:"retries"`
+	Status         string   `json:"status" firestore:"status"`
+	RetryAvailable bool     `json:"retry_available" firestore:"retry_available"`
+}
+
 type Message struct {
 	ResponseAPIEndpoint string  `json:"response_api_endpoint"`
 	PayloadType         string  `json:"payload_type"`

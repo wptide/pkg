@@ -147,19 +147,6 @@ func TestMongoProvider_GetNextMessage(t *testing.T) {
 			nil,
 			true,
 		},
-		{
-			"Get Next Message - Message Fail",
-			fields{
-				context.Background(),
-				&MockClient{
-					"test-message-fail",
-				},
-				"test",
-				"test-message-fail",
-			},
-			nil,
-			true,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
