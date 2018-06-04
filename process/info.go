@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/wptide/pkg/tide"
 	"github.com/wptide/pkg/log"
+	"github.com/wptide/pkg/message"
 )
 
 // Ingest defines the structure for our Ingest process.
@@ -79,7 +80,7 @@ func (info *Info) Do() error {
 		return err
 	}
 
-	projectType, details, _ := getProjectDetails(path)
+	projectType, details, _ := getProjectDetails(info.Message, path)
 
 	result["info"] = tide.CodeInfo{
 		Type:    projectType,
@@ -94,7 +95,7 @@ func (info *Info) Do() error {
 }
 
 // getProjectDetails attempts to get project details from code base.
-func getProjectDetails(path string) (string, []tide.InfoDetails, error) {
+func getProjectDetails(msg message.Message, path string) (string, []tide.InfoDetails, error) {
 
 	projectType := "other"
 	details := []tide.InfoDetails{}
@@ -107,13 +108,27 @@ func getProjectDetails(path string) (string, []tide.InfoDetails, error) {
 		return "", nil, err
 	}
 
+	// If the Message says its a theme, lets trust that it is a theme.
+	var isTheme bool
+	if msg.ProjectType == "theme" {
+		var pt string
+		pt, details, err = extractHeader(path + "/style.css")
+		isTheme = pt == "theme"
+		found = true
+	}
+
 	// Traverse files and scan for headers.
-	for _, f := range files {
-		projectType, details, err = extractHeader(path + "/" + f.Name())
-		if err == nil {
-			found = true
-			break
+	if ! isTheme {
+		found = false
+		for _, f := range files {
+			projectType, details, err = extractHeader(path + "/" + f.Name())
+			if err == nil {
+				found = true
+				break
+			}
 		}
+	} else {
+		projectType = "theme"
 	}
 
 	if ! found {

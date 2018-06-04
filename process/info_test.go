@@ -209,6 +209,7 @@ func TestInfo_Run(t *testing.T) {
 
 func Test_getProjectDetails(t *testing.T) {
 	type args struct {
+		msg message.Message
 		path string
 	}
 	tests := []struct {
@@ -221,16 +222,69 @@ func Test_getProjectDetails(t *testing.T) {
 		{
 			"Invalid directory",
 			args{
-				"./testdata/invalid",
+				path: "./testdata/invalid",
 			},
 			"",
 			nil,
 			true,
 		},
+		{
+			"Message is Theme",
+			args{
+				msg: message.Message{
+					ProjectType: "theme",
+				},
+				path: "./testdata/info/theme/unzipped",
+			},
+			"theme",
+			[]tide.InfoDetails{
+				{
+					"Description",
+					"This is a theme for testing purposes only.",
+				},
+				{
+					"Version",
+					"1.0",
+				},
+				{
+					"Author",
+					"DummyThemes",
+				},
+				{
+					"AuthorURI",
+					"http://dummy.local/",
+				},
+				{
+					"TextDomain",
+					"dummy-theme",
+				},
+				{
+					"License",
+					"GNU General Public License v2 or later",
+				},
+				{
+					"LicenseURI",
+					"http://www.gnu.org/licenses/gpl-2.0.html",
+				},
+				{
+					"Name",
+					"Dummy Theme",
+				},
+				{
+					"ThemeURI",
+					"http://dummy.local/dummy-theme",
+				},
+				{
+					"Tags",
+					"black, brown, orange, tan, white, yellow, light, one-column, two-columns, right-sidebar, flexible-width, custom-header, custom-menu, editor-style, featured-images, microformats, post-formats, rtl-language-support, sticky-post, translation-ready",
+				},
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := getProjectDetails(tt.args.path)
+			got, got1, err := getProjectDetails(tt.args.msg, tt.args.path)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getProjectDetails() error = %v, wantErr %v", err, tt.wantErr)
 				return
