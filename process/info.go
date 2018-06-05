@@ -100,7 +100,12 @@ func getProjectDetails(msg message.Message, path string) (string, []tide.InfoDet
 	projectType := "other"
 	details := []tide.InfoDetails{}
 
-	var found bool
+	type header struct {
+		projectType string
+		details     []tide.InfoDetails
+	}
+
+	var extracted []header
 
 	// Get files in root path.
 	files, err := ioutil.ReadDir(path)
@@ -108,34 +113,49 @@ func getProjectDetails(msg message.Message, path string) (string, []tide.InfoDet
 		return "", nil, err
 	}
 
-	// If the Message says its a theme, lets trust that it is a theme.
-	var isTheme bool
-	if msg.ProjectType == "theme" {
-		var pt string
-		pt, details, err = extractHeader(path + "/style.css")
-		isTheme = pt == "theme"
-		found = true
-	}
-
-	// Traverse files and scan for headers.
-	if ! isTheme {
-		found = false
-		for _, f := range files {
-			projectType, details, err = extractHeader(path + "/" + f.Name())
-			if err == nil {
-				found = true
-				break
-			}
+	for _, f := range files {
+		projectType, details, err = extractHeader(path + "/" + f.Name())
+		if err == nil {
+			extracted = append(extracted, header{
+				projectType,
+				details,
+			})
 		}
-	} else {
-		projectType = "theme"
 	}
 
-	if ! found {
-		err = errors.New("not a theme or plugin")
+	// No headers found.
+	if len(extracted) == 0 {
+		return projectType, details, errors.New("not a theme or plugin")
 	}
 
-	return projectType, details, err
+	// A single header found.
+	if len(extracted) == 1 {
+		return extracted[0].projectType, extracted[0].details, err
+	}
+
+	// Multiple headers found, attempt to match the correct one.
+
+	// Attempt to get slug from filename (purely fallback scenario if text domain does not match).
+	filenameMatch := ""
+	re := regexp.MustCompile(`(?mU)(?P<slug>[^\/\\]+)(\.\d).+$`)
+	matches := re.FindStringSubmatch(msg.SourceURL)
+	if len(matches) > 2 {
+		filenameMatch = matches[1]
+	}
+
+	// Range through each header...
+	for _, h := range extracted {
+		simplified := tide.SimplifyCodeDetails(h.details)
+
+		// ... match message slug to text domain or filename part and match project types.
+		if (simplified.TextDomain == msg.Slug || simplified.TextDomain == filenameMatch) &&
+			msg.ProjectType == h.projectType {
+			return h.projectType, h.details, nil
+		}
+	}
+
+	// Multiple headers found but could not assert appropriate header.
+	return "", nil, errors.New("Multiple headers: Could not assert appropriate header for project.")
 }
 
 // getCloc gets the code info for the current code base.

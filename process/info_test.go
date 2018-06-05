@@ -281,6 +281,69 @@ func Test_getProjectDetails(t *testing.T) {
 			},
 			false,
 		},
+		{
+			"Nested Plugins",
+			args{
+				message.Message{
+					SourceURL: "http://test.local/dummy-plugin.1.0.1.zip",
+					ProjectType: "plugin",
+					Slug: "dummy-plugin",
+				},
+				"./testdata/info/nested/unzipped",
+			},
+			"plugin",
+			[]tide.InfoDetails{
+				{
+					"Name",
+					"Dummy Plugin",
+				},
+				{
+					"PluginURI",
+					"http://dummy.local/plugin/dummy-plugin",
+				},
+				{
+					"Description",
+					"This does nothing.",
+				},
+				{
+					"Version",
+					"0.1-alpha",
+				},
+				{
+					"Author",
+					"DummyPlugins",
+				},
+				{
+					"AuthorURI",
+					"http://dummy.local",
+				},
+				{
+					"TextDomain",
+					"dummy-plugin",
+				},
+				{
+					"License",
+					"GPL2",
+				},
+				{
+					"LicenseURI",
+					"http://www.gnu.org/licenses/gpl-2.0.html",
+				},
+			},
+			false,
+		},
+		{
+			"Nested with unmatched Project Type",
+			args{
+				msg: message.Message{
+					ProjectType: "test-type",
+				},
+				path: "./testdata/info/nested/unzipped",
+			},
+			"",
+			nil,
+			true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -292,9 +355,11 @@ func Test_getProjectDetails(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("getProjectDetails() got = %v, want %v", got, tt.want)
 			}
+
 			if !reflect.DeepEqual(got1, tt.want1) {
 				t.Errorf("getProjectDetails() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}
 }
+
