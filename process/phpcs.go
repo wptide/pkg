@@ -232,6 +232,9 @@ func (cs *Phpcs) Do() error {
 		auditResults.CompatibleVersions = compatibleVersions
 	}
 
+	// Reset current audit.
+	result["phpcsCurrentAudit"] = nil
+
 	result[kind] = auditResults
 	cs.Result = &result
 
