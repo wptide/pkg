@@ -25,9 +25,10 @@ type Phpcs struct {
 	Process                                 // Inherits methods from Process.
 	In              <-chan Processor        // Expects a processor channel as input.
 	Out             chan Processor          // Send results to an output channel.
-	Config          Result  // Additional config.
+	Config          Result                  // Additional config.
 	TempFolder      string                  // Path to a temp folder where reports will be generated.
 	StorageProvider storage.StorageProvider // Storage provider to upload reports to.
+	currentAudit    *message.Audit
 }
 
 func (cs *Phpcs) Run(errc *chan error) error {
@@ -59,7 +60,8 @@ func (cs *Phpcs) Run(errc *chan error) error {
 				// If processing produces an error send it up the error channel.
 				for _, audit := range *cs.Message.Audits {
 					if audit.Type == "phpcs" {
-						if err := cs.Do(audit); err != nil {
+						cs.currentAudit = &audit
+						if err := cs.Do(); err != nil {
 							// Pass the error up the error channel.
 							*errc <- errors.New("PHPCS Error: " + err.Error())
 							// Don't break, the message is still useful to other processes.
@@ -77,9 +79,11 @@ func (cs *Phpcs) Run(errc *chan error) error {
 	return nil
 }
 
-func (cs *Phpcs) Do(audit message.Audit) error {
+func (cs *Phpcs) Do() error {
 
 	log.Log(cs.Message.Title, "Running PHPCS Audit...")
+
+	audit := cs.currentAudit
 
 	if phpcsRunner == nil {
 		phpcsRunner = defaultRunner
