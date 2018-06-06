@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/wptide/pkg/tide"
 	"github.com/wptide/pkg/log"
+	"github.com/wptide/pkg/message"
 )
 
 // Ingest defines the structure for our Ingest process.
@@ -79,7 +80,7 @@ func (info *Info) Do() error {
 		return err
 	}
 
-	projectType, details, _ := getProjectDetails(path)
+	projectType, details, _ := getProjectDetails(info.Message, path)
 
 	result["info"] = tide.CodeInfo{
 		Type:    projectType,
@@ -94,12 +95,17 @@ func (info *Info) Do() error {
 }
 
 // getProjectDetails attempts to get project details from code base.
-func getProjectDetails(path string) (string, []tide.InfoDetails, error) {
+func getProjectDetails(msg message.Message, path string) (string, []tide.InfoDetails, error) {
 
 	projectType := "other"
 	details := []tide.InfoDetails{}
 
-	var found bool
+	type header struct {
+		projectType string
+		details     []tide.InfoDetails
+	}
+
+	var extracted []header
 
 	// Get files in root path.
 	files, err := ioutil.ReadDir(path)
@@ -107,20 +113,49 @@ func getProjectDetails(path string) (string, []tide.InfoDetails, error) {
 		return "", nil, err
 	}
 
-	// Traverse files and scan for headers.
 	for _, f := range files {
 		projectType, details, err = extractHeader(path + "/" + f.Name())
 		if err == nil {
-			found = true
-			break
+			extracted = append(extracted, header{
+				projectType,
+				details,
+			})
 		}
 	}
 
-	if ! found {
-		err = errors.New("not a theme or plugin")
+	// No headers found.
+	if len(extracted) == 0 {
+		return projectType, details, errors.New("not a theme or plugin")
 	}
 
-	return projectType, details, err
+	// A single header found.
+	if len(extracted) == 1 {
+		return extracted[0].projectType, extracted[0].details, err
+	}
+
+	// Multiple headers found, attempt to match the correct one.
+
+	// Attempt to get slug from filename (purely fallback scenario if text domain does not match).
+	filenameMatch := ""
+	re := regexp.MustCompile(`(?mU)(?P<slug>[^\/\\]+)(\.\d).+$`)
+	matches := re.FindStringSubmatch(msg.SourceURL)
+	if len(matches) > 2 {
+		filenameMatch = matches[1]
+	}
+
+	// Range through each header...
+	for _, h := range extracted {
+		simplified := tide.SimplifyCodeDetails(h.details)
+
+		// ... match message slug to text domain or filename part and match project types.
+		if (simplified.TextDomain == msg.Slug || simplified.TextDomain == filenameMatch) &&
+			msg.ProjectType == h.projectType {
+			return h.projectType, h.details, nil
+		}
+	}
+
+	// Multiple headers found but could not assert appropriate header.
+	return "", nil, errors.New("Multiple headers: Could not assert appropriate header for project.")
 }
 
 // getCloc gets the code info for the current code base.
