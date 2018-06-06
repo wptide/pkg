@@ -73,7 +73,7 @@ func TestLighthouse_Run(t *testing.T) {
 	os.MkdirAll("./testdata/upload", os.ModePerm)
 	defer os.RemoveAll("./testdata/upload")
 
-	audits := &[]message.Audit{
+	audits := []*message.Audit{
 		{
 			Type: "lighthouse",
 		},
@@ -306,7 +306,7 @@ func TestLighthouse_Run(t *testing.T) {
 						Message: message.Message{
 							Title: "Not Lighthouse",
 							Slug:  "Not Lighthouse",
-							Audits: &[]message.Audit{
+							Audits: []*message.Audit{
 								{
 									Type: "phpcs",
 								},

@@ -57,9 +57,9 @@ func (cs *Phpcs) Run(errc *chan error) error {
 
 				// Run the process.
 				// If processing produces an error send it up the error channel.
-				for _, audit := range *cs.Message.Audits {
+				for _, audit := range cs.Message.Audits {
 					if audit.Type == "phpcs" {
-						if err := cs.Do(audit); err != nil {
+						if err := cs.Do(*audit); err != nil {
 							// Pass the error up the error channel.
 							*errc <- errors.New("PHPCS Error: " + err.Error())
 							// Don't break, the message is still useful to other processes.

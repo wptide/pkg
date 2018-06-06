@@ -1,5 +1,5 @@
-hash: 1b7f539d5b965f960ec12d57ce28f96948ea0adea42e281f4eb74c4cf4df7604
-updated: 2018-05-28T13:03:58.941944162+10:00
+hash: 470dc91138277e09cbe4cdfd1b8d710942bf4383d49df9c07b57d8a85ff00454
+updated: 2018-06-01T12:43:03.875400176+10:00
 imports:
 - name: cloud.google.com/go
   version: 0fd7230b2a7505833d5f69b75cbd6c9582401479
@@ -17,7 +17,7 @@ imports:
   - internal/version
   - storage
 - name: github.com/aws/aws-sdk-go
-  version: fad131ddc707880428615dc8bc1587b55fb46d74
+  version: 827e7eac8c2680d5bdea7bc3ef29c596eabe1eae
   subpackages:
   - aws
   - aws/awserr
@@ -55,6 +55,8 @@ imports:
   version: 2ee87856327ba09384cabd113bc6b5d174e9ec0f
 - name: github.com/go-ini/ini
   version: 06f5f3d67269ccec1fe5fe4134ba6e982984f7f5
+- name: github.com/go-stack/stack
+  version: 259ab82a6cad3992b4e21ff5cac294ccb06474bc
 - name: github.com/golang/protobuf
   version: 3a3da3a4e26776cc22a79ef46d5d58477532dede
   subpackages:
@@ -73,6 +75,36 @@ imports:
   version: 2530ab030fbe40407f12de1f90f01f277bbae0e9
 - name: github.com/jmespath/go-jmespath
   version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
+- name: github.com/mongodb/mongo-go-driver
+  version: de03a35e8661ae6df623f41ec8f616ffd8ef6131
+  subpackages:
+  - bson
+  - bson/builder
+  - bson/decimal
+  - bson/elements
+  - bson/internal/jsonparser
+  - bson/objectid
+  - bson/parser
+  - bson/parser/ast
+  - core/address
+  - core/auth
+  - core/auth/internal/gssapi
+  - core/command
+  - core/connection
+  - core/connstring
+  - core/description
+  - core/dispatch
+  - core/option
+  - core/readconcern
+  - core/readpref
+  - core/result
+  - core/tag
+  - core/topology
+  - core/version
+  - core/wiremessage
+  - core/writeconcern
+  - internal
+  - mongo
 - name: github.com/toqueteos/trie
   version: 56fed4a05683322f125e2d78ee269bb102280392
 - name: go.opencensus.io
@@ -91,6 +123,10 @@ imports:
   - trace
   - trace/internal
   - trace/propagation
+- name: golang.org/x/crypto
+  version: ab813273cd59e1333f7ae7bff5d027d4aadf528c
+  subpackages:
+  - pbkdf2
 - name: golang.org/x/net
   version: dfa909b99c79129e1100513e5cd36307665e5723
   subpackages:
@@ -109,6 +145,10 @@ imports:
   - internal
   - jws
   - jwt
+- name: golang.org/x/sync
+  version: 1d60e4601c6fd243af51cc01ddf169918a5407ca
+  subpackages:
+  - semaphore
 - name: golang.org/x/text
   version: 5c1cf69b5978e5a34c5f9ba09a83e56acc4b7877
   subpackages:
