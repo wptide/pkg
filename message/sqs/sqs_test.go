@@ -1,16 +1,16 @@
 package sqs
 
 import (
+	"encoding/json"
+	"errors"
 	"reflect"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
 	"github.com/wptide/pkg/message"
-	"errors"
-	"encoding/json"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 )
 
 type mockSqs struct {
@@ -367,6 +367,44 @@ func Test_getQueueUrl(t *testing.T) {
 			got, _ := getQueueUrl(tt.args.svc, tt.args.name)
 			if got != tt.want {
 				t.Errorf("getQueueUrl() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSqsProvider_Close(t *testing.T) {
+	type fields struct {
+		session   *session.Session
+		sqs       sqsiface.SQSAPI
+		QueueUrl  *string
+		QueueName *string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			"Close()",
+			fields{
+				nil,
+				nil,
+				nil,
+				nil,
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mgr := SqsProvider{
+				session:   tt.fields.session,
+				sqs:       tt.fields.sqs,
+				QueueUrl:  tt.fields.QueueUrl,
+				QueueName: tt.fields.QueueName,
+			}
+			if err := mgr.Close(); (err != nil) != tt.wantErr {
+				t.Errorf("SqsProvider.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

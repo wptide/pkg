@@ -209,6 +209,7 @@ func TestInfo_Run(t *testing.T) {
 
 func Test_getProjectDetails(t *testing.T) {
 	type args struct {
+		msg message.Message
 		path string
 	}
 	tests := []struct {
@@ -221,7 +222,123 @@ func Test_getProjectDetails(t *testing.T) {
 		{
 			"Invalid directory",
 			args{
-				"./testdata/invalid",
+				path: "./testdata/invalid",
+			},
+			"",
+			nil,
+			true,
+		},
+		{
+			"Message is Theme",
+			args{
+				msg: message.Message{
+					ProjectType: "theme",
+				},
+				path: "./testdata/info/theme/unzipped",
+			},
+			"theme",
+			[]tide.InfoDetails{
+				{
+					"Description",
+					"This is a theme for testing purposes only.",
+				},
+				{
+					"Version",
+					"1.0",
+				},
+				{
+					"Author",
+					"DummyThemes",
+				},
+				{
+					"AuthorURI",
+					"http://dummy.local/",
+				},
+				{
+					"TextDomain",
+					"dummy-theme",
+				},
+				{
+					"License",
+					"GNU General Public License v2 or later",
+				},
+				{
+					"LicenseURI",
+					"http://www.gnu.org/licenses/gpl-2.0.html",
+				},
+				{
+					"Name",
+					"Dummy Theme",
+				},
+				{
+					"ThemeURI",
+					"http://dummy.local/dummy-theme",
+				},
+				{
+					"Tags",
+					"black, brown, orange, tan, white, yellow, light, one-column, two-columns, right-sidebar, flexible-width, custom-header, custom-menu, editor-style, featured-images, microformats, post-formats, rtl-language-support, sticky-post, translation-ready",
+				},
+			},
+			false,
+		},
+		{
+			"Nested Plugins",
+			args{
+				message.Message{
+					SourceURL: "http://test.local/dummy-plugin.1.0.1.zip",
+					ProjectType: "plugin",
+					Slug: "dummy-plugin",
+				},
+				"./testdata/info/nested/unzipped",
+			},
+			"plugin",
+			[]tide.InfoDetails{
+				{
+					"Name",
+					"Dummy Plugin",
+				},
+				{
+					"PluginURI",
+					"http://dummy.local/plugin/dummy-plugin",
+				},
+				{
+					"Description",
+					"This does nothing.",
+				},
+				{
+					"Version",
+					"0.1-alpha",
+				},
+				{
+					"Author",
+					"DummyPlugins",
+				},
+				{
+					"AuthorURI",
+					"http://dummy.local",
+				},
+				{
+					"TextDomain",
+					"dummy-plugin",
+				},
+				{
+					"License",
+					"GPL2",
+				},
+				{
+					"LicenseURI",
+					"http://www.gnu.org/licenses/gpl-2.0.html",
+				},
+			},
+			false,
+		},
+		{
+			"Nested with unmatched Project Type",
+			args{
+				msg: message.Message{
+					ProjectType: "test-type",
+				},
+				path: "./testdata/info/nested/unzipped",
 			},
 			"",
 			nil,
@@ -230,7 +347,7 @@ func Test_getProjectDetails(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := getProjectDetails(tt.args.path)
+			got, got1, err := getProjectDetails(tt.args.msg, tt.args.path)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getProjectDetails() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -238,9 +355,11 @@ func Test_getProjectDetails(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("getProjectDetails() got = %v, want %v", got, tt.want)
 			}
+
 			if !reflect.DeepEqual(got1, tt.want1) {
 				t.Errorf("getProjectDetails() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}
 }
+

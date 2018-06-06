@@ -123,6 +123,11 @@ func (mgr SqsProvider) DeleteMessage(reference *string) error {
 	return nil
 }
 
+// Close implemented to satisfy MessageProvider interface.
+func (mgr SqsProvider) Close() error {
+	return nil
+}
+
 // getQueueUrl requests the queueURL from SQS.
 func getQueueUrl(svc sqsiface.SQSAPI, name string) (string, error) {
 	result, err := svc.GetQueueUrl(&sqs.GetQueueUrlInput{
