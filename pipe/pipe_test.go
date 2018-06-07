@@ -37,6 +37,7 @@ func (m mockProcess) SetResults(res *process.Result) {}
 func (m mockProcess) GetResult() *process.Result     { return nil }
 func (m mockProcess) SetFilesPath(path string)       {}
 func (m mockProcess) GetFilesPath() string           { return "" }
+func (m mockProcess) Do() error                      { return nil }
 
 func TestNew(t *testing.T) {
 	tests := []struct {

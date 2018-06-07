@@ -25,7 +25,7 @@ type Phpcs struct {
 	Process                                 // Inherits methods from Process.
 	In              <-chan Processor        // Expects a processor channel as input.
 	Out             chan Processor          // Send results to an output channel.
-	Config          Result  // Additional config.
+	Config          Result                  // Additional config.
 	TempFolder      string                  // Path to a temp folder where reports will be generated.
 	StorageProvider storage.StorageProvider // Storage provider to upload reports to.
 }
@@ -55,11 +55,15 @@ func (cs *Phpcs) Run(errc *chan error) error {
 				// Copy Process fields from `in` process.
 				cs.CopyFields(in)
 
+				result := *cs.Result
+
 				// Run the process.
 				// If processing produces an error send it up the error channel.
 				for _, audit := range cs.Message.Audits {
 					if audit.Type == "phpcs" {
-						if err := cs.Do(*audit); err != nil {
+						result["phpcsCurrentAudit"] = audit
+						cs.SetResults(&result)
+						if err := cs.Do(); err != nil {
 							// Pass the error up the error channel.
 							*errc <- errors.New("PHPCS Error: " + err.Error())
 							// Don't break, the message is still useful to other processes.
@@ -77,7 +81,7 @@ func (cs *Phpcs) Run(errc *chan error) error {
 	return nil
 }
 
-func (cs *Phpcs) Do(audit message.Audit) error {
+func (cs *Phpcs) Do() error {
 
 	log.Log(cs.Message.Title, "Running PHPCS Audit...")
 
@@ -86,6 +90,9 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	}
 
 	result := *cs.Result
+
+	// Get the current audit from the result.
+	audit := result["phpcsCurrentAudit"].(*message.Audit)
 
 	// Try to get filesPath from results first.
 	if path, ok := result["filesPath"].(string); ok {
@@ -224,6 +231,9 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 
 		auditResults.CompatibleVersions = compatibleVersions
 	}
+
+	// Reset current audit.
+	result["phpcsCurrentAudit"] = nil
 
 	result[kind] = auditResults
 	cs.Result = &result
