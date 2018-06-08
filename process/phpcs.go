@@ -25,7 +25,7 @@ type Phpcs struct {
 	Process                                 // Inherits methods from Process.
 	In              <-chan Processor        // Expects a processor channel as input.
 	Out             chan Processor          // Send results to an output channel.
-	Config          Result  // Additional config.
+	Config          Result                  // Additional config.
 	TempFolder      string                  // Path to a temp folder where reports will be generated.
 	StorageProvider storage.StorageProvider // Storage provider to upload reports to.
 }
@@ -55,11 +55,15 @@ func (cs *Phpcs) Run(errc *chan error) error {
 				// Copy Process fields from `in` process.
 				cs.CopyFields(in)
 
+				result := *cs.Result
+
 				// Run the process.
 				// If processing produces an error send it up the error channel.
-				for _, audit := range *cs.Message.Audits {
+				for _, audit := range cs.Message.Audits {
 					if audit.Type == "phpcs" {
-						if err := cs.Do(audit); err != nil {
+						result["phpcsCurrentAudit"] = audit
+						cs.SetResults(&result)
+						if err := cs.Do(); err != nil {
 							// Pass the error up the error channel.
 							*errc <- errors.New("PHPCS Error: " + err.Error())
 							// Don't break, the message is still useful to other processes.
@@ -77,7 +81,7 @@ func (cs *Phpcs) Run(errc *chan error) error {
 	return nil
 }
 
-func (cs *Phpcs) Do(audit message.Audit) error {
+func (cs *Phpcs) Do() error {
 
 	log.Log(cs.Message.Title, "Running PHPCS Audit...")
 
@@ -86,6 +90,9 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	}
 
 	result := *cs.Result
+
+	// Get the current audit from the result.
+	audit := result["phpcsCurrentAudit"].(*message.Audit)
 
 	// Try to get filesPath from results first.
 	if path, ok := result["filesPath"].(string); ok {
@@ -110,7 +117,7 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	path := cs.GetFilesPath() + "/unzipped"
 
 	kind := strings.ToLower(audit.Type) + "_" + strings.ToLower(standard)
-	filename := checksum + "-" + kind + "-full.json"
+	filename := checksum + "-" + kind + "-raw.json"
 	pathPrefix := strings.TrimRight(cs.TempFolder, "/") + "/"
 	filepath := pathPrefix + filename
 
@@ -166,17 +173,17 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	// We already have a reference to the report file, so lets upload and get the storage reference in a result.
 	log.Log(cs.Message.Title, "Uploading "+standard+" results to remote storage.")
 
-	fType, fKey, fBucket, err := cs.uploadToStorage(filepath, filename)
+	fType, fFileName, fPath, err := cs.uploadToStorage(filepath, filename)
 	if err != nil {
 		return err
 	}
 
-	// Initialise the result and set the "Full" entry to the uploaded file.
+	// Initialise the result and set the "Raw" entry to the uploaded file.
 	auditResults := tide.AuditResult{
-		Full: tide.AuditDetails{
-			Type:       fType,
-			Key:        fKey,
-			BucketName: fBucket,
+		Raw: tide.AuditDetails{
+			Type:     fType,
+			FileName: fFileName,
+			Path:     fPath,
 		},
 	}
 
@@ -196,15 +203,14 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	summary := phpcs.GetPhpcsSummary(*phpcsResults)
 	auditResults.Summary = tide.AuditSummary{PhpcsSummary: summary}
 
-	// Get PHPCompatibility
+	// Only PHPCompatibility provides parsed results.
 	// @todo Abstract this later.
-
 	if kind == "phpcs_phpcompatibility" {
 		compatibleVersions, compatResults := phpcs.GetPhpcsCompatibility(*phpcsResults)
 
 		resultsJson, _ := json.Marshal(compatResults)
 
-		fname := checksum + "-" + kind + "-details.json"
+		fname := checksum + "-" + kind + "-parsed.json"
 		fpath := pathPrefix + fname
 
 		err = writeFile(fpath, resultsJson, os.ModePerm)
@@ -212,30 +218,22 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 			return err
 		}
 
-		fType, fKey, fBucket, err := cs.uploadToStorage(fpath, fname)
+		fType, fFileName, fPath, err := cs.uploadToStorage(fpath, fname)
 		if err != nil {
 			return err
 		}
 
-		auditResults.Details = tide.AuditDetails{
-			Type:       fType,
-			Key:        fKey,
-			BucketName: fBucket,
+		auditResults.Parsed = tide.AuditDetails{
+			Type:     fType,
+			FileName: fFileName,
+			Path:     fPath,
 		}
 
 		auditResults.CompatibleVersions = compatibleVersions
 	}
 
-	// Only PHPCompatibility provides processed details, so if details
-	// are not available, make it the same as full.
-	empty := tide.AuditResult{}.Details
-	if auditResults.Details == empty {
-		auditResults.Details = tide.AuditDetails{
-			Type:       auditResults.Full.Type,
-			Key:        auditResults.Full.Key,
-			BucketName: auditResults.Full.BucketName,
-		}
-	}
+	// Reset current audit.
+	result["phpcsCurrentAudit"] = nil
 
 	result[kind] = auditResults
 	cs.Result = &result
@@ -245,14 +243,14 @@ func (cs *Phpcs) Do(audit message.Audit) error {
 	return nil
 }
 
-func (cs Phpcs) uploadToStorage(filepath, filename string) (fType, fKey, fBucket string, err error) {
+func (cs Phpcs) uploadToStorage(filepath, filename string) (fType, fFileName, fPath string, err error) {
 	err = cs.StorageProvider.UploadFile(filepath, filename)
 
 	if err == nil {
 		fType = cs.StorageProvider.Kind()
-		fKey = filename
-		fBucket = cs.StorageProvider.CollectionRef()
+		fFileName = filename
+		fPath = cs.StorageProvider.CollectionRef()
 	}
 
-	return fType, fKey, fBucket, err
+	return fType, fFileName, fPath, err
 }

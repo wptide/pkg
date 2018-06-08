@@ -10,6 +10,9 @@ import (
 	"errors"
 )
 
+const TimeFormat = "2006-01-02 3:04pm MST"
+const TimeFormatThemes = "2006-01-02"
+
 var (
 	themesApiUrl  = "https://api.wordpress.org/themes/info/1.1/"
 	pluginsApiUrl = "https://api.wordpress.org/plugins/info/1.1/"

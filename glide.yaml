@@ -1,7 +1,12 @@
 package: github.com/wptide/pkg
 import:
+- package: cloud.google.com/go
+  version: v0.23.0
+  subpackages:
+  - firestore
+  - storage
 - package: github.com/aws/aws-sdk-go
-  version: ~1.13.7
+  version: v1.13.59
   subpackages:
   - aws
   - aws/awserr
@@ -13,5 +18,18 @@ import:
   - service/sqs
   - service/sqs/sqsiface
 - package: github.com/blang/semver
-  version: ~3.5.1
+  version: v3.5.1
 - package: github.com/hhatto/gocloc
+- package: github.com/mongodb/mongo-go-driver
+  version: v0.0.6
+  subpackages:
+  - bson
+  - bson/objectid
+  - core/option
+  - mongo
+testImport:
+- package: firebase.google.com/go
+  version: v3.0.0
+- package: google.golang.org/api
+  subpackages:
+  - option

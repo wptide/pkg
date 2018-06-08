@@ -32,9 +32,9 @@ func (m mockRunner) Run(name string, arg ...string) ([]byte, []byte, error, int)
 func mockWriteFile(filename string, data []byte, perm os.FileMode) error {
 
 	switch filename {
-	case "./testdata/tmp/phpcompatwriteerror-phpcs_phpcompatibility-details.json":
+	case "./testdata/tmp/phpcompatwriteerror-phpcs_phpcompatibility-parsed.json":
 		fallthrough
-	case "./testdata/tmp/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff-lighthouse-full.json":
+	case "./testdata/tmp/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff-lighthouse-raw.json":
 		return errors.New("something went wrong")
 	default:
 		return ioutil.WriteFile(filename, data, perm)
@@ -73,7 +73,7 @@ func TestLighthouse_Run(t *testing.T) {
 	os.MkdirAll("./testdata/upload", os.ModePerm)
 	defer os.RemoveAll("./testdata/upload")
 
-	audits := &[]message.Audit{
+	audits := []*message.Audit{
 		{
 			Type: "lighthouse",
 		},
@@ -306,7 +306,7 @@ func TestLighthouse_Run(t *testing.T) {
 						Message: message.Message{
 							Title: "Not Lighthouse",
 							Slug:  "Not Lighthouse",
-							Audits: &[]message.Audit{
+							Audits: []*message.Audit{
 								{
 									Type: "phpcs",
 								},

@@ -16,7 +16,7 @@ type Item struct {
 	SourceUrl     string                 `json:"source_url"`
 	SourceType    string                 `json:"source_type"`
 	CodeInfo      CodeInfo               `json:"code_info,omitempty"`
-	Results       map[string]AuditResult `json:"results,omitempty"`
+	Reports       map[string]AuditResult `json:"reports,omitempty"`
 	Standards     []string               `json:"standards,omitempty"`      // Will potentially be overriden in API and should not be relied upon.
 	RequestClient string                 `json:"request_client,omitempty"` // Will be converted to a user.
 	Project       []string               `json:"project,omitempty"`        // Has to be an array of string because of how taxonomies work in WordPress.
@@ -52,8 +52,8 @@ type ClocResult struct {
 }
 
 type AuditResult struct {
-	Full               AuditDetails           `json:"full,omitempty"`
-	Details            AuditDetails           `json:"details,omitempty"`
+	Raw                AuditDetails           `json:"raw,omitempty"`
+	Parsed             AuditDetails           `json:"parsed,omitempty"`
 	Summary            AuditSummary           `json:"summary,omitempty"`
 	CompatibleVersions []string               `json:"compatible_versions,omitempty"`
 	Error              string                 `json:"error,omitempty"`
@@ -83,9 +83,9 @@ type PhpcsFilesMessage struct {
 }
 
 type AuditDetails struct {
-	Type       string `json:"type,omitempty"`
-	Key        string `json:"key,omitempty"`
-	BucketName string `json:"bucket_name,omitempty"`
+	Type     string `json:"type,omitempty"`
+	FileName string `json:"filename,omitempty"`
+	Path     string `json:"path,omitempty"`
 	*PhpcsResults
 	*LighthouseResults
 }
@@ -100,21 +100,20 @@ type PhpcsSummary struct {
 		Errors   int `json:"errors"`
 		Warnings int `json:"warnings"`
 	} `json:"files,omitempty"`
-	FilesCount    int `json:"files_count,omitempty"`
-	ErrorsCount   int `json:"errors_count,omitempty"`
-	WarningsCount int `json:"warnings_count,omitempty"`
+	FilesCount    int `json:"files_count"`
+	ErrorsCount   int `json:"errors_count"`
+	WarningsCount int `json:"warnings_count"`
 }
 
 // @todo Define this later
 type LighthouseResults struct{}
 
 type LighthouseSummary struct {
-	ReportCategories []LighthouseCategory `json:"reportCategories,omitempty"`
+	Categories map[string]LighthouseCategory `json:"categories,omitempty"`
 }
 
 type LighthouseCategory struct {
-	Name        string  `json:"name"`
-	Weight      float32 `json:"weight"`
+	Title       string  `json:"title"`
 	Description string  `json:"description"`
 	Id          string  `json:"id"`
 	Score       float32 `json:"score"`

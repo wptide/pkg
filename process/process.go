@@ -80,6 +80,7 @@ func (p *Process) CopyFields(proc Processor) {
 // Any process needs to implement the Processor interface.
 type Processor interface {
 	Run(*chan error) error
+	Do() error
 	SetContext(ctx context.Context)
 	SetMessage(msg message.Message)
 	GetMessage() message.Message

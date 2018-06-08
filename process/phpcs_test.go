@@ -27,7 +27,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 		// Simulate phpcs report written to tmp file.
 		data := examplePhpcsWordPressReport()
 		ioutil.WriteFile(
-			"./testdata/tmp/39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_wordpress-full.json",
+			"./testdata/tmp/39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_wordpress-raw.json",
 			[]byte(data),
 			0644,
 		)
@@ -39,7 +39,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 		// Simulate phpcs report written to tmp file.
 		data := examplePhpcsPhpCompatibilityReport()
 		ioutil.WriteFile(
-			"./testdata/tmp/39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_phpcompatibility-full.json",
+			"./testdata/tmp/39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e-phpcs_phpcompatibility-raw.json",
 			[]byte(data),
 			0644,
 		)
@@ -50,7 +50,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 	if basepath == "./testdata/info/filereadererror/unzipped" {
 		msg := "this is not json!"
 		ioutil.WriteFile(
-			"./testdata/tmp/filereadererror-phpcs_wordpress-full.json",
+			"./testdata/tmp/filereadererror-phpcs_wordpress-raw.json",
 			[]byte(msg),
 			os.ModePerm,
 		)
@@ -60,7 +60,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 	if basepath == "./testdata/info/phpcompatwriteerror/unzipped" {
 		msg := examplePhpcsPhpCompatibilityReport()
 		ioutil.WriteFile(
-			"./testdata/tmp/phpcompatwriteerror-phpcs_phpcompatibility-full.json",
+			"./testdata/tmp/phpcompatwriteerror-phpcs_phpcompatibility-raw.json",
 			[]byte(msg),
 			os.ModePerm,
 		)
@@ -70,7 +70,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 	if basepath == "./testdata/info/phpcompatuploaderror/unzipped" {
 		msg := examplePhpcsPhpCompatibilityReport()
 		ioutil.WriteFile(
-			"./testdata/tmp/phpcompatuploaderror-phpcs_phpcompatibility-full.json",
+			"./testdata/tmp/phpcompatuploaderror-phpcs_phpcompatibility-raw.json",
 			[]byte(msg),
 			os.ModePerm,
 		)
@@ -125,7 +125,7 @@ func TestPhpcs_Run(t *testing.T) {
 	os.MkdirAll("./testdata/upload", os.ModePerm)
 	defer os.RemoveAll("./testdata/upload")
 
-	auditsWordPress := &[]message.Audit{
+	auditsWordPress := []*message.Audit{
 		{
 			Type: "phpcs",
 			Options: &message.AuditOption{
@@ -134,7 +134,7 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 	}
 
-	auditsPhpCompatibility := &[]message.Audit{
+	auditsPhpCompatibility := []*message.Audit{
 		{
 			Type: "phpcs",
 			Options: &message.AuditOption{
@@ -144,7 +144,7 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 	}
 
-	auditsPhpCompatibilityOverride := &[]message.Audit{
+	auditsPhpCompatibilityOverride := []*message.Audit{
 		{
 			Type: "phpcs",
 			Options: &message.AuditOption{
@@ -155,7 +155,7 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 	}
 
-	auditsBoth := &[]message.Audit{
+	auditsBoth := []*message.Audit{
 		{
 			Type: "phpcs",
 			Options: &message.AuditOption{
@@ -170,7 +170,7 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 	}
 
-	auditsInvalidStandard := &[]message.Audit{
+	auditsInvalidStandard := []*message.Audit{
 		{
 			Type:    "phpcs",
 			Options: &message.AuditOption{},
@@ -420,7 +420,7 @@ func TestPhpcs_Run(t *testing.T) {
 						Message: message.Message{
 							Title: "Not PHPCS",
 							Slug:  "Not PHPCS",
-							Audits: &[]message.Audit{
+							Audits: []*message.Audit{
 								{
 									Type: "lighthouse",
 								},
