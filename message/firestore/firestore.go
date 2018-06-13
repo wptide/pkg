@@ -1,20 +1,21 @@
 package firestore
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"time"
+
+	"cloud.google.com/go/firestore"
 	"github.com/wptide/pkg/message"
 	fsClient "github.com/wptide/pkg/wrapper/firestore"
-	"context"
-	"errors"
-	"cloud.google.com/go/firestore"
-	"encoding/json"
-	"time"
-	"fmt"
 )
 
 const RetryAttemps = 3
 const LockDuration time.Duration = time.Minute * 5
 
-// FirestoreProvider implements the MessageProvider interface.
+// FirestoreProvider implements the Provider interface.
 type FirestoreProvider struct {
 	ctx      context.Context
 	client   fsClient.ClientInterface
@@ -145,7 +146,7 @@ func New(ctx context.Context, projectId string, rootDocPath string) (*FirestoreP
 // New creates a new FirestoreSync (UpdateSyncChecker) with a provided ClientInterface client.
 // Note: Use this one for the tests with a mock ClientInterface.
 func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client fsClient.ClientInterface) (*FirestoreProvider, error) {
-	if client == nil || ! client.Authenticated() {
+	if client == nil || !client.Authenticated() {
 		return nil, errors.New("Could not authenticate sync client.")
 	}
 

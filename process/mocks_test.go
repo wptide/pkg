@@ -1,9 +1,9 @@
 package process
 
 import (
-	"os"
-	"io"
 	"errors"
+	"io"
+	"os"
 )
 
 type mockStorage struct{}
@@ -23,14 +23,14 @@ func (m mockStorage) UploadFile(filename, reference string) error {
 	case "phpcompatuploaderror-phpcs_phpcompatibility-parsed.json":
 		fallthrough
 	case "uploaderrorchecksum-phpcs_wordpress-raw.json":
-		return errors.New("Upload error!")
+		return errors.New("upload error")
 	}
 
 	file, err := fileOpen(filename)
 	if err != nil {
 		return err
 	}
- 	defer file.Close()
+	defer file.Close()
 
 	out, _ := os.Create("./testdata/upload/" + reference)
 	if err != nil {

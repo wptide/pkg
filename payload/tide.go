@@ -1,16 +1,19 @@
 package payload
 
 import (
-	"github.com/wptide/pkg/tide"
-	"errors"
 	"encoding/json"
+	"errors"
+
 	"github.com/wptide/pkg/message"
+	"github.com/wptide/pkg/tide"
 )
 
+// TidePayload implements the Payloader interface to send payloads to the Tide API.
 type TidePayload struct {
 	Client tide.ClientInterface
 }
 
+// BuildPayload implements payload.Builder interface to generate Tide API payload.
 func (t TidePayload) BuildPayload(msg message.Message, data map[string]interface{}) ([]byte, error) {
 
 	codeInfo, ok := data["info"].(tide.CodeInfo)
@@ -43,7 +46,7 @@ func (t TidePayload) BuildPayload(msg message.Message, data map[string]interface
 		Checksum:      data["checksum"].(string),
 		Visibility:    msg.Visibility,
 		ProjectType:   fallbackValue(codeInfo.Type, msg.ProjectType).(string),
-		SourceUrl:     msg.SourceURL,
+		SourceURL:     msg.SourceURL,
 		SourceType:    msg.SourceType,
 		CodeInfo:      codeInfo,
 		Reports:       results,
@@ -120,6 +123,7 @@ func fallbackValue(value ...interface{}) interface{} {
 	return nil
 }
 
+// SendPayload sends a payload message to the Tide API.
 func (t TidePayload) SendPayload(destination string, payload []byte) ([]byte, error) {
 
 	reply, err := t.Client.SendPayload("POST", destination, string(payload))

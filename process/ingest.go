@@ -1,13 +1,14 @@
 package process
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
+
+	"github.com/wptide/pkg/log"
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/source"
 	"github.com/wptide/pkg/source/zip"
-	"crypto/sha256"
-	"encoding/base64"
-	"github.com/wptide/pkg/log"
 )
 
 // Ingest defines the structure for our Ingest process.
@@ -19,6 +20,7 @@ type Ingest struct {
 	sourceManager source.Source          // Responsible for getting the code to audit.
 }
 
+// Run executes the process in the pipeline.
 func (ig *Ingest) Run(errc *chan error) error {
 	// If we don't have a temp folder, then we need a fatal.
 	if ig.TempFolder == "" {
@@ -71,6 +73,7 @@ func (ig *Ingest) Run(errc *chan error) error {
 	return nil
 }
 
+// Do runs the actual code for this process.
 func (ig *Ingest) Do() error {
 
 	log.Log(ig.Message.Title, "Ingesting...")
@@ -122,7 +125,7 @@ func validateMessage(msg message.Message) error {
 
 	// A message should provide a title.
 	if msg.Title == "" {
-		return errors.New("Message does not have a title.")
+		return errors.New("message does not have a title")
 	}
 
 	// A message requires an endpoint to send results back to.

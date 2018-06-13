@@ -1,16 +1,16 @@
 package zip
 
 import (
-	"fmt"
-	"os"
-	"net/http"
-	"io"
-	"path/filepath"
-	"strings"
-	"crypto/sha256"
 	"archive/zip"
-	"sort"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 )
 
 type Zip struct {
@@ -115,7 +115,7 @@ func unzip(source, destination string) (filenames, checksums []string, err error
 	rootPath := ""
 	for _, file := range reader.File {
 		path := file.Name
-		if ! file.FileInfo().IsDir() {
+		if !file.FileInfo().IsDir() {
 			continue
 		}
 		if len(path) < len(rootPath) || rootPath == "" {

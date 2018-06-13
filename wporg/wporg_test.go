@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
-	"sort"
 )
 
-var mockThemesApi = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+var mockThemesAPI = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	bodyByte, _ := ioutil.ReadAll(r.Body)
 	parts := strings.Split(string(bodyByte), "&")
 
@@ -25,17 +25,17 @@ var mockThemesApi = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWrit
 	fmt.Fprintln(w, `invalid`)
 }))
 
-var mockPluginsApi = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+var mockPluginsAPI = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	bodyByte, _ := ioutil.ReadAll(r.Body)
 	parts := strings.Split(string(bodyByte), "&")
 
 	for _, part := range parts {
 		switch part {
 		case "request[browse]=versionFail":
-			fmt.Fprintln(w, wantedPluginVersionFailJson)
+			fmt.Fprintln(w, wantedPluginVersionFailJSON)
 			return
 		case "request[browse]=versionNumeric":
-			fmt.Fprintln(w, wantedPluginVersionNumericJson)
+			fmt.Fprintln(w, wantedPluginVersionNumericJSON)
 			return
 		case "request[browse]=alternate":
 			fmt.Fprintln(w, wantedPluginResponse5JsonAlternate)
@@ -50,8 +50,7 @@ var mockPluginsApi = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWri
 	fmt.Fprintln(w, `invalid`)
 }))
 
-var
-(
+var (
 	wantedPluginResponse5Json = `{
 				"info": {
 					"page": 1,
@@ -80,7 +79,7 @@ var
 					"plugin-5": {"name": "Plugin 5", "slug": "plugin-5", "version": "5.0.0", "last_updated": "2018-02-25", "short_description": "Plugin 5 Short", "description": "", "download_link": "http://example.local/plugin-5-5.0.0.zip" }
 				}
 			}`
-	wantedPluginVersionNumericJson = `{
+	wantedPluginVersionNumericJSON = `{
 				"info": {
 					"page": 1,
 					"pages": 1,
@@ -90,7 +89,7 @@ var
 					{"name": "Plugin 1", "slug": "plugin-1", "version": 1, "last_updated": "2018-02-21", "short_description": "Plugin 1 Short", "description": "", "download_link": "http://example.local/plugin-1-1.0.0.zip" }
 				]
 			}`
-	wantedPluginVersionFailJson = `{
+	wantedPluginVersionFailJSON = `{
 				"info": {
 					"page": 1,
 					"pages": 1,
@@ -101,8 +100,8 @@ var
 				]
 			}`
 
-	wantedPluginResponse5 = ApiResponse{
-		Info: ApiInfo{
+	wantedPluginResponse5 = APIResponse{
+		Info: APIInfo{
 			1,
 			1024,
 			5,
@@ -162,8 +161,8 @@ var
 		},
 	}
 
-	wantedPluginVersionNumeric = ApiResponse{
-		Info: ApiInfo{
+	wantedPluginVersionNumeric = APIResponse{
+		Info: APIInfo{
 			1,
 			1,
 			1,
@@ -197,8 +196,8 @@ var
 					{"name": "Theme 5", "slug": "theme-5", "version": "5.0.0", "last_updated": "2018-02-25", "description": "Theme 5 Short", "short_description": "", "download_link": "http://example.local/theme-5-5.0.0.zip" }
 				]
 			}`
-	wantedThemeResponse5 = ApiResponse{
-		Info: ApiInfo{
+	wantedThemeResponse5 = APIResponse{
+		Info: APIInfo{
 			1,
 			1024,
 			5,
@@ -271,14 +270,14 @@ func TestClient_Request(t *testing.T) {
 		name    string
 		c       Client
 		args    args
-		want    *ApiResponse
+		want    *APIResponse
 		wantErr bool
 	}{
 		{
 			"Get 5 Themes",
 			Client{},
 			args{
-				mockThemesApi.URL,
+				mockThemesAPI.URL,
 				"themes",
 				"updated",
 				5,
@@ -291,7 +290,7 @@ func TestClient_Request(t *testing.T) {
 			"Get 5 Plugins",
 			Client{},
 			args{
-				mockPluginsApi.URL,
+				mockPluginsAPI.URL,
 				"plugins",
 				"updated",
 				5,
@@ -304,7 +303,7 @@ func TestClient_Request(t *testing.T) {
 			"Get 5 Plugins - Alternate Response",
 			Client{},
 			args{
-				mockPluginsApi.URL,
+				mockPluginsAPI.URL,
 				"plugins",
 				"alternate",
 				5,
@@ -317,7 +316,7 @@ func TestClient_Request(t *testing.T) {
 			"Themes invalid JSON",
 			Client{},
 			args{
-				mockPluginsApi.URL,
+				mockPluginsAPI.URL,
 				"themes",
 				"invalid",
 				-1,
@@ -343,7 +342,7 @@ func TestClient_Request(t *testing.T) {
 			"Plugin Numeric Version",
 			Client{},
 			args{
-				mockPluginsApi.URL,
+				mockPluginsAPI.URL,
 				"plugins",
 				"versionNumeric",
 				-1,
@@ -356,7 +355,7 @@ func TestClient_Request(t *testing.T) {
 			"Plugin Failed Version",
 			Client{},
 			args{
-				mockPluginsApi.URL,
+				mockPluginsAPI.URL,
 				"plugins",
 				"versionFail",
 				-1,
@@ -389,10 +388,10 @@ func TestClient_Request(t *testing.T) {
 func TestClient_RequestThemes(t *testing.T) {
 
 	// Mock the API.
-	oldUrl := themesApiUrl
-	themesApiUrl = mockThemesApi.URL
+	oldURL := themesAPIURL
+	themesAPIURL = mockThemesAPI.URL
 	defer func() {
-		themesApiUrl = oldUrl
+		themesAPIURL = oldURL
 	}()
 
 	type args struct {
@@ -404,7 +403,7 @@ func TestClient_RequestThemes(t *testing.T) {
 		name    string
 		c       Client
 		args    args
-		want    *ApiResponse
+		want    *APIResponse
 		wantErr bool
 	}{
 		{
@@ -436,10 +435,10 @@ func TestClient_RequestThemes(t *testing.T) {
 func TestClient_RequestPlugins(t *testing.T) {
 
 	// Mock the API.
-	oldUrl := pluginsApiUrl
-	pluginsApiUrl = mockPluginsApi.URL
+	oldURL := pluginsAPIURL
+	pluginsAPIURL = mockPluginsAPI.URL
 	defer func() {
-		pluginsApiUrl = oldUrl
+		pluginsAPIURL = oldURL
 	}()
 
 	type args struct {
@@ -451,7 +450,7 @@ func TestClient_RequestPlugins(t *testing.T) {
 		name    string
 		c       Client
 		args    args
-		want    *ApiResponse
+		want    *APIResponse
 		wantErr bool
 	}{
 		{
@@ -515,10 +514,10 @@ func TestClient_SetPluginApiSource(t *testing.T) {
 			c := &Client{
 				pluginAPI: tt.fields.pluginAPI,
 			}
-			c.SetPluginApiSource(tt.args.source)
+			c.SetPluginAPISource(tt.args.source)
 			got := c.pluginAPI
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Client.SetPluginApiSource() = %v, want %v", got, tt.want)
+				t.Errorf("Client.SetPluginAPISource() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -553,10 +552,10 @@ func TestClient_SetThemeApiSource(t *testing.T) {
 			c := &Client{
 				themeAPI: tt.fields.themeAPI,
 			}
-			c.SetThemeApiSource(tt.args.source)
+			c.SetThemeAPISource(tt.args.source)
 			got := c.themeAPI
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Client.SetThemeApiSource() = %v, want %v", got, tt.want)
+				t.Errorf("Client.SetThemeAPISource() = %v, want %v", got, tt.want)
 			}
 		})
 	}

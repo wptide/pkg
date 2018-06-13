@@ -1,8 +1,8 @@
 package firestore
 
 import (
-	"context"
 	"cloud.google.com/go/firestore"
+	"context"
 	"errors"
 	"strings"
 )
@@ -81,7 +81,7 @@ func (c Client) QueryItems(
 	var query firestore.Query
 	querySet := false
 	for _, condition := range conditions {
-		if ! querySet {
+		if !querySet {
 			query = colRef.Where(condition.Path, condition.Operator, condition.Value)
 			querySet = true
 		} else {

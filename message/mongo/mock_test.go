@@ -1,14 +1,15 @@
 package mongo
 
 import (
-	"github.com/mongodb/mongo-go-driver/core/option"
 	"context"
-	wrapper "github.com/wptide/pkg/wrapper/mongo"
 	"encoding/json"
-	"github.com/wptide/pkg/message"
+	"errors"
+
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
-	"errors"
+	"github.com/mongodb/mongo-go-driver/core/option"
+	"github.com/wptide/pkg/message"
+	wrapper "github.com/wptide/pkg/wrapper/mongo"
 )
 
 type MockClient struct {

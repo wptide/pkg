@@ -1,15 +1,16 @@
 package mongo
 
 import (
-	"github.com/wptide/pkg/message"
 	"context"
-	"github.com/mongodb/mongo-go-driver/mongo"
 	"encoding/json"
-	"time"
 	"errors"
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
-	wrapper "github.com/wptide/pkg/wrapper/mongo"
+	"time"
+
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/wptide/pkg/message"
+	wrapper "github.com/wptide/pkg/wrapper/mongo"
 )
 
 const RetryAttemps = 3
@@ -59,7 +60,7 @@ func (m MongoProvider) GetNextMessage() (*message.Message, error) {
 	// Get retries.
 	retryAvailable := true
 	retries := qm.Retries - 1
-	if (retries <= 0) {
+	if retries <= 0 {
 		retryAvailable = false
 	}
 

@@ -1,23 +1,24 @@
 package process
 
 import (
-	"testing"
+	"bytes"
 	"context"
-	"time"
-	"github.com/wptide/pkg/storage"
-	"github.com/wptide/pkg/message"
 	"errors"
-	"github.com/wptide/pkg/shell"
+	"io/ioutil"
 	"os"
 	"strings"
-	"io/ioutil"
-	"bytes"
+	"testing"
+	"time"
+
 	"github.com/wptide/pkg/log"
+	"github.com/wptide/pkg/message"
+	"github.com/wptide/pkg/shell"
+	"github.com/wptide/pkg/storage"
 )
 
 type mockPhpcsRunner struct{}
 
-func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error, int) {
+func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, int, error) {
 
 	// "--basepath="
 	basepath := strings.Split(arg[4], "=")[1]
@@ -32,7 +33,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 			0644,
 		)
 
-		return []byte("[TEST] Time: 100ms; Memory: 4Mb"), nil, nil, 0
+		return []byte("[TEST] Time: 100ms; Memory: 4Mb"), nil, 0, nil
 	}
 
 	if basepath == "./testdata/info/plugin/unzipped" && standard == "phpcompatibility" {
@@ -44,7 +45,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 			0644,
 		)
 
-		return []byte("[TEST] Time: 50ms; Memory: 4Mb"), nil, nil, 0
+		return []byte("[TEST] Time: 50ms; Memory: 4Mb"), nil, 0, nil
 	}
 
 	if basepath == "./testdata/info/filereadererror/unzipped" {
@@ -54,7 +55,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 			[]byte(msg),
 			os.ModePerm,
 		)
-		return []byte(msg), nil, nil, 0
+		return []byte(msg), nil, 0, nil
 	}
 
 	if basepath == "./testdata/info/phpcompatwriteerror/unzipped" {
@@ -64,7 +65,7 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 			[]byte(msg),
 			os.ModePerm,
 		)
-		return []byte(msg), nil, nil, 0
+		return []byte(msg), nil, 0, nil
 	}
 
 	if basepath == "./testdata/info/phpcompatuploaderror/unzipped" {
@@ -74,10 +75,10 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, error,
 			[]byte(msg),
 			os.ModePerm,
 		)
-		return []byte(msg), nil, nil, 0
+		return []byte(msg), nil, 0, nil
 	}
 
-	return nil, nil, errors.New("Something went wrong."), 1
+	return nil, nil, 1, errors.New("something went wrong")
 }
 
 func mockOpen(name string) (*os.File, error) {
@@ -182,7 +183,7 @@ func TestPhpcs_Run(t *testing.T) {
 		In              <-chan Processor
 		Out             chan Processor
 		TempFolder      string
-		StorageProvider storage.StorageProvider
+		StorageProvider storage.Provider
 	}
 
 	validFields := fields{
@@ -583,7 +584,7 @@ func TestPhpcs_Run(t *testing.T) {
 							Audits: auditsPhpCompatibility,
 						},
 						Result: &Result{
-							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
+							"checksum":  "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
 							"filesPath": "./testdata/info/plugin",
 						},
 					},
@@ -609,7 +610,7 @@ func TestPhpcs_Run(t *testing.T) {
 				cs.In = generateProcs(ctx, tt.procs)
 			}
 
-			if ! tt.mockRunner {
+			if !tt.mockRunner {
 				oldRunner := phpcsRunner
 				phpcsRunner = nil
 				defer func() {

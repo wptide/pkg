@@ -1,29 +1,37 @@
 package wporg
 
 import (
-	"strconv"
 	"bytes"
-	"strings"
-	"io/ioutil"
 	"encoding/json"
-	"net/http"
 	"errors"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+	"strings"
 )
 
-const TimeFormat = "2006-01-02 3:04pm MST"
-const TimeFormatThemes = "2006-01-02"
+/*
+ *	TimeFormat is the Go-style time format used for plugins.
+ *	TimeFormatThemes is the Go-style time format used for themes.
+ */
+const (
+	TimeFormat       = "2006-01-02 3:04pm MST"
+	TimeFormatThemes = "2006-01-02"
+)
 
 var (
-	themesApiUrl  = "https://api.wordpress.org/themes/info/1.1/"
-	pluginsApiUrl = "https://api.wordpress.org/plugins/info/1.1/"
+	themesAPIURL  = "https://api.wordpress.org/themes/info/1.1/"
+	pluginsAPIURL = "https://api.wordpress.org/plugins/info/1.1/"
 )
 
-type ApiInfo struct {
+// APIInfo contains the results from a call to the WordPress.org theme/plugin API.
+type APIInfo struct {
 	Page    int `json:"page"`
 	Pages   int `json:"pages"`
 	Results int `json:"results"`
 }
 
+// RepoProject describes a single item in the returned results.
 type RepoProject struct {
 	Name             string `json:"name"`
 	Slug             string `json:"slug"`
@@ -34,10 +42,10 @@ type RepoProject struct {
 	DownloadLink     string `json:"download_link"`
 	// Type is excluded from the json object as this does not come
 	// from either the plugin or theme APIs.
-	Type             string `json:"-"`
+	Type string `json:"-"`
 }
 
-// Create a custom unmarshaller for RepoProject to deal with version passed as numbers.
+// UnmarshalJSON is a custom unmarshaller for RepoProject to deal with version passed as numbers.
 func (rp *RepoProject) UnmarshalJSON(d []byte) error {
 	type altRepoProject RepoProject // Do this to remove methods and avoid UnmarshalJSON loop.
 	temp := struct {
@@ -61,8 +69,9 @@ func (rp *RepoProject) UnmarshalJSON(d []byte) error {
 	return nil
 }
 
-type ApiResponse struct {
-	Info    ApiInfo       `json:"info"`
+// APIResponse describes a reponse from the WordPress.org theme/plugin API.
+type APIResponse struct {
+	Info APIInfo `json:"info"`
 	// Type is excluded from the json object as this does not come
 	// from either the plugin or theme APIs.
 	Type    string        `json:"-"`
@@ -70,11 +79,11 @@ type ApiResponse struct {
 	Themes  []RepoProject `json:"themes,omitempty"`
 }
 
-// alternateApiResponse is identical to ApiResponse except for the
+// alternateAPIResponse is identical to APIResponse except for the
 // Plugins field which expects an alternate json response from the
 // plugins API. (some inconsistencies with responses were noticed)
-type alternateApiResponse struct {
-	Info    ApiInfo                `json:"info"`
+type alternateAPIResponse struct {
+	Info    APIInfo                `json:"info"`
 	Type    string                 `json:"-"`
 	Plugins map[string]RepoProject `json:"plugins,omitempty"`
 	Themes  []RepoProject          `json:"themes,omitempty"`
@@ -88,7 +97,7 @@ type Requester interface {
 	// - "https://api.wordpress.org/themes/info/1.1/" for themes.
 	// - "https://api.wordpress.org/plugins/info/1.1/" for plugins.
 	//  `projectType` should be plural "themes" or "plugins".
-	Request(source, projectType, category string, perPage, page int) (*ApiResponse, error)
+	Request(source, projectType, category string, perPage, page int) (*APIResponse, error)
 }
 
 // Client is the default wporg client and implements Requester interface.
@@ -98,7 +107,7 @@ type Client struct {
 }
 
 // Request gets information from the WordPress.org API's.
-func (c Client) Request(source, projectType, category string, perPage, page int) (*ApiResponse, error) {
+func (c Client) Request(source, projectType, category string, perPage, page int) (*APIResponse, error) {
 	// formValues is an array of query parameters passed to the requestUrl.
 	formValues := []string{
 		"action=query_" + projectType,
@@ -124,7 +133,7 @@ func (c Client) Request(source, projectType, category string, perPage, page int)
 		"request[fields][stable_tag]=0",
 		"request[fields][download_link]=1", // Not available for themes.
 		"request[fields][requires_php]=0",
-	};
+	}
 	if projectType == "plugins" {
 		// Descriptions are too long for plugins.
 		formValues = append(formValues, "request[fields][description]=0")
@@ -142,10 +151,10 @@ func (c Client) Request(source, projectType, category string, perPage, page int)
 	defer response.Body.Close()
 	bodyByte, _ := ioutil.ReadAll(response.Body)
 
-	results := ApiResponse{}
+	results := APIResponse{}
 	if err := json.Unmarshal([]byte(bodyByte), &results); err != nil {
 		// Try alternate form.
-		alternate := alternateApiResponse{}
+		alternate := alternateAPIResponse{}
 		if err := json.Unmarshal([]byte(bodyByte), &alternate); err != nil {
 			return nil, err
 		}
@@ -164,27 +173,27 @@ func (c Client) Request(source, projectType, category string, perPage, page int)
 }
 
 // RequestThemes is a convenience method.
-func (c *Client) RequestThemes(category string, perPage, page int) (*ApiResponse, error) {
+func (c *Client) RequestThemes(category string, perPage, page int) (*APIResponse, error) {
 	if c.themeAPI == "" {
-		c.themeAPI = themesApiUrl
+		c.themeAPI = themesAPIURL
 	}
 	return c.Request(c.themeAPI, "themes", category, perPage, page)
 }
 
 // RequestPlugins is a convenience method.
-func (c *Client) RequestPlugins(category string, perPage, page int) (*ApiResponse, error) {
+func (c *Client) RequestPlugins(category string, perPage, page int) (*APIResponse, error) {
 	if c.pluginAPI == "" {
-		c.pluginAPI = pluginsApiUrl
+		c.pluginAPI = pluginsAPIURL
 	}
 	return c.Request(c.pluginAPI, "plugins", category, perPage, page)
 }
 
-// SetPluginApiSource allows to set an alternate plugins API source.
-func (c *Client) SetPluginApiSource(source string) {
+// SetPluginAPISource allows to set an alternate plugins API source.
+func (c *Client) SetPluginAPISource(source string) {
 	c.pluginAPI = source
 }
 
-// SetThemeApiSource allows to set an alternate themes API source.
-func (c *Client) SetThemeApiSource(source string) {
+// SetThemeAPISource allows to set an alternate themes API source.
+func (c *Client) SetThemeAPISource(source string) {
 	c.themeAPI = source
 }

@@ -1,14 +1,14 @@
 package api
 
 import (
-	"net/url"
 	"bytes"
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/wptide/pkg/tide"
-	"errors"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 )
 
 type Client struct {
@@ -73,7 +73,7 @@ func (c Client) SendPayload(method, endpoint, data string) (string, error) {
 		return "", err
 	}
 
-	if ( resp.StatusCode < 200 || resp.StatusCode > 299 ) {
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		return "", errors.New("Unexpected status code: " + resp.Status)
 	}
 	defer resp.Body.Close()

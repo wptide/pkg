@@ -61,7 +61,7 @@ func TestProvider_Kind(t *testing.T) {
 	t.Run("Storage Provider Kind", func(t *testing.T) {
 		p := Provider{}
 		if got := p.Kind(); got != "gcs" {
-			t.Errorf("StorageProvider.Kind() = %v, Impossible, this should be gcloud/storage.", got)
+			t.Errorf("Provider.Kind() = %v, Impossible, this should be gcloud/storage.", got)
 		}
 	})
 }

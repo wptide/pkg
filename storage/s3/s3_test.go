@@ -1,6 +1,7 @@
 package s3
 
 import (
+	"errors"
 	"io"
 	"os"
 	"reflect"
@@ -10,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager/s3manageriface"
-	"errors"
 )
 
 type mockS3 struct {

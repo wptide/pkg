@@ -2,21 +2,22 @@ package process
 
 import (
 	"errors"
-	"io/ioutil"
-	"github.com/hhatto/gocloc"
-	"strings"
-	"regexp"
 	"fmt"
-	"github.com/wptide/pkg/tide"
+	"io/ioutil"
+	"regexp"
+	"strings"
+
+	"github.com/hhatto/gocloc"
 	"github.com/wptide/pkg/log"
 	"github.com/wptide/pkg/message"
+	"github.com/wptide/pkg/tide"
 )
 
-// Ingest defines the structure for our Ingest process.
+// Info defines the structure for our Info process.
 type Info struct {
-	Process              // Inherits methods from Process.
-	In  <-chan Processor // Expects a processor channel as input.
-	Out chan Processor   // Send results to an output channel.
+	Process                  // Inherits methods from Process.
+	In      <-chan Processor // Expects a processor channel as input.
+	Out     chan Processor   // Send results to an output channel.
 }
 
 // Run executes the process in the pipeline.
@@ -57,7 +58,7 @@ func (info *Info) Run(errc *chan error) error {
 	return nil
 }
 
-// process runs the actual code for this process.
+// Do runs the actual code for this process.
 func (info *Info) Do() error {
 
 	result := *info.Result
@@ -155,7 +156,7 @@ func getProjectDetails(msg message.Message, path string) (string, []tide.InfoDet
 	}
 
 	// Multiple headers found but could not assert appropriate header.
-	return "", nil, errors.New("Multiple headers: Could not assert appropriate header for project.")
+	return "", nil, errors.New("multiple headers: could not assert appropriate header for project")
 }
 
 // getCloc gets the code info for the current code base.
@@ -174,7 +175,12 @@ func getCloc(path string) (map[string]tide.ClocResult, error) {
 		return nil, err
 	}
 
-	clocTotals := tide.ClocResult{0, 0, 0, 0}
+	clocTotals := tide.ClocResult{
+		Blank:   0,
+		Comment: 0,
+		Code:    0,
+		NFiles:  0,
+	}
 
 	for _, cLang := range cloc.Languages {
 		// Add Totals
@@ -184,10 +190,10 @@ func getCloc(path string) (map[string]tide.ClocResult, error) {
 		clocTotals.NFiles += len(cLang.Files)
 
 		clocMap[strings.ToLower(cLang.Name)] = tide.ClocResult{
-			int(cLang.Blanks),
-			int(cLang.Comments),
-			int(cLang.Code),
-			len(cLang.Files),
+			Blank:   int(cLang.Blanks),
+			Comment: int(cLang.Comments),
+			Code:    int(cLang.Code),
+			NFiles:  len(cLang.Files),
 		}
 	}
 
@@ -251,8 +257,8 @@ func extractHeader(filename string) (projectType string, details []tide.InfoDeta
 				}
 
 				details = append(details, tide.InfoDetails{
-					strings.Replace(fieldname, " ", "", -1),
-					strings.TrimSpace(value),
+					Key:   strings.Replace(fieldname, " ", "", -1),
+					Value: strings.TrimSpace(value),
 				})
 			}
 		}

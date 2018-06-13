@@ -1,9 +1,9 @@
 package gcs
 
 import (
-	"os"
 	"context"
 	"io"
+	"os"
 )
 
 var (
@@ -13,10 +13,10 @@ var (
 )
 
 type Provider struct {
-	ctx           context.Context
-	client        *client
-	projectID     *string
-	bucketName    *string
+	ctx        context.Context
+	client     *client
+	projectID  *string
+	bucketName *string
 }
 
 func (p Provider) Kind() string {
@@ -73,8 +73,8 @@ func (p Provider) DownloadFile(reference, filename string) error {
 
 func NewCloudStorageProvider(ctx context.Context, projectId string, bucketName string) *Provider {
 	return &Provider{
-		ctx:           ctx,
-		projectID:     &projectId,
-		bucketName:    &bucketName,
+		ctx:        ctx,
+		projectID:  &projectId,
+		bucketName: &bucketName,
 	}
 }

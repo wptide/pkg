@@ -1,11 +1,11 @@
 package mongo
 
 import (
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/core/option"
 	"context"
 	"errors"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/core/option"
+	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
 type Client interface {
@@ -74,7 +74,7 @@ func (c MongoCollection) InsertOne(ctx context.Context, document interface{}, op
 
 	// Recover on panic() from mongo driver.
 	defer func() {
-		if r := recover(); r!= nil {
+		if r := recover(); r != nil {
 			insertResult = nil
 			err = errors.New("Collection insert error.")
 		}
@@ -90,7 +90,7 @@ func (c MongoCollection) FindOne(ctx context.Context, filter interface{}, opts .
 
 	// Recover on panic() from mongo driver.
 	defer func() {
-		if r := recover(); r!= nil {
+		if r := recover(); r != nil {
 			docResult = nil
 		}
 	}()
@@ -109,7 +109,7 @@ func (c MongoCollection) FindOneAndDelete(ctx context.Context, filter interface{
 
 	// Recover on panic() from mongo driver.
 	defer func() {
-		if r := recover(); r!= nil {
+		if r := recover(); r != nil {
 			docResult = nil
 		}
 	}()

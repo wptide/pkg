@@ -1,11 +1,13 @@
 package payload
 
 import (
-	"github.com/wptide/pkg/message"
 	"io/ioutil"
 	"log"
+
+	"github.com/wptide/pkg/message"
 )
 
+// FilePayload implements a Payloader that simply writes to a file.
 type FilePayload struct {
 	TerminateChannel chan struct{}
 }

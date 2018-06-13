@@ -1,8 +1,8 @@
 package local
 
 import (
-	"os"
 	"io"
+	"os"
 )
 
 var (

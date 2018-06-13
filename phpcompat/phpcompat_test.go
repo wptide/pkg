@@ -3,6 +3,7 @@ package phpcompat
 import (
 	"reflect"
 	"testing"
+
 	"github.com/wptide/pkg/tide"
 )
 

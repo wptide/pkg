@@ -1,11 +1,11 @@
 package api
 
 import (
-	"testing"
-	"net/http/httptest"
-	"net/http"
 	"fmt"
 	"github.com/wptide/pkg/tide"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 // apiStub is a mock server for testing API requests.
@@ -135,7 +135,7 @@ func TestClient_SendPayload(t *testing.T) {
 		},
 		{
 			name: "Authenticated GET",
-			c:    &Client{
+			c: &Client{
 				&tide.Auth{
 					AccessToken: "verysecrettoken",
 				},
@@ -161,7 +161,7 @@ func TestClient_SendPayload(t *testing.T) {
 		},
 		{
 			name: "Authenticated POST",
-			c:    &Client{
+			c: &Client{
 				&tide.Auth{
 					AccessToken: "verysecrettoken",
 				},

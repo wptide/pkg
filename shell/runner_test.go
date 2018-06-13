@@ -1,11 +1,11 @@
 package shell
 
 import (
-	"os/exec"
-	"testing"
-	"os"
 	"fmt"
 	"io"
+	"os"
+	"os/exec"
+	"testing"
 )
 
 func mockExecCommand(command string, args ...string) *exec.Cmd {
@@ -25,8 +25,8 @@ func TestCommand_Run(t *testing.T) {
 	type funcs struct {
 		stdOutFunc func(*exec.Cmd) (io.ReadCloser, error)
 		stdErrFunc func(*exec.Cmd) (io.ReadCloser, error)
-		startFunc  func(*exec.Cmd) (error)
-		waitFunc   func(*exec.Cmd) (error)
+		startFunc  func(*exec.Cmd) error
+		waitFunc   func(*exec.Cmd) error
 	}
 
 	tests := []struct {
@@ -90,7 +90,7 @@ func TestCommand_Run(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			outBuff, errBuff, err, _ := tt.c.Run(tt.args.name, tt.args.arg...)
+			outBuff, errBuff, _, err := tt.c.Run(tt.args.name, tt.args.arg...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Command.Run() error = %v, wantErr %v", err, tt.wantErr)
 				return

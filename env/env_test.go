@@ -1,8 +1,9 @@
 package env_test
 
 import (
-	"testing"
 	"os"
+	"testing"
+
 	"github.com/wptide/pkg/env"
 )
 

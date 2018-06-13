@@ -7,12 +7,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/wptide/pkg/message"
-	"github.com/wptide/pkg/source"
+	"bytes"
 	"context"
 	"time"
+
 	"github.com/wptide/pkg/log"
-	"bytes"
+	"github.com/wptide/pkg/message"
+	"github.com/wptide/pkg/source"
 )
 
 type mockSource struct{}
@@ -333,7 +334,7 @@ func TestIngest_Run(t *testing.T) {
 			},
 			[]message.Message{
 				{
-					Title: "Invalid Source",
+					Title:               "Invalid Source",
 					ResponseAPIEndpoint: "http://test.local/api/audits/",
 					SourceURL:           ts.URL + "/test.rar",
 					SourceType:          "rar",

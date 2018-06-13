@@ -1,17 +1,18 @@
 package sqs
 
 import (
-	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
-	"errors"
-	"github.com/wptide/pkg/message"
-	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go/service/sqs/sqsiface"
+	"github.com/wptide/pkg/message"
 )
 
 // SqsProvider represents an SQS queue.
@@ -23,7 +24,7 @@ type SqsProvider struct {
 	QueueName *string
 }
 
-// Send implements the required interface method to be a MessageProvider.
+// Send implements the required interface method to be a Provider.
 //
 // This method sends a new SQS SendMessageInput message to SQS.
 func (mgr SqsProvider) SendMessage(msg *message.Message) error {
@@ -33,8 +34,8 @@ func (mgr SqsProvider) SendMessage(msg *message.Message) error {
 
 	// Create the message object.
 	messageInput := &sqs.SendMessageInput{
-		MessageBody:  aws.String(string(taskEncoded)),
-		QueueUrl:     mgr.QueueUrl,
+		MessageBody: aws.String(string(taskEncoded)),
+		QueueUrl:    mgr.QueueUrl,
 	}
 
 	// Change message if .fifo queue
@@ -55,7 +56,7 @@ func (mgr SqsProvider) SendMessage(msg *message.Message) error {
 	return nil
 }
 
-// Receive implements the required interface method to be a MessageProvider.
+// Receive implements the required interface method to be a Provider.
 //
 // This method sends a ReceiveMessageInput message to SQS and converts the message into a *task.Task object.
 func (mgr SqsProvider) GetNextMessage() (*message.Message, error) {
@@ -107,7 +108,7 @@ func (mgr SqsProvider) GetNextMessage() (*message.Message, error) {
 	return nil, errors.New("could not retrieve message")
 }
 
-// Delete implements the required interface method to be a MessageProvider.
+// Delete implements the required interface method to be a Provider.
 //
 // This method deletes a message from the queue.
 func (mgr SqsProvider) DeleteMessage(reference *string) error {
@@ -123,7 +124,7 @@ func (mgr SqsProvider) DeleteMessage(reference *string) error {
 	return nil
 }
 
-// Close implemented to satisfy MessageProvider interface.
+// Close implemented to satisfy Provider interface.
 func (mgr SqsProvider) Close() error {
 	return nil
 }
@@ -153,7 +154,7 @@ func getSession(region, key, secret string) (*session.Session, error) {
 // NewSqsProvider is a convenience method to return a new *SqsProvider instance.
 func NewSqsProvider(region, key, secret, queue string) *SqsProvider {
 
-	sess, _ := getSession(region, key, secret);
+	sess, _ := getSession(region, key, secret)
 	svc := sqs.New(sess)
 	queueUrl, _ := getQueueUrl(svc, queue)
 

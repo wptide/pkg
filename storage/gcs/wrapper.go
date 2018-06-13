@@ -1,9 +1,10 @@
 package gcs
 
 import (
-	"cloud.google.com/go/storage"
 	"context"
 	"io"
+
+	"cloud.google.com/go/storage"
 )
 
 // Provides a way to return an alternate objectHandle. Used for testing.

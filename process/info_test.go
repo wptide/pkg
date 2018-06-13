@@ -1,15 +1,16 @@
 package process
 
 import (
+	"bytes"
 	"context"
+	"os"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/wptide/pkg/log"
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/tide"
-	"bytes"
-	"os"
-	"github.com/wptide/pkg/log"
 )
 
 func TestInfo_Run(t *testing.T) {
@@ -115,8 +116,8 @@ func TestInfo_Run(t *testing.T) {
 			[]Processor{
 				&Ingest{
 					Process: Process{
-						Message:   message.Message{Title: "Test Theme"},
-						Result:    &Result{
+						Message: message.Message{Title: "Test Theme"},
+						Result: &Result{
 							"filesPath": "./testdata/info/theme",
 						},
 					},
@@ -209,7 +210,7 @@ func TestInfo_Run(t *testing.T) {
 
 func Test_getProjectDetails(t *testing.T) {
 	type args struct {
-		msg message.Message
+		msg  message.Message
 		path string
 	}
 	tests := []struct {
@@ -239,44 +240,44 @@ func Test_getProjectDetails(t *testing.T) {
 			"theme",
 			[]tide.InfoDetails{
 				{
-					"Description",
-					"This is a theme for testing purposes only.",
+					Key:   "Description",
+					Value: "This is a theme for testing purposes only.",
 				},
 				{
-					"Version",
-					"1.0",
+					Key:   "Version",
+					Value: "1.0",
 				},
 				{
-					"Author",
-					"DummyThemes",
+					Key:   "Author",
+					Value: "DummyThemes",
 				},
 				{
-					"AuthorURI",
-					"http://dummy.local/",
+					Key:   "AuthorURI",
+					Value: "http://dummy.local/",
 				},
 				{
-					"TextDomain",
-					"dummy-theme",
+					Key:   "TextDomain",
+					Value: "dummy-theme",
 				},
 				{
-					"License",
-					"GNU General Public License v2 or later",
+					Key:   "License",
+					Value: "GNU General Public License v2 or later",
 				},
 				{
-					"LicenseURI",
-					"http://www.gnu.org/licenses/gpl-2.0.html",
+					Key:   "LicenseURI",
+					Value: "http://www.gnu.org/licenses/gpl-2.0.html",
 				},
 				{
-					"Name",
-					"Dummy Theme",
+					Key:   "Name",
+					Value: "Dummy Theme",
 				},
 				{
-					"ThemeURI",
-					"http://dummy.local/dummy-theme",
+					Key:   "ThemeURI",
+					Value: "http://dummy.local/dummy-theme",
 				},
 				{
-					"Tags",
-					"black, brown, orange, tan, white, yellow, light, one-column, two-columns, right-sidebar, flexible-width, custom-header, custom-menu, editor-style, featured-images, microformats, post-formats, rtl-language-support, sticky-post, translation-ready",
+					Key:   "Tags",
+					Value: "black, brown, orange, tan, white, yellow, light, one-column, two-columns, right-sidebar, flexible-width, custom-header, custom-menu, editor-style, featured-images, microformats, post-formats, rtl-language-support, sticky-post, translation-ready",
 				},
 			},
 			false,
@@ -285,49 +286,49 @@ func Test_getProjectDetails(t *testing.T) {
 			"Nested Plugins",
 			args{
 				message.Message{
-					SourceURL: "http://test.local/dummy-plugin.1.0.1.zip",
+					SourceURL:   "http://test.local/dummy-plugin.1.0.1.zip",
 					ProjectType: "plugin",
-					Slug: "dummy-plugin",
+					Slug:        "dummy-plugin",
 				},
 				"./testdata/info/nested/unzipped",
 			},
 			"plugin",
 			[]tide.InfoDetails{
 				{
-					"Name",
-					"Dummy Plugin",
+					Key:   "Name",
+					Value: "Dummy Plugin",
 				},
 				{
-					"PluginURI",
-					"http://dummy.local/plugin/dummy-plugin",
+					Key:   "PluginURI",
+					Value: "http://dummy.local/plugin/dummy-plugin",
 				},
 				{
-					"Description",
-					"This does nothing.",
+					Key:   "Description",
+					Value: "This does nothing.",
 				},
 				{
-					"Version",
-					"0.1-alpha",
+					Key:   "Version",
+					Value: "0.1-alpha",
 				},
 				{
-					"Author",
-					"DummyPlugins",
+					Key:   "Author",
+					Value: "DummyPlugins",
 				},
 				{
-					"AuthorURI",
-					"http://dummy.local",
+					Key:   "AuthorURI",
+					Value: "http://dummy.local",
 				},
 				{
-					"TextDomain",
-					"dummy-plugin",
+					Key:   "TextDomain",
+					Value: "dummy-plugin",
 				},
 				{
-					"License",
-					"GPL2",
+					Key:   "License",
+					Value: "GPL2",
 				},
 				{
-					"LicenseURI",
-					"http://www.gnu.org/licenses/gpl-2.0.html",
+					Key:   "LicenseURI",
+					Value: "http://www.gnu.org/licenses/gpl-2.0.html",
 				},
 			},
 			false,
@@ -362,4 +363,3 @@ func Test_getProjectDetails(t *testing.T) {
 		})
 	}
 }
-

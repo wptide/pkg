@@ -1,9 +1,10 @@
-// Adapted from https://github.com/rheinardkorf/go-concurrency/blob/master/11_pipeline_complex/pipe/pipe.go
+// Package pipe is adapted from https://github.com/rheinardkorf/go-concurrency/blob/master/11_pipeline_complex/pipe/pipe.go
 package pipe
 
 import (
 	"context"
 	"errors"
+
 	"github.com/wptide/pkg/process"
 )
 
@@ -48,7 +49,7 @@ func (p *Pipe) AddProcess(proc process.Processor) error {
 	return nil
 }
 
-// AddProcess adds a multiple processes to the processes slice.
+// AddProcesses adds a multiple processes to the processes slice.
 func (p *Pipe) AddProcesses(procs ...process.Processor) error {
 	for _, proc := range procs {
 		err := p.AddProcess(proc)

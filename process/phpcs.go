@@ -1,35 +1,37 @@
 package process
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/wptide/pkg/log"
 	"github.com/wptide/pkg/message"
-	"github.com/wptide/pkg/tide"
-	"github.com/wptide/pkg/storage"
-	"strings"
-	"strconv"
 	"github.com/wptide/pkg/process/phpcs"
-	"os"
-	"io/ioutil"
-	"encoding/json"
 	"github.com/wptide/pkg/shell"
+	"github.com/wptide/pkg/storage"
+	"github.com/wptide/pkg/tide"
 )
 
 var (
 	phpcsRunner shell.Runner
 )
 
-// Ingest defines the structure for our Ingest process.
+// Phpcs defines the structure for our Phpcs process.
 type Phpcs struct {
-	Process                                 // Inherits methods from Process.
-	In              <-chan Processor        // Expects a processor channel as input.
-	Out             chan Processor          // Send results to an output channel.
-	Config          Result                  // Additional config.
-	TempFolder      string                  // Path to a temp folder where reports will be generated.
-	StorageProvider storage.StorageProvider // Storage provider to upload reports to.
+	Process                          // Inherits methods from Process.
+	In              <-chan Processor // Expects a processor channel as input.
+	Out             chan Processor   // Send results to an output channel.
+	Config          Result           // Additional config.
+	TempFolder      string           // Path to a temp folder where reports will be generated.
+	StorageProvider storage.Provider // Storage provider to upload reports to.
 }
 
+// Run executes the process in a pipe.
 func (cs *Phpcs) Run(errc *chan error) error {
 
 	if cs.TempFolder == "" {
@@ -81,6 +83,7 @@ func (cs *Phpcs) Run(errc *chan error) error {
 	return nil
 }
 
+// Do executes the process.
 func (cs *Phpcs) Do() error {
 
 	log.Log(cs.Message.Title, "Running PHPCS Audit...")
@@ -105,7 +108,7 @@ func (cs *Phpcs) Do() error {
 	}
 
 	checksum, ok := result["checksum"].(string)
-	if ! ok {
+	if !ok {
 		return errors.New("could not determine checksum")
 	}
 
@@ -123,7 +126,7 @@ func (cs *Phpcs) Do() error {
 
 	// Provide in implementation, not from message.
 	parallel, ok := cs.Config["parallel"].(int)
-	if ! ok {
+	if !ok {
 		parallel = 1
 	}
 
@@ -166,7 +169,7 @@ func (cs *Phpcs) Do() error {
 	cmdArgs = append(cmdArgs, "-q")
 
 	// Prepare the command and set the stdOut pipe.
-	resultBytes, _, err, exitCode := phpcsRunner.Run(cmdName, cmdArgs...)
+	resultBytes, _, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
 
 	log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
 
@@ -208,12 +211,12 @@ func (cs *Phpcs) Do() error {
 	if kind == "phpcs_phpcompatibility" {
 		compatibleVersions, compatResults := phpcs.GetPhpcsCompatibility(*phpcsResults)
 
-		resultsJson, _ := json.Marshal(compatResults)
+		resultsJSON, _ := json.Marshal(compatResults)
 
 		fname := checksum + "-" + kind + "-parsed.json"
 		fpath := pathPrefix + fname
 
-		err = writeFile(fpath, resultsJson, os.ModePerm)
+		err = writeFile(fpath, resultsJSON, os.ModePerm)
 		if err != nil {
 			return err
 		}

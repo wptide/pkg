@@ -1,8 +1,9 @@
 package sync
 
 import (
-	"github.com/wptide/pkg/wporg"
 	"time"
+
+	"github.com/wptide/pkg/wporg"
 )
 
 // Dispatcher describes an interface for dispatching RepoProjects to
@@ -13,20 +14,21 @@ type Dispatcher interface {
 	Close() error
 }
 
-// UpdateChecker describes an interface to determine and record the currency
+// Updater describes an interface to determine and record the currency
 // of the last dispatched RepoProject.
-type UpdateChecker interface {
+type Updater interface {
 	UpdateCheck(project wporg.RepoProject) bool
 	RecordUpdate(project wporg.RepoProject) error
 }
 
-// Syncer records and retrieves the last sync times
-type SyncChecker interface {
+// Checker records and retrieves the last sync times.
+type Checker interface {
 	SetSyncTime(event, projectType string, t time.Time)
 	GetSyncTime(event, projectType string) time.Time
 }
 
-type UpdateSyncChecker interface {
-	UpdateChecker
-	SyncChecker
+// UpdateChecker describes a combined Updater and Checker.
+type UpdateChecker interface {
+	Updater
+	Checker
 }

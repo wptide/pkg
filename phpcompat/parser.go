@@ -1,10 +1,11 @@
 package phpcompat
 
 import (
-	"github.com/wptide/pkg/tide"
-	"strings"
-	"regexp"
 	"errors"
+	"regexp"
+	"strings"
+
+	"github.com/wptide/pkg/tide"
 )
 
 var (
@@ -207,7 +208,7 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 			}
 		}
 	} else {
-		return Compatibility{}, errors.New("Could not parse message.")
+		return Compatibility{}, errors.New("could not parse message")
 	}
 
 	return Compatibility{
@@ -256,11 +257,11 @@ func orderMatches(m []string) (matches []string) {
 
 		for _, match := range m {
 
-			if strings.ToLower(verb) == strings.ToLower(match) && ! found(match, matches) {
+			if strings.ToLower(verb) == strings.ToLower(match) && !found(match, matches) {
 				matches = append(matches, strings.ToLower(match))
 			}
 		}
 	}
 
-	return;
+	return
 }

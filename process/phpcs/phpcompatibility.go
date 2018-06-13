@@ -2,6 +2,7 @@ package phpcs
 
 import (
 	"io/ioutil"
+
 	"github.com/wptide/pkg/phpcompat"
 	"github.com/wptide/pkg/tide"
 )

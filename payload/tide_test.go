@@ -1,20 +1,20 @@
 package payload
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/tide"
-	"errors"
-	"fmt"
 )
 
 type MockTideClient struct {
 	apiError bool
 }
 
-func (m MockTideClient) Authenticate(clientId, clientSecret, authEndpoint string) error {
+func (m MockTideClient) Authenticate(clientID, clientSecret, authEndpoint string) error {
 	return nil
 }
 

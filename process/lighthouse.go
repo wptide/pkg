@@ -1,30 +1,32 @@
 package process
 
 import (
-	"errors"
-	"strings"
-	"github.com/wptide/pkg/log"
-	"github.com/wptide/pkg/tide"
-	"github.com/wptide/pkg/storage"
-	"fmt"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/wptide/pkg/log"
 	"github.com/wptide/pkg/shell"
+	"github.com/wptide/pkg/storage"
+	"github.com/wptide/pkg/tide"
 )
 
 var (
-	lhRunner shell.Runner
+	lhRunner      shell.Runner
 	defaultRunner shell.Runner = &shell.Command{}
 )
 
-// Ingest defines the structure for our Ingest process.
+// Lighthouse defines the structure for our Lighthouse process.
 type Lighthouse struct {
-	Process                                 // Inherits methods from Process.
-	In              <-chan Processor        // Expects a processor channel as input.
-	Out             chan Processor          // Send results to an output channel.
-	TempFolder      string                  // Path to a temp folder where reports will be generated.
-	StorageProvider storage.StorageProvider // Storage provider to upload reports to.
+	Process                          // Inherits methods from Process.
+	In              <-chan Processor // Expects a processor channel as input.
+	Out             chan Processor   // Send results to an output channel.
+	TempFolder      string           // Path to a temp folder where reports will be generated.
+	StorageProvider storage.Provider // Storage provider to upload reports to.
 }
 
+// Run runs the process in a pipeline.
 func (lh *Lighthouse) Run(errc *chan error) error {
 	if lh.TempFolder == "" {
 		return errors.New("no temp folder provided for lighthouse reports")
@@ -78,9 +80,9 @@ func (lh *Lighthouse) Run(errc *chan error) error {
 	return nil
 }
 
+// Do executes the process.
 func (lh *Lighthouse) Do() error {
 	log.Log(lh.Message.Title, "Running Lighthouse Audit...")
-
 
 	if lhRunner == nil {
 		lhRunner = defaultRunner
@@ -94,7 +96,7 @@ func (lh *Lighthouse) Do() error {
 	cmdArgs := []string{fmt.Sprintf("https://wp-themes.com/%s", lh.Message.Slug)}
 
 	// Prepare the command and set the stdOut pipe.
-	resultBytes, errorBytes, err, _ := lhRunner.Run(cmdName, cmdArgs...)
+	resultBytes, errorBytes, _, err := lhRunner.Run(cmdName, cmdArgs...)
 
 	if len(errorBytes) > 0 {
 		return lh.Error("lighthouse command failed: " + string(errorBytes))
@@ -138,7 +140,7 @@ func (lh Lighthouse) uploadToStorage(buffer []byte) (*tide.AuditResult, error) {
 
 	result := *lh.Result
 	checksum, checksumOk := result["checksum"].(string)
-	if ! checksumOk {
+	if !checksumOk {
 		return nil, errors.New("there was no checksum to be used for filenames")
 	}
 
