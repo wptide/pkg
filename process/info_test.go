@@ -345,6 +345,43 @@ func Test_getProjectDetails(t *testing.T) {
 			nil,
 			true,
 		},
+		{
+			"\r line endings",
+			args{
+				msg: message.Message{
+					ProjectType: "plugin",
+				},
+				path: "./testdata/info/r-line-endings/unzipped",
+			},
+			"plugin",
+			[]tide.InfoDetails{
+				{
+					"Name",
+					"大猫评论内容关键词过滤",
+				},
+				{
+					"PluginURI",
+					"http://www.yiduqiang.com/",
+				},
+				{
+					"Description",
+					"过滤评论者或文章中不应该出现的词汇。",
+				},
+				{
+					"Version",
+					"1.0.1",
+				},
+				{
+					"Author",
+					"一堵墙",
+				},
+				{
+					"AuthorURI",
+					"http://www.yiduqiang.com/",
+				},
+			},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

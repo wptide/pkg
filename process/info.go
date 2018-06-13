@@ -11,6 +11,7 @@ import (
 	"github.com/wptide/pkg/log"
 	"github.com/wptide/pkg/message"
 	"github.com/wptide/pkg/tide"
+	"golang.org/x/text/transform"
 )
 
 // Info defines the structure for our Info process.
@@ -202,6 +203,22 @@ func getCloc(path string) (map[string]tide.ClocResult, error) {
 	return clocMap, nil
 }
 
+// cr2nl is a transformer to conver \r endings to \n.
+type cr2nl struct{ transform.NopResetter }
+
+// Transform implements transform.Transformer.
+func (cr2nl) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) {
+	nSrc = copy(dst, src)
+	nDst = nSrc
+	dst = dst[:nDst]
+	for i := range dst {
+		if dst[i] == '\r' {
+			dst[i] = '\n'
+		}
+	}
+	return nSrc, nDst, nil
+}
+
 // extractHeader scans every .php file in the path to retrieve a possible plugin header, or
 // looks for style.css to extract the theme header.
 //
@@ -227,8 +244,12 @@ func extractHeader(filename string) (projectType string, details []tide.InfoDeta
 
 	f, _ := fileOpen(filename)
 	defer f.Close()
+
+	// Pass the `f` reader to a transformed reader.
+	tr := transform.NewReader(f, cr2nl{})
 	b1 := make([]byte, 8192)
-	n1, _ := f.Read(b1)
+	// Use the transform reader instead of file.
+	n1, _ := tr.Read(b1)
 
 	isStyleCSS, _ := regexp.Match(`(\/style.css)$`, []byte(filename))
 
