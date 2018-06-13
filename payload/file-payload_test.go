@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/wptide/pkg/message"
-	"os"
 	"github.com/wptide/pkg/tide"
+	"os"
 )
 
 func Test_filePayload_SendPayload(t *testing.T) {
@@ -77,7 +77,7 @@ func Test_filePayload_SendPayload(t *testing.T) {
 				go func() {
 					for {
 						select {
-							case <-tt.args.terminateChan:
+						case <-tt.args.terminateChan:
 						}
 					}
 				}()

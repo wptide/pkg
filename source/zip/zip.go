@@ -1,18 +1,19 @@
 package zip
 
 import (
-	"fmt"
-	"os"
-	"net/http"
-	"io"
-	"path/filepath"
-	"strings"
-	"crypto/sha256"
 	"archive/zip"
-	"sort"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 )
 
+// Zip describes a zip file.
 type Zip struct {
 	url      string
 	dest     string
@@ -31,6 +32,7 @@ var (
 	sourceFilename = "source.zip"
 )
 
+// PrepareFiles downloads a zip file to a given destination and extracts info about the files in the zip.
 func (m *Zip) PrepareFiles(dest string) error {
 
 	// Prepare destination.
@@ -56,14 +58,17 @@ func (m *Zip) PrepareFiles(dest string) error {
 	return nil
 }
 
+// GetChecksum returns the combined checksum for the zip file.
 func (m Zip) GetChecksum() string {
 	return m.checksum
 }
 
+// GetFiles returns the files contained in the zip file.
 func (m Zip) GetFiles() []string {
 	return m.files
 }
 
+// NewZip returns a new Zip source.
 func NewZip(url string) *Zip {
 	return &Zip{
 		url: url,
@@ -115,7 +120,7 @@ func unzip(source, destination string) (filenames, checksums []string, err error
 	rootPath := ""
 	for _, file := range reader.File {
 		path := file.Name
-		if ! file.FileInfo().IsDir() {
+		if !file.FileInfo().IsDir() {
 			continue
 		}
 		if len(path) < len(rootPath) || rootPath == "" {

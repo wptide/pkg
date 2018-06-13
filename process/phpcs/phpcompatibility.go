@@ -2,6 +2,7 @@ package phpcs
 
 import (
 	"io/ioutil"
+
 	"github.com/wptide/pkg/phpcompat"
 	"github.com/wptide/pkg/tide"
 )
@@ -10,12 +11,14 @@ var (
 	writeFile = ioutil.WriteFile
 )
 
+// PhpCompatDetails describes details from `phpcs` phpcompatibility rules.
 type PhpCompatDetails struct {
 	Totals   map[string]int                       `json:"totals"`
 	ErrorMap map[string][]string                  `json:"error_map"`
 	Errors   map[string]PhpCompatDetailsViolation `json:"errors"`
 }
 
+// PhpCompatDetailsViolation describes a single violation.
 type PhpCompatDetailsViolation struct {
 	Message  string                    `json:"message"`
 	Source   string                    `json:"source"`
@@ -25,6 +28,7 @@ type PhpCompatDetailsViolation struct {
 	Files    map[string][]FilePosition `json:"files"`
 }
 
+// FilePosition describes where a violation occurred.
 type FilePosition struct {
 	Line   int `json:"line"`
 	Column int `json:"column"`

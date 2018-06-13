@@ -2,8 +2,9 @@ package process
 
 import (
 	"errors"
-	"github.com/wptide/pkg/payload"
 	"fmt"
+
+	"github.com/wptide/pkg/payload"
 )
 
 // Response defines the structure for a Response process.
@@ -15,6 +16,7 @@ type Response struct {
 	Payloaders map[string]payload.Payloader // A map of "Payloader"s for different services.
 }
 
+// Run executes the process in a pipe.
 func (res *Response) Run(errc *chan error) error {
 
 	if res.In == nil {
@@ -53,6 +55,7 @@ func (res *Response) Run(errc *chan error) error {
 	return nil
 }
 
+// Do executes the process.
 func (res *Response) Do() error {
 
 	result := *res.Result
@@ -66,7 +69,7 @@ func (res *Response) Do() error {
 	}
 
 	payloader, ok := res.Payloaders[payloadType]
-	if ! ok {
+	if !ok {
 		return errors.New("Could not find a valid payload generator for task")
 	}
 

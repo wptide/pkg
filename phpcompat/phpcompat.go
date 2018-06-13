@@ -1,11 +1,12 @@
 package phpcompat
 
 import (
-	"strings"
-	"strconv"
 	"fmt"
-	"github.com/blang/semver"
 	"sort"
+	"strconv"
+	"strings"
+
+	"github.com/blang/semver"
 	"github.com/wptide/pkg/tide"
 )
 
@@ -36,15 +37,18 @@ var (
 			"max": "7.2.1",
 		},
 	}
+	// PhpLatest represents the latest version of PHP.
 	PhpLatest = "7.2.1"
 )
 
+// Compatibility describes a compatibility report with breaking and warning ranges.
 type Compatibility struct {
 	Source string              `json:"source"`
 	Breaks *CompatibilityRange `json:"breaks,omitempty"`
 	Warns  *CompatibilityRange `json:"warns,omitempty"`
 }
 
+// CompatibilityRange describes the violation's PHP version range.
 type CompatibilityRange struct {
 	Low        string `json:"low"`
 	High       string `json:"high"`
@@ -80,13 +84,13 @@ func PreviousVersion(version string) string {
 		maxPrev = strings.Split(phpVersions[mMPre]["max"], ".")
 	} else {
 		pre, _ := strconv.Atoi(parts[1])
-		pre -= 1
+		pre--
 		maxPrev = strings.Split(phpVersions[parts[0]+"."+strconv.Itoa(pre)]["max"], ".")
 	}
 
 	// Convert and subtract parts
 	p3, _ := strconv.Atoi(parts[2])
-	p3 -= 1
+	p3--
 	if p3 < 0 {
 		parts[2] = maxPrev[2]
 
@@ -96,7 +100,7 @@ func PreviousVersion(version string) string {
 		} else {
 
 			p2, _ := strconv.Atoi(parts[1])
-			p2 -= 1
+			p2--
 			parts[1] = strconv.Itoa(p2)
 
 		}
@@ -121,7 +125,7 @@ func VersionParts(version string) (int, int, int) {
 	return major, minor, patch
 }
 
-// GerVersionParts returns a version range (low and high) as well as the majorMinor for the given version and the given version as `reported`.
+// GetVersionParts returns a version range (low and high) as well as the majorMinor for the given version and the given version as `reported`.
 func GetVersionParts(version, lowIn string) (low, high, majorMinor, reported string) {
 	vParts := strings.Split(version, ".")
 
@@ -171,7 +175,7 @@ func GetVersionParts(version, lowIn string) (low, high, majorMinor, reported str
 	return
 }
 
-// BreasksVersions takes a PHPCompatibility sniff code and returns the versions that break for that code.
+// BreaksVersions takes a PHPCompatibility sniff code and returns the versions that break for that code.
 func BreaksVersions(message tide.PhpcsFilesMessage) []string {
 
 	compat, err := Parse(message)
@@ -207,7 +211,7 @@ func BreaksVersions(message tide.PhpcsFilesMessage) []string {
 func PhpMajorVersions() []string {
 	versions := []string{}
 
-	for key, _ := range phpVersions {
+	for key := range phpVersions {
 		versions = append(versions, key)
 	}
 
@@ -222,7 +226,7 @@ func MergeVersions(n ...[]string) []string {
 
 	for _, slice := range n {
 		for _, value := range slice {
-			if ! contains(merged, value) {
+			if !contains(merged, value) {
 				merged = append(merged, value)
 			}
 		}
@@ -236,7 +240,7 @@ func ExcludeVersions(versions, exclude []string) []string {
 	included := []string{}
 
 	for _, version := range versions {
-		if ! contains(exclude, version) && ! contains(included, version) {
+		if !contains(exclude, version) && !contains(included, version) {
 			included = append(included, version)
 		}
 	}

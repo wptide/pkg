@@ -1,9 +1,10 @@
 package phpcompat
 
 import (
-	"github.com/wptide/pkg/tide"
-	"testing"
 	"reflect"
+	"testing"
+
+	"github.com/wptide/pkg/tide"
 )
 
 var (
@@ -129,7 +130,7 @@ func TestParse(t *testing.T) {
 			}
 
 			expectWarning, ok := warningMap[message.Source]
-			if err != nil && ! ok && expectWarning == false {
+			if err != nil && !ok && expectWarning == false {
 				t.Errorf("phpcompat.Parse(): %v", err)
 			}
 		})

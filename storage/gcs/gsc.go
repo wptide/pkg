@@ -1,9 +1,9 @@
 package gcs
 
 import (
-	"os"
 	"context"
 	"io"
+	"os"
 )
 
 var (
@@ -12,21 +12,26 @@ var (
 	storageObject = GSCClient(context.Background())
 )
 
+// Provider describes the GCS provider.
 type Provider struct {
-	ctx           context.Context
-	client        *client
-	projectID     *string
-	bucketName    *string
+	ctx        context.Context
+	client     *client
+	projectID  *string
+	bucketName *string
 }
 
+// Kind returns the kind of provider.
 func (p Provider) Kind() string {
 	return "gcs"
 }
 
+
+// CollectionRef returns an reference to a storage collection/bucket.
 func (p Provider) CollectionRef() string {
 	return *p.bucketName
 }
 
+// UploadFile puts the given file to the storage provider.
 func (p Provider) UploadFile(filename, reference string) error {
 
 	// Open file for writing to Cloud Storage.
@@ -49,6 +54,7 @@ func (p Provider) UploadFile(filename, reference string) error {
 	return nil
 }
 
+// DownloadFile gets the file from the storage provider.
 func (p Provider) DownloadFile(reference, filename string) error {
 	// Create file for writing.
 	file, err := fileCreate(filename)
@@ -71,10 +77,11 @@ func (p Provider) DownloadFile(reference, filename string) error {
 	return nil
 }
 
-func NewCloudStorageProvider(ctx context.Context, projectId string, bucketName string) *Provider {
+// NewCloudStorageProvider creates a new GCS provider.
+func NewCloudStorageProvider(ctx context.Context, projectID string, bucketName string) *Provider {
 	return &Provider{
-		ctx:           ctx,
-		projectID:     &projectId,
-		bucketName:    &bucketName,
+		ctx:        ctx,
+		projectID:  &projectID,
+		bucketName: &bucketName,
 	}
 }

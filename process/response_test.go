@@ -1,21 +1,21 @@
 package process
 
 import (
-	"testing"
-
-	"github.com/wptide/pkg/payload"
-	"context"
-	"time"
-	"github.com/wptide/pkg/message"
-	"errors"
 	"bytes"
+	"context"
+	"errors"
 	"os"
+	"testing"
+	"time"
+
 	"github.com/wptide/pkg/log"
+	"github.com/wptide/pkg/message"
+	"github.com/wptide/pkg/payload"
 )
 
 type MockPayloader struct{}
 
-func (m MockPayloader) BuildPayload(msg message.Message, data map[string]interface {}) ([]byte, error) {
+func (m MockPayloader) BuildPayload(msg message.Message, data map[string]interface{}) ([]byte, error) {
 
 	if msg.Slug == "buildFail" {
 		return nil, errors.New("something went wrong")
@@ -174,8 +174,8 @@ func TestResponse_Run(t *testing.T) {
 				&Ingest{
 					Process: Process{
 						Message: message.Message{
-							Title:       "Payload Send Fail",
-							PayloadType: "mock",
+							Title:               "Payload Send Fail",
+							PayloadType:         "mock",
 							ResponseAPIEndpoint: "http://test.local/sendfail",
 						},
 						Result: &Result{},

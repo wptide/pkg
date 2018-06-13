@@ -2,9 +2,9 @@ package log
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"testing"
-	"io"
 )
 
 func TestLog(t *testing.T) {
@@ -85,7 +85,7 @@ func fromStruct() struct {
 
 func TestSetOutput(t *testing.T) {
 	tests := []struct {
-		name  string
+		name   string
 		writer io.Writer
 	}{
 		{

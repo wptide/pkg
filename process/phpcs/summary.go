@@ -2,7 +2,7 @@ package phpcs
 
 import "github.com/wptide/pkg/tide"
 
-// getPhpcsSummary loops through all reported files and leaves only summary information.
+// GetPhpcsSummary loops through all reported files and leaves only summary information.
 func GetPhpcsSummary(fullResults tide.PhpcsResults) *tide.PhpcsSummary {
 	summary := &tide.PhpcsSummary{
 		ErrorsCount:   fullResults.Totals.Errors,

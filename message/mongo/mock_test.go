@@ -1,14 +1,15 @@
 package mongo
 
 import (
-	"github.com/mongodb/mongo-go-driver/core/option"
 	"context"
-	wrapper "github.com/wptide/pkg/wrapper/mongo"
 	"encoding/json"
-	"github.com/wptide/pkg/message"
+	"errors"
+
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
-	"errors"
+	"github.com/mongodb/mongo-go-driver/core/option"
+	"github.com/wptide/pkg/message"
+	wrapper "github.com/wptide/pkg/wrapper/mongo"
 )
 
 type MockClient struct {
@@ -79,9 +80,9 @@ func (d MockDocumentResult) Decode() (*bson.Document, error) {
 		msg := generateMessage(&message.Message{
 			Title: "Plugin One",
 		})
-		msgJson, _ := json.Marshal(msg)
+		msgJSON, _ := json.Marshal(msg)
 
-		doc, err := bson.ParseExtJSONObject(string(msgJson))
+		doc, err := bson.ParseExtJSONObject(string(msgJSON))
 		id, _ := objectid.FromHex("abcdef123456789009876364")
 		doc.Append(bson.EC.ObjectID("_id", id))
 		return doc, err
@@ -93,9 +94,9 @@ func (d MockDocumentResult) Decode() (*bson.Document, error) {
 			Title: "Plugin One",
 		})
 		msg["retries"] = int64(0)
-		msgJson, _ := json.Marshal(msg)
+		msgJSON, _ := json.Marshal(msg)
 
-		doc, err := bson.ParseExtJSONObject(string(msgJson))
+		doc, err := bson.ParseExtJSONObject(string(msgJSON))
 		id, _ := objectid.FromHex("abcdef123456789009876364")
 		doc.Append(bson.EC.ObjectID("_id", id))
 		return doc, err
@@ -107,9 +108,9 @@ func (d MockDocumentResult) Decode() (*bson.Document, error) {
 		msg := generateMessage(&message.Message{
 			Title: "Plugin One",
 		})
-		msgJson, _ := json.Marshal(msg)
+		msgJSON, _ := json.Marshal(msg)
 
-		doc, err := bson.ParseExtJSONObject(string(msgJson))
+		doc, err := bson.ParseExtJSONObject(string(msgJSON))
 		id, _ := objectid.FromHex("abcdef123456789009876364")
 		doc.Append(bson.EC.ObjectID("_id", id))
 		return doc, err

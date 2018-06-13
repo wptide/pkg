@@ -274,7 +274,6 @@ func TestClient_DeleteDoc(t *testing.T) {
 	)
 	mockStore, _ := mockBase.Firestore(context.Background())
 
-
 	type fields struct {
 		Firestore *firestore.Client
 		Ctx       context.Context

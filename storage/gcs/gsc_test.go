@@ -61,7 +61,7 @@ func TestProvider_Kind(t *testing.T) {
 	t.Run("Storage Provider Kind", func(t *testing.T) {
 		p := Provider{}
 		if got := p.Kind(); got != "gcs" {
-			t.Errorf("StorageProvider.Kind() = %v, Impossible, this should be gcloud/storage.", got)
+			t.Errorf("Provider.Kind() = %v, Impossible, this should be gcloud/storage.", got)
 		}
 	})
 }
@@ -191,7 +191,7 @@ func TestNewCloudStorageProvider(t *testing.T) {
 
 	type args struct {
 		ctx        context.Context
-		projectId  string
+		projectID  string
 		bucketName string
 	}
 	tests := []struct {
@@ -210,7 +210,7 @@ func TestNewCloudStorageProvider(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewCloudStorageProvider(tt.args.ctx, tt.args.projectId, tt.args.bucketName); !reflect.DeepEqual(reflect.TypeOf(got), tt.want) {
+			if got := NewCloudStorageProvider(tt.args.ctx, tt.args.projectID, tt.args.bucketName); !reflect.DeepEqual(reflect.TypeOf(got), tt.want) {
 				t.Errorf("NewCloudStorageProvider() = %v, want %v", got, tt.want)
 			}
 		})

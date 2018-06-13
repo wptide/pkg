@@ -10,6 +10,7 @@ type QueueMessage struct {
 	RetryAvailable bool     `json:"retry_available" firestore:"retry_available"`
 }
 
+// Message represents a task to read from or send to a queue.
 type Message struct {
 	ResponseAPIEndpoint string  `json:"response_api_endpoint"`
 	PayloadType         string  `json:"payload_type"`
@@ -28,11 +29,13 @@ type Message struct {
 	Audits    []*Audit `json:"audits,omitempty"`
 }
 
+// Audit describes an audit type with its options.
 type Audit struct {
 	Type    string       `json:"type"`
 	Options *AuditOption `json:"options,omitempty"`
 }
 
+// AuditOption describes specific options for an Audit.
 type AuditOption struct {
 	Standard         string `json:"standard,omitempty"`
 	Report           string `json:"report,omitempty"`
@@ -42,7 +45,8 @@ type AuditOption struct {
 	StandardOverride string `json:"standard-override,omitempty"`
 }
 
-type MessageProvider interface {
+// Provider is an interface for creating new providers. E.g. firestore, mongo, sqs.
+type Provider interface {
 	SendMessage(msg *Message) error
 	GetNextMessage() (*Message, error)
 	DeleteMessage(ref *string) error

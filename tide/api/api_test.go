@@ -1,11 +1,11 @@
 package api
 
 import (
-	"testing"
-	"net/http/httptest"
-	"net/http"
 	"fmt"
 	"github.com/wptide/pkg/tide"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 // apiStub is a mock server for testing API requests.
@@ -55,7 +55,7 @@ func TestClient_Authenticate(t *testing.T) {
 	mockEndpoint := apiStub.URL + "/auth"
 
 	type args struct {
-		clientId     string
+		clientID     string
 		clientSecret string
 		authEndpoint string
 	}
@@ -70,7 +70,7 @@ func TestClient_Authenticate(t *testing.T) {
 			name: "Success",
 			c:    &Client{},
 			args: args{
-				clientId:     "successId",
+				clientID:     "successId",
 				clientSecret: "successSecret",
 				authEndpoint: mockEndpoint,
 			},
@@ -80,7 +80,7 @@ func TestClient_Authenticate(t *testing.T) {
 			name: "Fail",
 			c:    &Client{},
 			args: args{
-				clientId:     "failId",
+				clientID:     "failId",
 				clientSecret: "failSecret",
 				authEndpoint: mockEndpoint,
 			},
@@ -90,7 +90,7 @@ func TestClient_Authenticate(t *testing.T) {
 			name: "Error",
 			c:    &Client{},
 			args: args{
-				clientId:     "error",
+				clientID:     "error",
 				authEndpoint: "http://error",
 			},
 			wantErr: true,
@@ -99,7 +99,7 @@ func TestClient_Authenticate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.c.Authenticate(tt.args.clientId, tt.args.clientSecret, tt.args.authEndpoint); (err != nil) != tt.wantErr {
+			if err := tt.c.Authenticate(tt.args.clientID, tt.args.clientSecret, tt.args.authEndpoint); (err != nil) != tt.wantErr {
 				t.Errorf("Client.Authenticate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -135,7 +135,7 @@ func TestClient_SendPayload(t *testing.T) {
 		},
 		{
 			name: "Authenticated GET",
-			c:    &Client{
+			c: &Client{
 				&tide.Auth{
 					AccessToken: "verysecrettoken",
 				},
@@ -161,7 +161,7 @@ func TestClient_SendPayload(t *testing.T) {
 		},
 		{
 			name: "Authenticated POST",
-			c:    &Client{
+			c: &Client{
 				&tide.Auth{
 					AccessToken: "verysecrettoken",
 				},

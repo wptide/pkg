@@ -70,7 +70,7 @@ func TestMongoProvider_SendMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m, _ := NewWithClient(tt.fields.ctx, tt.fields.database, tt.fields.collection, tt.fields.client)
 			if err := m.SendMessage(tt.args.msg); (err != nil) != tt.wantErr {
-				t.Errorf("MongoProvider.SendMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.SendMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -154,11 +154,11 @@ func TestMongoProvider_GetNextMessage(t *testing.T) {
 
 			got, err := m.GetNextMessage()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("MongoProvider.GetNextMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.GetNextMessage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MongoProvider.GetNextMessage() = %v, want %v", got, tt.want)
+				t.Errorf("Provider.GetNextMessage() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -198,7 +198,7 @@ func TestMongoProvider_DeleteMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m, _ := NewWithClient(tt.fields.ctx, tt.fields.database, tt.fields.collection, tt.fields.client)
 			if err := m.DeleteMessage(tt.args.ref); (err != nil) != tt.wantErr {
-				t.Errorf("MongoProvider.DeleteMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.DeleteMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -233,7 +233,7 @@ func TestNew(t *testing.T) {
 				"collection",
 				nil,
 			},
-			reflect.TypeOf(&MongoProvider{}),
+			reflect.TypeOf(&Provider{}),
 			false,
 		},
 		{
@@ -247,7 +247,7 @@ func TestNew(t *testing.T) {
 				"collection",
 				nil,
 			},
-			reflect.TypeOf(&MongoProvider{}),
+			reflect.TypeOf(&Provider{}),
 			true,
 		},
 	}
@@ -292,7 +292,7 @@ func TestMongoProvider_Close(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			m, _ := NewWithClient(tt.fields.ctx, tt.fields.database, tt.fields.collection, tt.fields.client)
 			if err := m.Close(); (err != nil) != tt.wantErr {
-				t.Errorf("MongoProvider.Close() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -131,7 +131,7 @@ func TestProvider_DownloadFile(t *testing.T) {
 func TestNewLocalStorage(t *testing.T) {
 	type args struct {
 		serverPath string
-		localPath string
+		localPath  string
 	}
 	tests := []struct {
 		name string

@@ -1,31 +1,32 @@
 package process
 
 import (
-	"testing"
+	"bytes"
 	"context"
-	"time"
-	"github.com/wptide/pkg/storage"
-	"os"
 	"errors"
 	"io/ioutil"
-	"github.com/wptide/pkg/shell"
-	"github.com/wptide/pkg/message"
-	"bytes"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/wptide/pkg/log"
+	"github.com/wptide/pkg/message"
+	"github.com/wptide/pkg/shell"
+	"github.com/wptide/pkg/storage"
 )
 
 type mockRunner struct{}
 
-func (m mockRunner) Run(name string, arg ...string) ([]byte, []byte, error, int) {
+func (m mockRunner) Run(name string, arg ...string) ([]byte, []byte, int, error) {
 	switch arg[0] {
 	case "https://wp-themes.com/test":
-		return []byte(exampleLighthouseReport()), nil, nil, 0
+		return []byte(exampleLighthouseReport()), nil, 0, nil
 	case "https://wp-themes.com/jsonError":
-		return []byte("this is not json"), nil, nil, 0
+		return []byte("this is not json"), nil, 0, nil
 	case "https://wp-themes.com/error":
-		return nil, []byte("error output"), nil, 0
+		return nil, []byte("error output"), 0, nil
 	default:
-		return nil, nil, errors.New("Something went wrong."), 1
+		return nil, nil, 1, errors.New("something went wrong")
 	}
 }
 
@@ -84,7 +85,7 @@ func TestLighthouse_Run(t *testing.T) {
 		In              <-chan Processor
 		Out             chan Processor
 		TempFolder      string
-		StorageProvider storage.StorageProvider
+		StorageProvider storage.Provider
 	}
 	tests := []struct {
 		name       string
@@ -377,7 +378,7 @@ func TestLighthouse_Run(t *testing.T) {
 				lh.In = generateProcs(ctx, tt.procs)
 			}
 
-			if ! tt.mockRunner {
+			if !tt.mockRunner {
 				oldRunner := lhRunner
 				lhRunner = nil
 				defer func() {

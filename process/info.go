@@ -2,21 +2,23 @@ package process
 
 import (
 	"errors"
-	"io/ioutil"
-	"github.com/hhatto/gocloc"
-	"strings"
-	"regexp"
 	"fmt"
-	"github.com/wptide/pkg/tide"
+	"io/ioutil"
+	"regexp"
+	"strings"
+
+	"github.com/hhatto/gocloc"
 	"github.com/wptide/pkg/log"
 	"github.com/wptide/pkg/message"
+	"github.com/wptide/pkg/tide"
+	"golang.org/x/text/transform"
 )
 
-// Ingest defines the structure for our Ingest process.
+// Info defines the structure for our Info process.
 type Info struct {
-	Process              // Inherits methods from Process.
-	In  <-chan Processor // Expects a processor channel as input.
-	Out chan Processor   // Send results to an output channel.
+	Process                  // Inherits methods from Process.
+	In      <-chan Processor // Expects a processor channel as input.
+	Out     chan Processor   // Send results to an output channel.
 }
 
 // Run executes the process in the pipeline.
@@ -57,7 +59,7 @@ func (info *Info) Run(errc *chan error) error {
 	return nil
 }
 
-// process runs the actual code for this process.
+// Do runs the actual code for this process.
 func (info *Info) Do() error {
 
 	result := *info.Result
@@ -155,7 +157,7 @@ func getProjectDetails(msg message.Message, path string) (string, []tide.InfoDet
 	}
 
 	// Multiple headers found but could not assert appropriate header.
-	return "", nil, errors.New("Multiple headers: Could not assert appropriate header for project.")
+	return "", nil, errors.New("multiple headers: could not assert appropriate header for project")
 }
 
 // getCloc gets the code info for the current code base.
@@ -174,7 +176,12 @@ func getCloc(path string) (map[string]tide.ClocResult, error) {
 		return nil, err
 	}
 
-	clocTotals := tide.ClocResult{0, 0, 0, 0}
+	clocTotals := tide.ClocResult{
+		Blank:   0,
+		Comment: 0,
+		Code:    0,
+		NFiles:  0,
+	}
 
 	for _, cLang := range cloc.Languages {
 		// Add Totals
@@ -184,16 +191,32 @@ func getCloc(path string) (map[string]tide.ClocResult, error) {
 		clocTotals.NFiles += len(cLang.Files)
 
 		clocMap[strings.ToLower(cLang.Name)] = tide.ClocResult{
-			int(cLang.Blanks),
-			int(cLang.Comments),
-			int(cLang.Code),
-			len(cLang.Files),
+			Blank:   int(cLang.Blanks),
+			Comment: int(cLang.Comments),
+			Code:    int(cLang.Code),
+			NFiles:  len(cLang.Files),
 		}
 	}
 
 	clocMap["sum"] = clocTotals
 
 	return clocMap, nil
+}
+
+// cr2nl is a transformer to conver \r endings to \n.
+type cr2nl struct{ transform.NopResetter }
+
+// Transform implements transform.Transformer.
+func (cr2nl) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) {
+	nSrc = copy(dst, src)
+	nDst = nSrc
+	dst = dst[:nDst]
+	for i := range dst {
+		if dst[i] == '\r' {
+			dst[i] = '\n'
+		}
+	}
+	return nSrc, nDst, nil
 }
 
 // extractHeader scans every .php file in the path to retrieve a possible plugin header, or
@@ -221,8 +244,12 @@ func extractHeader(filename string) (projectType string, details []tide.InfoDeta
 
 	f, _ := fileOpen(filename)
 	defer f.Close()
+
+	// Pass the `f` reader to a transformed reader.
+	tr := transform.NewReader(f, cr2nl{})
 	b1 := make([]byte, 8192)
-	n1, _ := f.Read(b1)
+	// Use the transform reader instead of file.
+	n1, _ := tr.Read(b1)
 
 	isStyleCSS, _ := regexp.Match(`(\/style.css)$`, []byte(filename))
 
@@ -251,8 +278,8 @@ func extractHeader(filename string) (projectType string, details []tide.InfoDeta
 				}
 
 				details = append(details, tide.InfoDetails{
-					strings.Replace(fieldname, " ", "", -1),
-					strings.TrimSpace(value),
+					Key:   strings.Replace(fieldname, " ", "", -1),
+					Value: strings.TrimSpace(value),
 				})
 			}
 		}

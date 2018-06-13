@@ -54,7 +54,7 @@ func TestNewMongoClient(t *testing.T) {
 				"localhost:27017",
 				nil,
 			},
-			reflect.TypeOf(&MongoClient{}),
+			reflect.TypeOf(&Wrapper{}),
 			false,
 		},
 		{
@@ -65,7 +65,7 @@ func TestNewMongoClient(t *testing.T) {
 				"localhost:27017",
 				nil,
 			},
-			reflect.TypeOf(&MongoClient{}),
+			reflect.TypeOf(&Wrapper{}),
 			false,
 		},
 		{
@@ -76,7 +76,7 @@ func TestNewMongoClient(t *testing.T) {
 				"localhost:27017",
 				nil,
 			},
-			reflect.TypeOf(&MongoClient{}),
+			reflect.TypeOf(&Wrapper{}),
 			false,
 		},
 	}
@@ -119,16 +119,16 @@ func TestMongoClient_Database(t *testing.T) {
 			args{
 				"test_db",
 			},
-			reflect.TypeOf(&MongoDatabase{}),
+			reflect.TypeOf(&WrapperDatabase{}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mc := MongoClient{
+			mc := Wrapper{
 				Client: tt.fields.Client,
 			}
 			if got := mc.Database(tt.args.name); reflect.TypeOf(got) != tt.want {
-				t.Errorf("MongoClient.Database() = %v, want %v", reflect.TypeOf(got), tt.want)
+				t.Errorf("Wrapper.Database() = %v, want %v", reflect.TypeOf(got), tt.want)
 			}
 		})
 	}
@@ -155,16 +155,16 @@ func TestMongoDatabase_Collection(t *testing.T) {
 			args{
 				"test_collection",
 			},
-			reflect.TypeOf(&MongoCollection{}),
+			reflect.TypeOf(&WrapperCollection{}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := MongoDatabase{
+			d := WrapperDatabase{
 				Database: tt.fields.Database,
 			}
 			if got := d.Collection(tt.args.name); reflect.TypeOf(got) != tt.want {
-				t.Errorf("MongoDatabase.Collection() = %v, want %v", reflect.TypeOf(got), tt.want)
+				t.Errorf("WrapperDatabase.Collection() = %v, want %v", reflect.TypeOf(got), tt.want)
 			}
 		})
 	}
@@ -189,7 +189,7 @@ func TestMongoCollection_InsertOne(t *testing.T) {
 		{
 			"InsertOne()",
 			fields{
-				&MongoCollection{},
+				&WrapperCollection{},
 			},
 			args{
 				context.Background(),
@@ -205,11 +205,11 @@ func TestMongoCollection_InsertOne(t *testing.T) {
 			c := tt.fields.Collection
 			got, err := c.InsertOne(tt.args.ctx, tt.args.document, tt.args.opts...)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("MongoCollection.InsertOne() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("WrapperCollection.InsertOne() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MongoCollection.InsertOne() = %v, want %v", got, tt.want)
+				t.Errorf("WrapperCollection.InsertOne() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -233,7 +233,7 @@ func TestMongoCollection_FindOne(t *testing.T) {
 		{
 			"FindOne()",
 			fields{
-				&MongoCollection{},
+				&WrapperCollection{},
 			},
 			args{
 				context.Background(),
@@ -248,7 +248,7 @@ func TestMongoCollection_FindOne(t *testing.T) {
 			c := tt.fields.Collection
 
 			if got := c.FindOne(tt.args.ctx, tt.args.filter, tt.args.opts...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MongoCollection.FindOne() = %v, want %v", got, tt.want)
+				t.Errorf("WrapperCollection.FindOne() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -273,7 +273,7 @@ func TestMongoCollection_FindOneAndUpdate(t *testing.T) {
 		{
 			"FindOneAndUpdate()",
 			fields{
-				&MongoCollection{},
+				&WrapperCollection{},
 			},
 			args{
 				context.Background(),
@@ -281,7 +281,7 @@ func TestMongoCollection_FindOneAndUpdate(t *testing.T) {
 				nil,
 				nil,
 			},
-			reflect.TypeOf(&MongoDocumentResult{}),
+			reflect.TypeOf(&WrapperDocumentResult{}),
 		},
 	}
 	for _, tt := range tests {
@@ -289,7 +289,7 @@ func TestMongoCollection_FindOneAndUpdate(t *testing.T) {
 			c := tt.fields.Collection
 
 			if got := c.FindOneAndUpdate(tt.args.ctx, tt.args.filter, tt.args.update, tt.args.opts...); reflect.TypeOf(got) != tt.want {
-				t.Errorf("MongoCollection.FindOneAndUpdate() = %v, want %v", reflect.TypeOf(got), tt.want)
+				t.Errorf("WrapperCollection.FindOneAndUpdate() = %v, want %v", reflect.TypeOf(got), tt.want)
 			}
 		})
 	}
@@ -313,7 +313,7 @@ func TestMongoCollection_FindOneAndDelete(t *testing.T) {
 		{
 			"FindOneAndDelete()",
 			fields{
-				&MongoCollection{},
+				&WrapperCollection{},
 			},
 			args{
 				context.Background(),
@@ -328,7 +328,7 @@ func TestMongoCollection_FindOneAndDelete(t *testing.T) {
 			c := tt.fields.Collection
 
 			if got := c.FindOneAndDelete(tt.args.ctx, tt.args.filter, tt.args.opts...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MongoCollection.FindOneAndDelete() = %v, want %v", got, tt.want)
+				t.Errorf("WrapperCollection.FindOneAndDelete() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -354,12 +354,12 @@ func TestMongoDocumentResult_Decode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			d := MongoDocumentResult{
+			d := WrapperDocumentResult{
 				DocumentResult: tt.fields.DocumentResult,
 			}
 
 			if _, err := d.Decode(); (err != nil) != tt.wantErr {
-				t.Errorf("MongoDocumentResult.Decode() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("WrapperDocumentResult.Decode() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -390,12 +390,12 @@ func TestMongoClient_Close(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mc := MongoClient{
+			mc := Wrapper{
 				ctx:    tt.fields.ctx,
 				Client: tt.fields.Client,
 			}
 			if err := mc.Close(); (err != nil) != tt.wantErr {
-				t.Errorf("MongoClient.Close() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Wrapper.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

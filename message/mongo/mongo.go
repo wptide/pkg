@@ -1,34 +1,43 @@
 package mongo
 
 import (
-	"github.com/wptide/pkg/message"
 	"context"
-	"github.com/mongodb/mongo-go-driver/mongo"
 	"encoding/json"
-	"time"
 	"errors"
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
-	wrapper "github.com/wptide/pkg/wrapper/mongo"
+	"time"
+
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/wptide/pkg/message"
+	wrapper "github.com/wptide/pkg/wrapper/mongo"
 )
 
-const RetryAttemps = 3
-const LockDuration time.Duration = time.Minute * 5
+const (
+	// RetryAttempts sets the amount of default retries.
+	RetryAttempts               = 3
 
-type MongoProvider struct {
+	// LockDuration sets how long an item needs to be locked for.
+	LockDuration  time.Duration = time.Minute * 10
+)
+
+// Provider implements the Provider interface.
+type Provider struct {
 	ctx        context.Context
 	client     wrapper.Client
 	database   string
 	collection string
 }
 
-func (m MongoProvider) SendMessage(msg *message.Message) error {
+// SendMessage sends a message to MongoDB.
+func (m Provider) SendMessage(msg *message.Message) error {
 	collection := m.client.Database(m.database).Collection(m.collection)
 	_, err := collection.InsertOne(context.Background(), generateMessage(msg))
 	return err
 }
 
-func (m MongoProvider) GetNextMessage() (*message.Message, error) {
+// GetNextMessage gets the next message from MongoDB.
+func (m Provider) GetNextMessage() (*message.Message, error) {
 	collection := m.client.Database(m.database).Collection(m.collection)
 
 	// Query.
@@ -59,7 +68,7 @@ func (m MongoProvider) GetNextMessage() (*message.Message, error) {
 	// Get retries.
 	retryAvailable := true
 	retries := qm.Retries - 1
-	if (retries <= 0) {
+	if retries <= 0 {
 		retryAvailable = false
 	}
 
@@ -75,13 +84,14 @@ func (m MongoProvider) GetNextMessage() (*message.Message, error) {
 	// Update item and get new reference.
 	uqm, err := ResultToQueueMessage(collection.FindOneAndUpdate(context.Background(), filter, updateData))
 	if err != nil {
-		return nil, errors.New("MongoDB: Could not set lock on item.")
+		return nil, errors.New("mongodb: could not set lock on item")
 	}
 
 	return uqm.Message, nil
 }
 
-func (m MongoProvider) DeleteMessage(ref *string) error {
+// DeleteMessage deletes a Document from MongoDB.
+func (m Provider) DeleteMessage(ref *string) error {
 	collection := m.client.Database(m.database).Collection(m.collection)
 
 	itemID, _ := objectid.FromHex(*ref)
@@ -95,7 +105,7 @@ func (m MongoProvider) DeleteMessage(ref *string) error {
 }
 
 // Close the MongoDB client.
-func (m MongoProvider) Close() error {
+func (m Provider) Close() error {
 	return m.client.Close()
 }
 
@@ -110,13 +120,14 @@ func generateMessage(in *message.Message) map[string]interface{} {
 	return map[string]interface{}{
 		"created":         time.Now().UnixNano(),
 		"lock":            int64(0),
-		"retries":         int64(RetryAttemps),
+		"retries":         int64(RetryAttempts),
 		"message":         msgMap,
 		"status":          "pending",
 		"retry_available": true,
 	}
 }
 
+// ResultToQueueMessage converts a MongoDB result to a QueueMessage.
 func ResultToQueueMessage(layer wrapper.DocumentResultLayer) (*message.QueueMessage, error) {
 
 	elem, _ := layer.Decode()
@@ -124,7 +135,7 @@ func ResultToQueueMessage(layer wrapper.DocumentResultLayer) (*message.QueueMess
 	js, err := bson.ToExtJSON(false, raw)
 
 	if err != nil || js == "{}" {
-		return nil, errors.New("No document found.")
+		return nil, errors.New("mongodb: no document found")
 	}
 
 	extRef := elem.Lookup("_id").ObjectID().Hex()
@@ -137,7 +148,8 @@ func ResultToQueueMessage(layer wrapper.DocumentResultLayer) (*message.QueueMess
 	return qm, nil
 }
 
-func New(ctx context.Context, user string, pass string, host string, db string, collection string, opts *mongo.ClientOptions) (*MongoProvider, error) {
+// New creates a new MongoDB (UpdateChecker) with a default client.
+func New(ctx context.Context, user string, pass string, host string, db string, collection string, opts *mongo.ClientOptions) (*Provider, error) {
 	client, err := wrapper.NewMongoClient(ctx, user, pass, host, opts)
 	if err != nil {
 		return nil, err
@@ -146,8 +158,9 @@ func New(ctx context.Context, user string, pass string, host string, db string, 
 	return NewWithClient(ctx, db, collection, client)
 }
 
-func NewWithClient(ctx context.Context, db string, collection string, client wrapper.Client) (*MongoProvider, error) {
-	return &MongoProvider{
+// NewWithClient creates a new MongoDB (UpdateChecker) with a provided ClientInterface client.
+func NewWithClient(ctx context.Context, db string, collection string, client wrapper.Client) (*Provider, error) {
+	return &Provider{
 		ctx:        ctx,
 		client:     client,
 		database:   db,

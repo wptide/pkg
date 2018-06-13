@@ -1,23 +1,27 @@
 package mongo
 
 import (
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/core/option"
 	"context"
 	"errors"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/core/option"
+	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
+// Client interface describes a MongoDB client (a wrapper).
 type Client interface {
 	Close() error
 	Database(string) DataLayer
 }
 
-type MongoClient struct {
+// Wrapper wraps the client.
+// The client gets shadowed when tested.
+type Wrapper struct {
 	ctx context.Context
 	*mongo.Client
 }
 
+// NewMongoClient creates a new Wrapper.
 func NewMongoClient(ctx context.Context, user string, pass string, host string, opts *mongo.ClientOptions) (Client, error) {
 
 	var creds string
@@ -34,29 +38,35 @@ func NewMongoClient(ctx context.Context, user string, pass string, host string, 
 	if err == nil {
 		client.Connect(ctx)
 	}
-	return &MongoClient{ctx, client}, err
+	return &Wrapper{ctx, client}, err
 }
 
-func (mc MongoClient) Database(name string) DataLayer {
-	return &MongoDatabase{Database: mc.Client.Database(name)}
+// Database returns a Database object. DataLayer shadows the mongo.Database.
+func (mc Wrapper) Database(name string) DataLayer {
+	return &WrapperDatabase{Database: mc.Client.Database(name)}
 }
 
-func (mc MongoClient) Close() error {
+// Close closes the MongoDB connection.
+func (mc Wrapper) Close() error {
 	return mc.Client.Disconnect(mc.ctx)
 }
 
+// DataLayer wraps a CollectionLayer.
 type DataLayer interface {
 	Collection(name string) CollectionLayer
 }
 
-type MongoDatabase struct {
+// WrapperDatabase wraps the mongo.Database.
+type WrapperDatabase struct {
 	*mongo.Database
 }
 
-func (d MongoDatabase) Collection(name string) CollectionLayer {
-	return &MongoCollection{Collection: d.Database.Collection(name)}
+// Collection returns a mongo collection. CollectionLayer shadows the mongo.Collection.
+func (d WrapperDatabase) Collection(name string) CollectionLayer {
+	return &WrapperCollection{Collection: d.Database.Collection(name)}
 }
 
+// CollectionLayer abstracts the required functions for MongoDB.
 type CollectionLayer interface {
 	InsertOne(ctx context.Context, document interface{}, opts ...option.InsertOneOptioner) (InsertOneResultLayer, error)
 	FindOne(ctx context.Context, filter interface{}, opts ...option.FindOneOptioner) DocumentResultLayer
@@ -64,75 +74,88 @@ type CollectionLayer interface {
 	FindOneAndDelete(ctx context.Context, filter interface{}, opts ...option.FindOneAndDeleteOptioner) DocumentResultLayer
 }
 
-type MongoCollection struct {
+// WrapperCollection wraps mongo.Collection.
+type WrapperCollection struct {
 	*mongo.Collection
 }
 
-func (c MongoCollection) InsertOne(ctx context.Context, document interface{}, opts ...option.InsertOneOptioner) (InsertOneResultLayer, error) {
-	var insertResult *MongoInsertOneResult
+// InsertOne inserts a document.
+func (c WrapperCollection) InsertOne(ctx context.Context, document interface{}, opts ...option.InsertOneOptioner) (InsertOneResultLayer, error) {
+	var insertResult *WrapperInsertOneResult
 	var err error
 
 	// Recover on panic() from mongo driver.
 	defer func() {
-		if r := recover(); r!= nil {
+		if r := recover(); r != nil {
 			insertResult = nil
-			err = errors.New("Collection insert error.")
+			err = errors.New("mongodb: collection insert error")
 		}
 	}()
 
 	res, err := c.Collection.InsertOne(ctx, document, opts...)
-	insertResult = &MongoInsertOneResult{res}
+	insertResult = &WrapperInsertOneResult{res}
 	return insertResult, err
 }
 
-func (c MongoCollection) FindOne(ctx context.Context, filter interface{}, opts ...option.FindOneOptioner) DocumentResultLayer {
-	var docResult *MongoDocumentResult
+// FindOne finds a document given filters and options.
+func (c WrapperCollection) FindOne(ctx context.Context, filter interface{}, opts ...option.FindOneOptioner) DocumentResultLayer {
+	var docResult *WrapperDocumentResult
 
 	// Recover on panic() from mongo driver.
 	defer func() {
-		if r := recover(); r!= nil {
+		if r := recover(); r != nil {
 			docResult = nil
 		}
 	}()
 
-	docResult = &MongoDocumentResult{c.Collection.FindOne(ctx, filter, opts...)}
+	docResult = &WrapperDocumentResult{c.Collection.FindOne(ctx, filter, opts...)}
 	return docResult
 }
 
-func (c MongoCollection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...option.FindOneAndUpdateOptioner) DocumentResultLayer {
+// FindOneAndUpdate finds a document and updates it. Closest we have to a transaction.
+func (c WrapperCollection) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...option.FindOneAndUpdateOptioner) DocumentResultLayer {
 	// No need to panic check. Fails gracefully.
-	return &MongoDocumentResult{c.Collection.FindOneAndUpdate(ctx, filter, update, opts...)}
+	return &WrapperDocumentResult{c.Collection.FindOneAndUpdate(ctx, filter, update, opts...)}
 }
 
-func (c MongoCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...option.FindOneAndDeleteOptioner) DocumentResultLayer {
-	var docResult *MongoDocumentResult
+// FindOneAndDelete finds a document and removes it.
+func (c WrapperCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...option.FindOneAndDeleteOptioner) DocumentResultLayer {
+	var docResult *WrapperDocumentResult
 
 	// Recover on panic() from mongo driver.
 	defer func() {
-		if r := recover(); r!= nil {
+		if r := recover(); r != nil {
 			docResult = nil
 		}
 	}()
 
-	docResult = &MongoDocumentResult{c.Collection.FindOneAndDelete(ctx, filter, opts...)}
+	docResult = &WrapperDocumentResult{c.Collection.FindOneAndDelete(ctx, filter, opts...)}
 	return docResult
 }
 
+// InsertOneResultLayer is an empty interface. No methods are required for this.
+// Everything implements this.
 type InsertOneResultLayer interface{}
 
-type MongoInsertOneResult struct {
+// WrapperInsertOneResult wraps mongo.InsertOneResult.
+type WrapperInsertOneResult struct {
 	*mongo.InsertOneResult
 }
 
+// DocumentResultLayer abstracts the Decode() method.
 type DocumentResultLayer interface {
 	Decode() (*bson.Document, error)
 }
 
-type MongoDocumentResult struct {
+// WrapperDocumentResult wraps mongo.DocumentResult.
+type WrapperDocumentResult struct {
 	*mongo.DocumentResult
 }
 
-func (d MongoDocumentResult) Decode() (*bson.Document, error) {
+// Decode decodes an element into a bson document.
+// Note: Mongo's Decode() accepts a document as a parameter. This method uses
+// Mongo's Decode(), but makes it simpler to test.
+func (d WrapperDocumentResult) Decode() (*bson.Document, error) {
 	elem := bson.NewDocument()
 	err := d.DocumentResult.Decode(elem)
 	return elem, err

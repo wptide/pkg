@@ -1,14 +1,13 @@
 package zip
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"reflect"
 	"testing"
-
-	"errors"
 )
 
 var fileServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -103,7 +102,7 @@ func Test_unzip(t *testing.T) {
 	}()
 
 	errorDirectoryCreate := func(path string, perm os.FileMode) error {
-		return errors.New("something went wrong.")
+		return errors.New("something went wrong")
 	}
 
 	errorCopySHA := func(dst io.Writer, src io.Reader) (written int64, err error) {

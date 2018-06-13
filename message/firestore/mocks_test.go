@@ -1,9 +1,10 @@
 package firestore
 
 import (
-	fsClient "github.com/wptide/pkg/wrapper/firestore"
 	"errors"
+
 	"github.com/wptide/pkg/message"
+	fsClient "github.com/wptide/pkg/wrapper/firestore"
 )
 
 type mockClient struct {
@@ -58,7 +59,7 @@ func (m mockClient) QueryItems(collection string, conditions []fsClient.Conditio
 		}
 	}
 
-	type fake struct{
+	type fake struct {
 		test interface{}
 	}
 	type fakeToo struct {

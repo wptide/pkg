@@ -1,25 +1,29 @@
 package firestore
 
 import (
-	"context"
 	"cloud.google.com/go/firestore"
+	"context"
 	"errors"
 	"strings"
 )
 
+// Condition describes a Query condition.
 type Condition struct {
 	Path     string
 	Operator string
 	Value    interface{}
 }
 
+// Order describes a Query order.
 type Order struct {
 	Field     string
 	Direction string
 }
 
+// UpdateFunc describes a method signature for an update function.
 type UpdateFunc func(data map[string]interface{}) (map[string]interface{}, error)
 
+// ClientInterface is the Firestore client interface.
 type ClientInterface interface {
 	GetDoc(path string) map[string]interface{}
 	SetDoc(path string, data map[string]interface{}) error
@@ -30,27 +34,32 @@ type ClientInterface interface {
 	DeleteDoc(path string) error
 }
 
+// Client wraps the Firestore client.
 type Client struct {
 	Firestore *firestore.Client
 	Ctx       context.Context
 }
 
+// GetDoc gets a Firestore document.
 func (c Client) GetDoc(path string) map[string]interface{} {
 	docRef, _ := c.Firestore.Doc(path).Get(c.Ctx)
 	return c.getDocData(docRef)
 }
 
+// SetDoc writes a Firestore document.
 func (c Client) SetDoc(path string, data map[string]interface{}) error {
 	// firestore.MergeAll "causes all the field paths ... to be overwritten." avoiding redundant read ops.
 	_, err := c.Firestore.Doc(path).Set(c.Ctx, data, firestore.MergeAll)
 	return err
 }
 
+// AddDoc creates a Firestore document.
 func (c Client) AddDoc(collection string, data interface{}) error {
 	_, _, err := c.Firestore.Collection(collection).Add(c.Ctx, data)
 	return err
 }
 
+// Close the Firestore client.
 func (c Client) Close() error {
 	return c.Firestore.Close()
 }
@@ -62,10 +71,12 @@ func (c Client) getDocData(ss *firestore.DocumentSnapshot) map[string]interface{
 	return ss.Data()
 }
 
+// Authenticated returns true if client is authenticated.
 func (c Client) Authenticated() bool {
 	return c.Firestore != nil
 }
 
+// QueryItems queries the Firestore database.
 func (c Client) QueryItems(
 	collection string,
 	conditions []Condition,
@@ -74,14 +85,14 @@ func (c Client) QueryItems(
 	updateFunc UpdateFunc,
 ) ([]interface{}, error) {
 	if len(conditions) == 0 {
-		return nil, errors.New("Must provide conditions.")
+		return nil, errors.New("firestore query: must provide conditions")
 	}
 
 	colRef := c.Firestore.Collection(collection)
 	var query firestore.Query
 	querySet := false
 	for _, condition := range conditions {
-		if ! querySet {
+		if !querySet {
 			query = colRef.Where(condition.Path, condition.Operator, condition.Value)
 			querySet = true
 		} else {
@@ -148,6 +159,7 @@ func (c Client) QueryItems(
 	return items, txErr
 }
 
+// DeleteDoc deletes a Firestore document.
 func (c Client) DeleteDoc(path string) error {
 	_, err := c.Firestore.Doc(path).Delete(c.Ctx)
 	return err

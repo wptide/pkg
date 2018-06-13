@@ -6,7 +6,7 @@ type Auth struct {
 	Client      AuthClient `json:"client"`
 }
 
-// Client represents a Data object with information about the user that is connected to Tide.
+// AuthClient represents a Data object with information about the user that is connected to Tide.
 type AuthClient struct {
 	Data ClientData `json:"data"`
 }
@@ -19,7 +19,8 @@ type ClientData struct {
 	DisplayName string `json:"display_name"`
 }
 
+// ClientInterface describes a client that can authenticate with and send payloads to Tide API.
 type ClientInterface interface {
-	Authenticate(clientId, clientSecret, authEndpoint string) error
+	Authenticate(clientID, clientSecret, authEndpoint string) error
 	SendPayload(method, endpoint, data string) (string, error)
 }

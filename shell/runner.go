@@ -1,22 +1,25 @@
 package shell
 
 import (
+	"bytes"
 	"os/exec"
 	"sync"
 	"syscall"
-	"bytes"
 )
 
+// Runner implements an interface for running a shell command.
 type Runner interface {
-	Run(name string, arg ...string) ([]byte, []byte, error, int)
+	Run(name string, arg ...string) ([]byte, []byte, int, error)
 }
 
+// Command implements Runner.
 type Command struct {
-	execFunc   func(name string, arg ...string) *exec.Cmd
-	once       sync.Once
+	execFunc func(name string, arg ...string) *exec.Cmd
+	once     sync.Once
 }
 
-func (c *Command) Run(name string, arg ...string) ([]byte, []byte, error, int) {
+// Run executes the shell command.
+func (c *Command) Run(name string, arg ...string) ([]byte, []byte, int, error) {
 
 	c.once.Do(func() {
 		if c.execFunc == nil {
@@ -26,7 +29,7 @@ func (c *Command) Run(name string, arg ...string) ([]byte, []byte, error, int) {
 
 	resultsBuffer := bytes.Buffer{}
 	errorsBuffer := bytes.Buffer{}
-	cmd:= c.execFunc(name, arg...)
+	cmd := c.execFunc(name, arg...)
 	cmd.Stdout = &resultsBuffer
 	cmd.Stderr = &errorsBuffer
 
@@ -39,5 +42,5 @@ func (c *Command) Run(name string, arg ...string) ([]byte, []byte, error, int) {
 		}
 	}
 
-	return resultsBuffer.Bytes(), errorsBuffer.Bytes(), exitErr, exitCode
+	return resultsBuffer.Bytes(), errorsBuffer.Bytes(), exitCode, exitErr
 }
