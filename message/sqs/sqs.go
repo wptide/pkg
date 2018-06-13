@@ -15,19 +15,18 @@ import (
 	"github.com/wptide/pkg/message"
 )
 
-// SqsProvider represents an SQS queue.
-type SqsProvider struct {
+// Provider represents an SQS queue.
+type Provider struct {
 	session *session.Session
 	// Use sqsiface instead of sqs.SQS to benefit from the interface.
 	sqs       sqsiface.SQSAPI
-	QueueUrl  *string
+	QueueURL  *string
 	QueueName *string
 }
 
-// Send implements the required interface method to be a Provider.
-//
+// SendMessage implements the required interface method to be a Provider.
 // This method sends a new SQS SendMessageInput message to SQS.
-func (mgr SqsProvider) SendMessage(msg *message.Message) error {
+func (mgr Provider) SendMessage(msg *message.Message) error {
 
 	// Encode the task to send as the message body.
 	taskEncoded, _ := json.Marshal(msg)
@@ -35,13 +34,13 @@ func (mgr SqsProvider) SendMessage(msg *message.Message) error {
 	// Create the message object.
 	messageInput := &sqs.SendMessageInput{
 		MessageBody: aws.String(string(taskEncoded)),
-		QueueUrl:    mgr.QueueUrl,
+		QueueUrl:    mgr.QueueURL,
 	}
 
 	// Change message if .fifo queue
-	var messageGroupId string = fmt.Sprintf("%s-%s", msg.RequestClient, msg.Slug)
+	var messageGroupID = fmt.Sprintf("%s-%s", msg.RequestClient, msg.Slug)
 	if strings.HasSuffix(*mgr.QueueName, ".fifo") {
-		messageInput.MessageGroupId = &messageGroupId
+		messageInput.MessageGroupId = &messageGroupID
 	} else {
 		messageInput.DelaySeconds = aws.Int64(10)
 	}
@@ -56,10 +55,9 @@ func (mgr SqsProvider) SendMessage(msg *message.Message) error {
 	return nil
 }
 
-// Receive implements the required interface method to be a Provider.
-//
+// GetNextMessage implements the required interface method to be a Provider.
 // This method sends a ReceiveMessageInput message to SQS and converts the message into a *task.Task object.
-func (mgr SqsProvider) GetNextMessage() (*message.Message, error) {
+func (mgr Provider) GetNextMessage() (*message.Message, error) {
 	var returnMessage message.Message
 
 	// Prepare the message
@@ -70,7 +68,7 @@ func (mgr SqsProvider) GetNextMessage() (*message.Message, error) {
 		MessageAttributeNames: []*string{
 			aws.String(sqs.QueueAttributeNameAll),
 		},
-		QueueUrl:            mgr.QueueUrl,
+		QueueUrl:            mgr.QueueURL,
 		MaxNumberOfMessages: aws.Int64(1),
 		VisibilityTimeout:   aws.Int64(300), // 300 seconds : 5 minutes
 		WaitTimeSeconds:     aws.Int64(0),
@@ -90,9 +88,8 @@ func (mgr SqsProvider) GetNextMessage() (*message.Message, error) {
 				pErr.Type = message.ErrOverQuota
 			}
 			return nil, pErr
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 
 	// Attempt to unmarshal the message body into the returnTask.
@@ -108,12 +105,11 @@ func (mgr SqsProvider) GetNextMessage() (*message.Message, error) {
 	return nil, errors.New("could not retrieve message")
 }
 
-// Delete implements the required interface method to be a Provider.
-//
+// DeleteMessage implements the required interface method to be a Provider.
 // This method deletes a message from the queue.
-func (mgr SqsProvider) DeleteMessage(reference *string) error {
+func (mgr Provider) DeleteMessage(reference *string) error {
 	_, err := mgr.sqs.DeleteMessage(&sqs.DeleteMessageInput{
-		QueueUrl:      mgr.QueueUrl,
+		QueueUrl:      mgr.QueueURL,
 		ReceiptHandle: reference,
 	})
 
@@ -125,12 +121,12 @@ func (mgr SqsProvider) DeleteMessage(reference *string) error {
 }
 
 // Close implemented to satisfy Provider interface.
-func (mgr SqsProvider) Close() error {
+func (mgr Provider) Close() error {
 	return nil
 }
 
-// getQueueUrl requests the queueURL from SQS.
-func getQueueUrl(svc sqsiface.SQSAPI, name string) (string, error) {
+// getQueueURL requests the queueURL from SQS.
+func getQueueURL(svc sqsiface.SQSAPI, name string) (string, error) {
 	result, err := svc.GetQueueUrl(&sqs.GetQueueUrlInput{
 		QueueName: aws.String(name),
 	})
@@ -151,17 +147,17 @@ func getSession(region, key, secret string) (*session.Session, error) {
 	return sess, err
 }
 
-// NewSqsProvider is a convenience method to return a new *SqsProvider instance.
-func NewSqsProvider(region, key, secret, queue string) *SqsProvider {
+// NewSqsProvider is a convenience method to return a new *Provider instance.
+func NewSqsProvider(region, key, secret, queue string) *Provider {
 
 	sess, _ := getSession(region, key, secret)
 	svc := sqs.New(sess)
-	queueUrl, _ := getQueueUrl(svc, queue)
+	queueURL, _ := getQueueURL(svc, queue)
 
-	return &SqsProvider{
+	return &Provider{
 		session:   sess,
 		sqs:       svc,
-		QueueUrl:  &queueUrl,
+		QueueURL:  &queueURL,
 		QueueName: &queue,
 	}
 }

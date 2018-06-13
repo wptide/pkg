@@ -102,7 +102,7 @@ func Test_unzip(t *testing.T) {
 	}()
 
 	errorDirectoryCreate := func(path string, perm os.FileMode) error {
-		return errors.New("something went wrong.")
+		return errors.New("something went wrong")
 	}
 
 	errorCopySHA := func(dst io.Writer, src io.Reader) (written int64, err error) {

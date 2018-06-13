@@ -122,7 +122,7 @@ func TestFirestoreSync_UpdateCheck(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f, _ := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
 			if got := f.UpdateCheck(tt.args.project); got != tt.want {
-				t.Errorf("FirestoreSync.UpdateCheck() = %v, want %v", got, tt.want)
+				t.Errorf("Sync.UpdateCheck() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -169,7 +169,7 @@ func TestFirestoreSync_RecordUpdate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f, _ := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
 			if err := f.RecordUpdate(tt.args.project); (err != nil) != tt.wantErr {
-				t.Errorf("FirestoreSync.RecordUpdate() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Sync.RecordUpdate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -275,7 +275,7 @@ func TestFirestoreSync_GetSyncTime(t *testing.T) {
 			f, _ := NewWithClient(tt.fields.ctx, "mock-project", tt.fields.rootPath, tt.fields.client)
 
 			if got := f.GetSyncTime(tt.args.event, tt.args.projectType); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FirestoreSync.GetSyncTime() = %v, want %v", got, tt.want)
+				t.Errorf("Sync.GetSyncTime() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -386,7 +386,7 @@ func Test_ptoi(t *testing.T) {
 func TestNew(t *testing.T) {
 	type args struct {
 		ctx         context.Context
-		projectId   string
+		projectID   string
 		rootDocPath string
 	}
 	tests := []struct {
@@ -401,12 +401,12 @@ func TestNew(t *testing.T) {
 				"random-project",
 				"sync/org.wordpress",
 			},
-			reflect.TypeOf(&FirestoreSync{}),
+			reflect.TypeOf(&Sync{}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := New(tt.args.ctx, tt.args.projectId, tt.args.rootDocPath); reflect.TypeOf(got) != tt.want {
+			if got, _ := New(tt.args.ctx, tt.args.projectID, tt.args.rootDocPath); reflect.TypeOf(got) != tt.want {
 				t.Errorf("New() = %v, want %v", reflect.TypeOf(got), tt.want)
 			}
 		})
@@ -416,7 +416,7 @@ func TestNew(t *testing.T) {
 func TestNewWithClient(t *testing.T) {
 	type args struct {
 		ctx         context.Context
-		projectId   string
+		projectID   string
 		rootDocPath string
 		client      fsClient.ClientInterface
 	}
@@ -433,12 +433,12 @@ func TestNewWithClient(t *testing.T) {
 				"collection/doc",
 				&mockClient{},
 			},
-			reflect.TypeOf(&FirestoreSync{}),
+			reflect.TypeOf(&Sync{}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := NewWithClient(tt.args.ctx, tt.args.projectId, tt.args.rootDocPath, tt.args.client); reflect.TypeOf(got) != tt.want {
+			if got, _ := NewWithClient(tt.args.ctx, tt.args.projectID, tt.args.rootDocPath, tt.args.client); reflect.TypeOf(got) != tt.want {
 				t.Errorf("NewWithClient() = %v, want %v", reflect.TypeOf(got), tt.want)
 			}
 		})

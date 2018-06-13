@@ -17,13 +17,15 @@ var (
 	mutex = sync.Mutex{}
 )
 
-type FirestoreSync struct {
+// Sync describes the Firestore sync provider.
+type Sync struct {
 	ctx      context.Context
 	client   fsClient.ClientInterface
 	rootPath string
 }
 
-func (f FirestoreSync) UpdateCheck(project wporg.RepoProject) bool {
+// UpdateCheck determines if an item should be synced.
+func (f Sync) UpdateCheck(project wporg.RepoProject) bool {
 	key := fmt.Sprintf("%s/%s/%s", f.rootPath, project.Type, project.Slug)
 
 	data := f.client.GetDoc(key)
@@ -34,7 +36,8 @@ func (f FirestoreSync) UpdateCheck(project wporg.RepoProject) bool {
 	return record.LastUpdated != project.LastUpdated || record.Version != project.Version
 }
 
-func (f FirestoreSync) RecordUpdate(project wporg.RepoProject) error {
+// RecordUpdate records the project.
+func (f Sync) RecordUpdate(project wporg.RepoProject) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -45,7 +48,8 @@ func (f FirestoreSync) RecordUpdate(project wporg.RepoProject) error {
 	return f.client.SetDoc(key, data)
 }
 
-func (f FirestoreSync) SetSyncTime(event, projectType string, t time.Time) {
+// SetSyncTime sets the time a sync occurred.
+func (f Sync) SetSyncTime(event, projectType string, t time.Time) {
 	key := fmt.Sprintf("%s-sync-%s", projectType, event)
 
 	data := make(map[string]interface{})
@@ -55,7 +59,8 @@ func (f FirestoreSync) SetSyncTime(event, projectType string, t time.Time) {
 	f.client.SetDoc(f.rootPath, data)
 }
 
-func (f FirestoreSync) GetSyncTime(event, projectType string) time.Time {
+// GetSyncTime gets the time a sync occurred.
+func (f Sync) GetSyncTime(event, projectType string) time.Time {
 	key := fmt.Sprintf("%s-sync-%s", projectType, event)
 
 	var t time.Time
@@ -94,27 +99,27 @@ func ptoi(project wporg.RepoProject) (map[string]interface{}, error) {
 	return data, cErr
 }
 
-// New creates a new FirestoreSync (UpdateChecker) with a default client
+// New creates a new Sync (UpdateChecker) with a default client
 // using Firestore.
-func New(ctx context.Context, projectId string, rootDocPath string) (*FirestoreSync, error) {
+func New(ctx context.Context, projectID string, rootDocPath string) (*Sync, error) {
 
-	fireClient, _ := firestore.NewClient(ctx, projectId)
+	fireClient, _ := firestore.NewClient(ctx, projectID)
 	client := fsClient.Client{
 		Firestore: fireClient,
 		Ctx:       ctx,
 	}
 
-	return NewWithClient(ctx, projectId, rootDocPath, client)
+	return NewWithClient(ctx, projectID, rootDocPath, client)
 }
 
-// New creates a new FirestoreSync (UpdateChecker) with a provided ClientInterface client.
+// NewWithClient creates a new Sync (UpdateChecker) with a provided ClientInterface client.
 // Note: Use this one for the tests with a mock ClientInterface.
-func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client fsClient.ClientInterface) (*FirestoreSync, error) {
+func NewWithClient(ctx context.Context, projectID string, rootDocPath string, client fsClient.ClientInterface) (*Sync, error) {
 	if !client.Authenticated() {
-		return nil, errors.New("Could not authenticate sync client.")
+		return nil, errors.New("firestore: could not authenticate sync client")
 	}
 
-	return &FirestoreSync{
+	return &Sync{
 		ctx:      ctx,
 		client:   client,
 		rootPath: rootDocPath,

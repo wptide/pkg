@@ -21,68 +21,68 @@ type mockSqs struct {
 
 var (
 	// Provider to mock fifo queue.
-	testQueue    string      = "test.fifo"
-	testQueueUrl string      = "http://sqsurl/test.fifo"
-	testProvider SqsProvider = SqsProvider{
+	testQueue    = "test.fifo"
+	testQueueURL = "http://sqsurl/test.fifo"
+	testProvider = Provider{
 		session:   &session.Session{},
 		sqs:       &mockSqs{},
 		QueueName: &testQueue,
-		QueueUrl:  &testQueueUrl,
+		QueueURL:  &testQueueURL,
 	}
 
 	// Provider to mock non-fifo queue.
-	testNonFifoQueue    string      = "test"
-	testNonFifoQueueUrl string      = "http://sqsurl/test"
-	testNonFifoProvider SqsProvider = SqsProvider{
+	testNonFifoQueue    = "test"
+	testNonFifoQueueURL = "http://sqsurl/test"
+	testNonFifoProvider = Provider{
 		session:   &session.Session{},
 		sqs:       &mockSqs{},
 		QueueName: &testNonFifoQueue,
-		QueueUrl:  &testNonFifoQueueUrl,
+		QueueURL:  &testNonFifoQueueURL,
 	}
 
 	// Provider to mock an error response.
-	failQueue    string      = "fail.fifo"
-	failQueueUrl string      = "http://sqsurl/fail.fifo"
-	failProvider SqsProvider = SqsProvider{
+	failQueue    = "fail.fifo"
+	failQueueURL = "http://sqsurl/fail.fifo"
+	failProvider = Provider{
 		session:   &session.Session{},
 		sqs:       &mockSqs{},
 		QueueName: &failQueue,
-		QueueUrl:  &failQueueUrl,
+		QueueURL:  &failQueueURL,
 	}
 
 	// Provider to mock an empty response.
-	emptyQueue    string      = "empty.fifo"
-	emptyQueueUrl string      = "http://sqsurl/empty.fifo"
-	emptyProvider SqsProvider = SqsProvider{
+	emptyQueue    = "empty.fifo"
+	emptyQueueURL = "http://sqsurl/empty.fifo"
+	emptyProvider = Provider{
 		session:   &session.Session{},
 		sqs:       &mockSqs{},
 		QueueName: &emptyQueue,
-		QueueUrl:  &emptyQueueUrl,
+		QueueURL:  &emptyQueueURL,
 	}
 
 	// Provider to mock an over limit response.
-	limitQueueUrl string      = "http://sqsurl/limit.fifo"
-	limitProvider SqsProvider = SqsProvider{
+	limitQueueURL = "http://sqsurl/limit.fifo"
+	limitProvider = Provider{
 		session:   &session.Session{},
 		sqs:       &mockSqs{},
 		QueueName: &emptyQueue,
-		QueueUrl:  &limitQueueUrl,
+		QueueURL:  &limitQueueURL,
 	}
 
 	// Provider to mock an over limit response.
-	errorQueueUrl string      = "http://sqsurl/error.fifo"
-	errorProvider SqsProvider = SqsProvider{
+	errorQueueURL = "http://sqsurl/error.fifo"
+	errorProvider = Provider{
 		session:   &session.Session{},
 		sqs:       &mockSqs{},
 		QueueName: &emptyQueue,
-		QueueUrl:  &errorQueueUrl,
+		QueueURL:  &errorQueueURL,
 	}
 )
 
 func (m mockSqs) DeleteMessage(in *sqs.DeleteMessageInput) (*sqs.DeleteMessageOutput, error) {
 
 	if *in.ReceiptHandle == "fail-id" {
-		return m.deleteMessageOutput, errors.New("Something went wrong.")
+		return m.deleteMessageOutput, errors.New("something went wrong")
 	}
 	// contains filtered or unexported fields - so will be an empty struct of sqs.DeleteMessageOutput
 	// https://docs.aws.amazon.com/sdk-for-go/api/service/sqs/#DeleteMessageOutput
@@ -94,13 +94,13 @@ func (m mockSqs) ReceiveMessage(in *sqs.ReceiveMessageInput) (*sqs.ReceiveMessag
 	var messages []*sqs.Message
 
 	switch *in.QueueUrl {
-	case failQueueUrl:
-		return nil, awserr.New("Provider Error", "Provider Error", errors.New("Provider Error"))
-	case errorQueueUrl:
-		return nil, errors.New("Other error")
-	case emptyQueueUrl:
+	case failQueueURL:
+		return nil, awserr.New("Provider Error", "Provider Error", errors.New("provider error"))
+	case errorQueueURL:
+		return nil, errors.New("other error")
+	case emptyQueueURL:
 		// Do nothing here.
-	case limitQueueUrl:
+	case limitQueueURL:
 		return nil, awserr.New(sqs.ErrCodeOverLimit, sqs.ErrCodeOverLimit, errors.New(sqs.ErrCodeOverLimit))
 	default:
 		fake := message.Message{
@@ -131,12 +131,15 @@ func (m mockSqs) SendMessage(in *sqs.SendMessageInput) (*sqs.SendMessageOutput, 
 	}
 
 	if msg.Title == "FAIL" {
-		return m.sendMessageOutput, errors.New("Something went wrong.")
+		return m.sendMessageOutput, errors.New("something went wrong")
 	}
 
 	return m.sendMessageOutput, nil
 }
 
+// Note: Must be GetQueueUrl to implement sqsiface.SQSAPI.
+//       DO NOT change to GetQueueURL.
+//       Run golint with `golint -min_confidence=0.9`
 func (m mockSqs) GetQueueUrl(in *sqs.GetQueueUrlInput) (*sqs.GetQueueUrlOutput, error) {
 	url := "http://sqsurl/" + *in.QueueName
 	return &sqs.GetQueueUrlOutput{
@@ -150,7 +153,7 @@ func TestSqsProvider_SendMessage(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		mgr     SqsProvider
+		mgr     Provider
 		args    args
 		wantErr bool
 	}{
@@ -184,7 +187,7 @@ func TestSqsProvider_SendMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := tt.mgr.SendMessage(tt.args.msg); (err != nil) != tt.wantErr {
-				t.Errorf("SqsProvider.SendMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.SendMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -193,7 +196,7 @@ func TestSqsProvider_SendMessage(t *testing.T) {
 func TestSqsProvider_GetNextMessage(t *testing.T) {
 	tests := []struct {
 		name    string
-		mgr     SqsProvider
+		mgr     Provider
 		want    *message.Message
 		wantErr bool
 	}{
@@ -234,11 +237,11 @@ func TestSqsProvider_GetNextMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := tt.mgr.GetNextMessage()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("SqsProvider.GetNextMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.GetNextMessage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SqsProvider.GetNextMessage() = %v, want %v", got, tt.want)
+				t.Errorf("Provider.GetNextMessage() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -249,12 +252,12 @@ func TestSqsProvider_DeleteMessage(t *testing.T) {
 		reference *string
 	}
 
-	successId := "success-id"
-	failId := "fail-id"
+	successID := "success-id"
+	failID := "fail-id"
 
 	tests := []struct {
 		name    string
-		mgr     SqsProvider
+		mgr     Provider
 		args    args
 		wantErr bool
 	}{
@@ -262,7 +265,7 @@ func TestSqsProvider_DeleteMessage(t *testing.T) {
 			name: "Test Delete Message",
 			mgr:  testProvider,
 			args: args{
-				reference: &successId,
+				reference: &successID,
 			},
 			wantErr: false,
 		},
@@ -270,7 +273,7 @@ func TestSqsProvider_DeleteMessage(t *testing.T) {
 			name: "Test Delete Message Error",
 			mgr:  testProvider,
 			args: args{
-				reference: &failId,
+				reference: &failID,
 			},
 			wantErr: true,
 		},
@@ -278,7 +281,7 @@ func TestSqsProvider_DeleteMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := tt.mgr.DeleteMessage(tt.args.reference); (err != nil) != tt.wantErr {
-				t.Errorf("SqsProvider.DeleteMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.DeleteMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -331,7 +334,7 @@ func TestNewSqsProvider(t *testing.T) {
 				secret: "so-secret",
 				queue:  "test.fifo",
 			},
-			want: reflect.TypeOf(&SqsProvider{}),
+			want: reflect.TypeOf(&Provider{}),
 		},
 	}
 	for _, tt := range tests {
@@ -354,7 +357,7 @@ func Test_getQueueUrl(t *testing.T) {
 		want string
 	}{
 		{
-			name: "Test getQueueUrl",
+			name: "Test getQueueURL",
 			args: args{
 				svc:  &mockSqs{},
 				name: "test.fifo",
@@ -364,9 +367,9 @@ func Test_getQueueUrl(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, _ := getQueueUrl(tt.args.svc, tt.args.name)
+			got, _ := getQueueURL(tt.args.svc, tt.args.name)
 			if got != tt.want {
-				t.Errorf("getQueueUrl() = %v, want %v", got, tt.want)
+				t.Errorf("getQueueURL() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -376,7 +379,7 @@ func TestSqsProvider_Close(t *testing.T) {
 	type fields struct {
 		session   *session.Session
 		sqs       sqsiface.SQSAPI
-		QueueUrl  *string
+		QueueURL  *string
 		QueueName *string
 	}
 	tests := []struct {
@@ -397,14 +400,14 @@ func TestSqsProvider_Close(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mgr := SqsProvider{
+			mgr := Provider{
 				session:   tt.fields.session,
 				sqs:       tt.fields.sqs,
-				QueueUrl:  tt.fields.QueueUrl,
+				QueueURL:  tt.fields.QueueURL,
 				QueueName: tt.fields.QueueName,
 			}
 			if err := mgr.Close(); (err != nil) != tt.wantErr {
-				t.Errorf("SqsProvider.Close() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

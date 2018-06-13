@@ -19,7 +19,7 @@ func TestFirestoreProvider_SendMessage(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		fs      *FirestoreProvider
+		fs      *Provider
 		args    args
 		wantErr bool
 	}{
@@ -47,7 +47,7 @@ func TestFirestoreProvider_SendMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := tt.fs.SendMessage(tt.args.msg); (err != nil) != tt.wantErr {
-				t.Errorf("FirestoreProvider.SendMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.SendMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -61,7 +61,7 @@ func TestFirestoreProvider_GetNextMessage(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		fs      *FirestoreProvider
+		fs      *Provider
 		want    *message.Message
 		wantErr bool
 	}{
@@ -95,11 +95,11 @@ func TestFirestoreProvider_GetNextMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := tt.fs.GetNextMessage()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("FirestoreProvider.GetNextMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.GetNextMessage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FirestoreProvider.GetNextMessage() = %v, want %v", got, tt.want)
+				t.Errorf("Provider.GetNextMessage() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -114,7 +114,7 @@ func TestFirestoreProvider_DeleteMessage(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		fs      *FirestoreProvider
+		fs      *Provider
 		args    args
 		wantErr bool
 	}{
@@ -130,7 +130,7 @@ func TestFirestoreProvider_DeleteMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := tt.fs.DeleteMessage(tt.args.ref); (err != nil) != tt.wantErr {
-				t.Errorf("FirestoreProvider.DeleteMessage() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.DeleteMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -139,13 +139,13 @@ func TestFirestoreProvider_DeleteMessage(t *testing.T) {
 func TestNew(t *testing.T) {
 	type args struct {
 		ctx         context.Context
-		projectId   string
+		projectID   string
 		rootDocPath string
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    *FirestoreProvider
+		want    *Provider
 		wantErr bool
 	}{
 		{
@@ -161,7 +161,7 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := New(tt.args.ctx, tt.args.projectId, tt.args.rootDocPath)
+			got, err := New(tt.args.ctx, tt.args.projectID, tt.args.rootDocPath)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -205,14 +205,14 @@ func TestFirestoreProvider_Close(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fs := &FirestoreProvider{
+			fs := &Provider{
 				ctx:      tt.fields.ctx,
 				client:   tt.fields.client,
 				rootPath: tt.fields.rootPath,
 			}
 
 			if err := fs.Close(); (err != nil) != tt.wantErr {
-				t.Errorf("FirestoreProvider.Close() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.Close() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

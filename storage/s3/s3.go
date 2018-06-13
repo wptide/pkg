@@ -16,22 +16,26 @@ var (
 	fileOpen   = os.Open
 )
 
-type S3Provider struct {
+// Provider describes a new S3 storage provider.
+type Provider struct {
 	session    *session.Session
 	uploader   s3manageriface.UploaderAPI
 	downloader s3manageriface.DownloaderAPI
 	bucket     string
 }
 
-func (s3p S3Provider) Kind() string {
+// Kind returns the provider kind.
+func (s3p Provider) Kind() string {
 	return "s3"
 }
 
-func (s3p S3Provider) CollectionRef() string {
+// CollectionRef gets the bucket reference.
+func (s3p Provider) CollectionRef() string {
 	return s3p.bucket
 }
 
-func (s3p S3Provider) UploadFile(filename, reference string) error {
+// UploadFile puts a file in the relevant bucket.
+func (s3p Provider) UploadFile(filename, reference string) error {
 
 	// Open file for writing to S3.
 	file, err := fileOpen(filename)
@@ -58,7 +62,8 @@ func (s3p S3Provider) UploadFile(filename, reference string) error {
 	return nil
 }
 
-func (s3p S3Provider) DownloadFile(reference, filename string) error {
+// DownloadFile gets the file from an S3 bucket.
+func (s3p Provider) DownloadFile(reference, filename string) error {
 
 	// Create file for writing.
 	file, err := fileCreate(filename)
@@ -84,14 +89,14 @@ func (s3p S3Provider) DownloadFile(reference, filename string) error {
 	return nil
 }
 
-// NewS3Provider is a convenience method to return a new *S3Provider instance.
-func NewS3Provider(region, key, secret, bucket string) *S3Provider {
+// NewS3Provider is a convenience method to return a new *Provider instance.
+func NewS3Provider(region, key, secret, bucket string) *Provider {
 
 	sess, _ := getSession(region, key, secret)
 	uploader := s3manager.NewUploader(sess)
 	downloader := s3manager.NewDownloader(sess)
 
-	return &S3Provider{
+	return &Provider{
 		session:    sess,
 		uploader:   uploader,
 		downloader: downloader,

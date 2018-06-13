@@ -11,16 +11,17 @@ import (
 	"net/url"
 )
 
+// Client describes a new Tide API client.
 type Client struct {
 	user *tide.Auth
 }
 
 // Authenticate creates a call to a Tide API instance and attempts to authenticate a user.
-func (c *Client) Authenticate(clientId, clientSecret, authEndpoint string) error {
+func (c *Client) Authenticate(clientID, clientSecret, authEndpoint string) error {
 
 	// Create form data to send via the HTTP request.
 	form := url.Values{
-		"api_key":    {clientId},
+		"api_key":    {clientID},
 		"api_secret": {clientSecret},
 	}
 	body := bytes.NewBufferString(form.Encode())
@@ -33,14 +34,14 @@ func (c *Client) Authenticate(clientId, clientSecret, authEndpoint string) error
 	defer rsp.Body.Close()
 
 	// Read the response into a bytes buffer.
-	body_byte, _ := ioutil.ReadAll(rsp.Body)
+	bodyBytes, _ := ioutil.ReadAll(rsp.Body)
 
 	// Attempt to unmarshal the JSON string into an Auth object.
 	var auth *tide.Auth
-	json.Unmarshal(body_byte, &auth)
+	json.Unmarshal(bodyBytes, &auth)
 
 	if rsp.StatusCode != http.StatusOK || auth == nil || auth.AccessToken == "" {
-		return errors.New("Could not authenticate user.")
+		return errors.New("tide: could not authenticate user")
 	}
 
 	c.user = auth

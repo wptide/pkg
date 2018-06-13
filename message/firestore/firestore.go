@@ -12,26 +12,31 @@ import (
 	fsClient "github.com/wptide/pkg/wrapper/firestore"
 )
 
-const RetryAttemps = 3
-const LockDuration time.Duration = time.Minute * 5
+const (
+	// RetryAttempts sets the amount of default retries.
+	RetryAttempts               = 3
 
-// FirestoreProvider implements the Provider interface.
-type FirestoreProvider struct {
+	// LockDuration sets how long an item needs to be locked for.
+	LockDuration  time.Duration = time.Minute * 5
+)
+
+// Provider implements the Provider interface.
+type Provider struct {
 	ctx      context.Context
 	client   fsClient.ClientInterface
 	rootPath string
 }
 
 // SendMessage sends a message to Firestore.
-func (fs FirestoreProvider) SendMessage(msg *message.Message) error {
+func (fs Provider) SendMessage(msg *message.Message) error {
 	return fs.client.AddDoc(fs.rootPath, generateMessage(msg))
 }
 
-// Get message gets the next message from Firestore.
+// GetNextMessage gets the next message from Firestore.
 //
 // This uses Firestore transactions to update the lock time and
 // available retries for an item.
-func (fs FirestoreProvider) GetNextMessage() (*message.Message, error) {
+func (fs Provider) GetNextMessage() (*message.Message, error) {
 	items, err := fs.client.QueryItems(
 		// Collection to get the message from.
 		fs.rootPath,
@@ -86,13 +91,13 @@ func (fs FirestoreProvider) GetNextMessage() (*message.Message, error) {
 	return msg, err
 }
 
-// Delete a Document from Firestore.
-func (fs FirestoreProvider) DeleteMessage(ref *string) error {
+// DeleteMessage deletes a Document from Firestore.
+func (fs Provider) DeleteMessage(ref *string) error {
 	return fs.client.DeleteDoc(fmt.Sprintf("%s/%s", fs.rootPath, *ref))
 }
 
 // Close the Firestore client.
-func (fs FirestoreProvider) Close() error {
+func (fs Provider) Close() error {
 	if fs.client != nil {
 		return fs.client.Close()
 	}
@@ -123,34 +128,34 @@ func generateMessage(in *message.Message) map[string]interface{} {
 	return map[string]interface{}{
 		"created":         time.Now().UnixNano(),
 		"lock":            int64(0),
-		"retries":         int64(RetryAttemps),
+		"retries":         int64(RetryAttempts),
 		"message":         msgMap,
 		"status":          "pending",
 		"retry_available": true,
 	}
 }
 
-// New creates a new FirestoreSync (UpdateSyncChecker) with a default client
+// New creates a new Sync (UpdateSyncChecker) with a default client
 // using Firestore.
-func New(ctx context.Context, projectId string, rootDocPath string) (*FirestoreProvider, error) {
+func New(ctx context.Context, projectID string, rootDocPath string) (*Provider, error) {
 
-	fireClient, _ := firestore.NewClient(ctx, projectId)
+	fireClient, _ := firestore.NewClient(ctx, projectID)
 	client := fsClient.Client{
 		Firestore: fireClient,
 		Ctx:       ctx,
 	}
 
-	return NewWithClient(ctx, projectId, rootDocPath, client)
+	return NewWithClient(ctx, projectID, rootDocPath, client)
 }
 
-// New creates a new FirestoreSync (UpdateSyncChecker) with a provided ClientInterface client.
+// NewWithClient creates a new Sync (UpdateSyncChecker) with a provided ClientInterface client.
 // Note: Use this one for the tests with a mock ClientInterface.
-func NewWithClient(ctx context.Context, projectId string, rootDocPath string, client fsClient.ClientInterface) (*FirestoreProvider, error) {
+func NewWithClient(ctx context.Context, projectID string, rootDocPath string, client fsClient.ClientInterface) (*Provider, error) {
 	if client == nil || !client.Authenticated() {
-		return nil, errors.New("Could not authenticate sync client.")
+		return nil, errors.New("could not authenticate sync client")
 	}
 
-	return &FirestoreProvider{
+	return &Provider{
 		ctx:      ctx,
 		client:   client,
 		rootPath: rootDocPath,

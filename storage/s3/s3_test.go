@@ -75,13 +75,13 @@ func TestS3Provider_UploadFile(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		s3p     S3Provider
+		s3p     Provider
 		args    args
 		wantErr bool
 	}{
 		{
 			"Test Upload - upload.txt",
-			S3Provider{
+			Provider{
 				uploader:   &mockS3{},
 				downloader: &mockS3{},
 				bucket:     "test_bucket",
@@ -94,7 +94,7 @@ func TestS3Provider_UploadFile(t *testing.T) {
 		},
 		{
 			"Test Upload Bucket Error",
-			S3Provider{
+			Provider{
 				uploader:   &mockS3{},
 				downloader: &mockS3{},
 				bucket:     "error_bucket",
@@ -107,7 +107,7 @@ func TestS3Provider_UploadFile(t *testing.T) {
 		},
 		{
 			"Test File Open Error",
-			S3Provider{
+			Provider{
 				uploader:   &mockS3{},
 				downloader: &mockS3{},
 				bucket:     "test_bucket",
@@ -122,7 +122,7 @@ func TestS3Provider_UploadFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := tt.s3p.UploadFile(tt.args.filename, tt.args.reference); (err != nil) != tt.wantErr {
-				t.Errorf("S3Provider.UploadFile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.UploadFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -141,13 +141,13 @@ func TestS3Provider_DownloadFile(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		s3p     S3Provider
+		s3p     Provider
 		args    args
 		wantErr bool
 	}{
 		{
 			"Test Download - download.txt",
-			S3Provider{
+			Provider{
 				uploader:   &mockS3{},
 				downloader: &mockS3{},
 				bucket:     "test_bucket",
@@ -160,7 +160,7 @@ func TestS3Provider_DownloadFile(t *testing.T) {
 		},
 		{
 			"Test File Creare Error",
-			S3Provider{
+			Provider{
 				uploader:   &mockS3{},
 				downloader: &mockS3{},
 				bucket:     "test_bucket",
@@ -173,7 +173,7 @@ func TestS3Provider_DownloadFile(t *testing.T) {
 		},
 		{
 			"Test Bucket File Error",
-			S3Provider{
+			Provider{
 				uploader:   &mockS3{},
 				downloader: &mockS3{},
 				bucket:     "test_bucket",
@@ -188,7 +188,7 @@ func TestS3Provider_DownloadFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := tt.s3p.DownloadFile(tt.args.reference, tt.args.filename); (err != nil) != tt.wantErr {
-				t.Errorf("S3Provider.DownloadFile() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Provider.DownloadFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -214,7 +214,7 @@ func TestNewS3Provider(t *testing.T) {
 				"so-secret",
 				"the-bucket",
 			},
-			reflect.TypeOf(&S3Provider{}),
+			reflect.TypeOf(&Provider{}),
 		},
 	}
 	for _, tt := range tests {
@@ -245,11 +245,11 @@ func TestS3Provider_CollectionRef(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s3p := S3Provider{
+			s3p := Provider{
 				bucket: tt.fields.bucket,
 			}
 			if got := s3p.CollectionRef(); got != tt.want {
-				t.Errorf("S3Provider.CollectionRef() = %v, want %v", got, tt.want)
+				t.Errorf("Provider.CollectionRef() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -257,7 +257,7 @@ func TestS3Provider_CollectionRef(t *testing.T) {
 
 func TestS3Provider_Kind(t *testing.T) {
 	t.Run("Storage Provider Kind", func(t *testing.T) {
-		p := S3Provider{}
+		p := Provider{}
 		if got := p.Kind(); got != "s3" {
 			t.Errorf("StorageProvider.Kind() = %v, Impossible, this should be s3.", got)
 		}
