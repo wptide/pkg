@@ -17,7 +17,7 @@ const (
 	RetryAttempts               = 3
 
 	// LockDuration sets how long an item needs to be locked for.
-	LockDuration  time.Duration = time.Minute * 5
+	LockDuration  time.Duration = time.Minute * 10
 )
 
 // Provider implements the Provider interface.

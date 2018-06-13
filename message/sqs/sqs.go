@@ -70,7 +70,7 @@ func (mgr Provider) GetNextMessage() (*message.Message, error) {
 		},
 		QueueUrl:            mgr.QueueURL,
 		MaxNumberOfMessages: aws.Int64(1),
-		VisibilityTimeout:   aws.Int64(300), // 300 seconds : 5 minutes
+		VisibilityTimeout:   aws.Int64(600), // 600 seconds : 10 minutes
 		WaitTimeSeconds:     aws.Int64(0),
 	}
 
