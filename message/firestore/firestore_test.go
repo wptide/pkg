@@ -149,7 +149,7 @@ func TestNew(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			"Test New Client - Fail because API acces",
+			"Test New Client - Fail because API access",
 			args{
 				context.Background(),
 				"sample-project",
