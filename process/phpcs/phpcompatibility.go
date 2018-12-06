@@ -82,7 +82,6 @@ func GetPhpcsCompatibility(fullResults tide.PhpcsResults) ([]string, interface{}
 
 					// Add the source to each broken version.
 					for _, version := range broken {
-						// @todo if version is null set to `all`.
 						details.ErrorMap[version] = append(details.ErrorMap[version], sniffMessage.Source)
 					}
 
@@ -110,11 +109,10 @@ func GetPhpcsCompatibility(fullResults tide.PhpcsResults) ([]string, interface{}
 						Files:    make(map[string][]FilePosition),
 					}
 
-					broken := phpcompat.BreaksVersions(sniffMessage)
+					broken := phpcompat.NonBreakingVersions(sniffMessage)
 					violation.Versions = broken
 
 					for _, version := range broken {
-						// @todo if version is null set to `all`.
 						details.WarningMap[version] = append(details.WarningMap[version], sniffMessage.Source)
 					}
 

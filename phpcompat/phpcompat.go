@@ -207,6 +207,38 @@ func BreaksVersions(message tide.PhpcsFilesMessage) []string {
 	return broken
 }
 
+// NonBreakingVersions takes a PHPCompatibility sniff code and returns the versions that are warnings.
+func NonBreakingVersions(message tide.PhpcsFilesMessage) []string {
+
+	compat, err := Parse(message)
+
+	if err != nil || strings.ToLower(message.Type) != "warning" {
+		return nil
+	}
+
+	versions := []string{}
+
+	var rangeString string
+	if compat.Warns.Reported == "all" {
+		rangeString = ">=5.2.0" + " <=" + PhpLatest
+	} else {
+		rangeString = ">=" + compat.Warns.Low + " <=" + compat.Warns.High
+	}
+
+	failRange, _ := semver.ParseRange(rangeString)
+
+	for majorMinor, item := range phpVersions {
+
+		if failRange(semver.MustParse(item["max"])) {
+			versions = append(versions, majorMinor)
+		}
+	}
+
+	sort.Strings(versions)
+
+	return versions
+}
+
 // PhpMajorVersions returns only the major.minor parts from the `versions` variable as slice of strings.
 func PhpMajorVersions() []string {
 	versions := []string{}

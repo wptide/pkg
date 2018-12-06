@@ -225,7 +225,7 @@ func getVersions(line string) []string {
 	result := re.FindAllString(line, -1)
 
 	if len(result) == 0 {
-		// Becaise they don't like minors?
+		// Because they don't like minors?
 		pattern := `(?i)PHP 7`
 		var re = regexp.MustCompile(pattern)
 		result := re.FindAllString(line, -1)
