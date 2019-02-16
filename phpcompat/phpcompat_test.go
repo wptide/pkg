@@ -171,6 +171,13 @@ func TestNonBreakingVersions(t *testing.T) {
 			[]string{"7.2"},
 		},
 		{
+			"PHPCompatibility.PHP.FakeAllWarning",
+			args{
+				testMessages["PHPCompatibility.PHP.FakeAllWarning"],
+			},
+			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+		},
+		{
 			"PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated",
 			args{
 				testMessages["PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated"],

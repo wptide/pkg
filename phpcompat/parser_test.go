@@ -29,6 +29,11 @@ var (
 			Source:  "PHPCompatibility.PHP.ForbiddenNames.constFound",
 			Type:    "ERROR",
 		},
+		"PHPCompatibility.PHP.FakeAllWarning": {
+			Message: "Some fake warning message (since version all)",
+			Source:  "PHPCompatibility.PHP.FakeAllWarning",
+			Type:    "WARNING",
+		},
 		"PHPCompatibility.PHP.DeprecatedFunctions.mysqli_send_long_dataDeprecatedRemoved": {
 			Message: "Function mysqli_send_long_data() is deprecated since PHP 5.3 and removed since PHP 5.4; Use mysqli_stmt::send_long_data() instead",
 			Source:  "PHPCompatibility.PHP.DeprecatedFunctions.mysqli_send_long_dataDeprecatedRemoved",
