@@ -59,6 +59,69 @@ func TestBreaksVersions(t *testing.T) {
 			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
 		},
 		{
+			"PHPCompatibility.PHP.DynamicAccessToStatic.Found",
+			args{
+				testMessages["PHPCompatibility.PHP.DynamicAccessToStatic.Found"],
+			},
+			[]string{"5.2"},
+		},
+		{
+			"PHPCompatibility.PHP.ValidIntegers.HexNumericStringFound",
+			args{
+				testMessages["PHPCompatibility.PHP.ValidIntegers.HexNumericStringFound"],
+			},
+			[]string{"7.0", "7.1", "7.2"},
+		},
+		{
+			"PHPCompatibility.PHP.ValidIntegers.InvalidOctalIntegerFound",
+			args{
+				testMessages["PHPCompatibility.PHP.ValidIntegers.InvalidOctalIntegerFound"],
+			},
+			[]string{"7.0", "7.1", "7.2"},
+		},
+		{
+			"PHPCompatibility.PHP.LanguageConstructs.NewEmptyNonVariableFound",
+			args{
+				testMessages["PHPCompatibility.PHP.LanguageConstructs.NewEmptyNonVariableFound"],
+			},
+			[]string{"5.2", "5.3", "5.4"},
+		},
+		{
+			"PHPCompatibility.PHP.EmptyNonVariable.Found",
+			args{
+				testMessages["PHPCompatibility.PHP.EmptyNonVariable.Found"],
+			},
+			[]string{"5.2", "5.3", "5.4"},
+		},
+		{
+			"PHPCompatibility.PHP.TernaryOperators.MiddleMissing",
+			args{
+				testMessages["PHPCompatibility.PHP.TernaryOperators.MiddleMissing"],
+			},
+			[]string{"5.2"},
+		},
+		{
+			"PHPCompatibility.PHP.NonStaticMagicMethods.__getMethodVisibility",
+			args{
+				testMessages["PHPCompatibility.PHP.NonStaticMagicMethods.__getMethodVisibility"],
+			},
+			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+		},
+		{
+			"PHPCompatibility.PHP.ShortArray.Found",
+			args{
+				testMessages["PHPCompatibility.PHP.ShortArray.Found"],
+			},
+			[]string{"5.2", "5.3"},
+		},
+		{
+			"PHPCompatibility.PHP.ForbiddenSwitchWithMultipleDefaultBlocks.Found",
+			args{
+				testMessages["PHPCompatibility.PHP.ForbiddenSwitchWithMultipleDefaultBlocks.Found"],
+			},
+			[]string{"7.0", "7.1", "7.2"},
+		},
+		{
 			// Warnings only, no breaks.
 			"PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated",
 			args{
@@ -86,6 +149,88 @@ func TestBreaksVersions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := BreaksVersions(tt.args.message); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("BreaksVersions() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNonBreakingVersions(t *testing.T) {
+	type args struct {
+		message tide.PhpcsFilesMessage
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			"PHPCompatibility.PHP.RemovedConstants.intl_idna_variant_2003Deprecated",
+			args{
+				testMessages["PHPCompatibility.PHP.RemovedConstants.intl_idna_variant_2003Deprecated"],
+			},
+			[]string{"7.2"},
+		},
+		{
+			"PHPCompatibility.PHP.FakeAllWarning",
+			args{
+				testMessages["PHPCompatibility.PHP.FakeAllWarning"],
+			},
+			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+		},
+		{
+			"PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated",
+			args{
+				testMessages["PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated"],
+			},
+			[]string{"7.1", "7.2"},
+		},
+		{
+			"PHPCompatibility.PHP.DeprecatedPHP4StyleConstructors.Found",
+			args{
+				testMessages["PHPCompatibility.PHP.DeprecatedPHP4StyleConstructors.Found"],
+			},
+			[]string{"7.0", "7.1", "7.2"},
+		},
+		{
+			"PHPCompatibility.PHP.ForbiddenNamesAsDeclared.resourceFound",
+			args{
+				testMessages["PHPCompatibility.PHP.ForbiddenNamesAsDeclared.resourceFound"],
+			},
+			[]string{"7.0", "7.1", "7.2"},
+		},
+		{
+			"PHPCompatibility.PHP.FakeAvailableSinceWarning",
+			args{
+				testMessages["PHPCompatibility.PHP.FakeAvailableSinceWarning"],
+			},
+			[]string{"5.2", "5.3"},
+		},
+		{
+			"PHPCompatibility.PHP.FakeSinceWarning",
+			args{
+				testMessages["PHPCompatibility.PHP.FakeSinceWarning"],
+			},
+			[]string{"7.0", "7.1", "7.2"},
+		},
+		{
+			"PHPCompatibility.PHP.NewFunctions.random_bytesFound",
+			args{
+				testMessages["PHPCompatibility.PHP.NewFunctions.random_bytesFound"],
+			},
+			nil,
+		},
+		{
+			"Unknown.Code",
+			args{
+				testMessages["Unknown.Code"],
+			},
+			nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NonBreakingVersions(tt.args.message); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NonBreakingVersions() = %v, want %v", got, tt.want)
 			}
 		})
 	}

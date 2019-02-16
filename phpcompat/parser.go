@@ -13,7 +13,6 @@ var (
 	// There are many other phrases used in messages, but these are all we need
 	// to assert the compatibility of a sniff violation.
 	verbs = []string{
-		"supported",
 		"not present",   // or earlier
 		"soft reserved", // "as of" "reserved keyword as of" , works like "deprecated"
 		"reserved",      // "since", "introduced", "as of"
@@ -68,8 +67,6 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 
 		// NOTE: Order is VERY important
 		switch matches[0] {
-		case "supported":
-			fallthrough
 		case "not present":
 			low, high, majorMinor, reported := GetVersionParts(versions[0], "5.2.0")
 
@@ -132,19 +129,19 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 			}
 		case "prior to":
 
-			// Annoying bad grammar for this error...
-			if e.Source == "PHPCompatibility.PHP.EmptyNonVariable.Found" {
-				version := PreviousVersion(versions[0])
-				low, high, majorMinor, reported := GetVersionParts(version, "5.2.0")
+			// Annoying bad grammar for these errors...
+			if e.Source == "PHPCompatibility.PHP.ValidIntegers.InvalidOctalIntegerFound" {
+				low, _, majorMinor, reported := GetVersionParts(versions[0], versions[0])
 
 				breaks = &CompatibilityRange{
 					low,
-					high,
+					PhpLatest,
 					reported,
 					majorMinor,
 				}
 			} else {
-				low, high, majorMinor, reported := GetVersionParts(versions[0], versions[0])
+				version := PreviousVersion(versions[0])
+				low, high, majorMinor, reported := GetVersionParts(version, "5.2.0")
 
 				breaks = &CompatibilityRange{
 					low,
@@ -156,7 +153,8 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 		case "<":
 			// Another annoying grammar.
 			if e.Source == "PHPCompatibility.PHP.TernaryOperators.MiddleMissing" {
-				low, high, majorMinor, reported := GetVersionParts(versions[0], versions[0])
+				version := PreviousVersion(versions[0])
+				low, high, majorMinor, reported := GetVersionParts(version, "5.2.0")
 
 				breaks = &CompatibilityRange{
 					low,
@@ -178,7 +176,6 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 				reported,
 				majorMinor,
 			}
-
 		case "magic method":
 			low, high, majorMinor, reported := GetVersionParts("all", "")
 
@@ -188,7 +185,6 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 				reported,
 				majorMinor,
 			}
-
 		case "available since":
 			if breaks != nil {
 				breaks.Low = "5.2.1"
@@ -198,7 +194,6 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 				warns.Low = "5.2.1"
 				warns.High = PreviousVersion(warns.MajorMinor)
 			}
-
 		case "since":
 			if breaks != nil {
 				breaks.High = PhpLatest
@@ -225,7 +220,7 @@ func getVersions(line string) []string {
 	result := re.FindAllString(line, -1)
 
 	if len(result) == 0 {
-		// Becaise they don't like minors?
+		// Because they don't like minors?
 		pattern := `(?i)PHP 7`
 		var re = regexp.MustCompile(pattern)
 		result := re.FindAllString(line, -1)

@@ -29,6 +29,11 @@ var (
 			Source:  "PHPCompatibility.PHP.ForbiddenNames.constFound",
 			Type:    "ERROR",
 		},
+		"PHPCompatibility.PHP.FakeAllWarning": {
+			Message: "Some fake warning message (since version all)",
+			Source:  "PHPCompatibility.PHP.FakeAllWarning",
+			Type:    "WARNING",
+		},
 		"PHPCompatibility.PHP.DeprecatedFunctions.mysqli_send_long_dataDeprecatedRemoved": {
 			Message: "Function mysqli_send_long_data() is deprecated since PHP 5.3 and removed since PHP 5.4; Use mysqli_stmt::send_long_data() instead",
 			Source:  "PHPCompatibility.PHP.DeprecatedFunctions.mysqli_send_long_dataDeprecatedRemoved",
@@ -72,6 +77,11 @@ var (
 		"PHPCompatibility.PHP.ValidIntegers.InvalidOctalIntegerFound": {
 			Message: "Invalid octal integer detected. Prior to PHP 7 this would lead to a truncated number. From PHP 7 onwards this causes a parse error. Found: 038",
 			Source:  "PHPCompatibility.PHP.ValidIntegers.InvalidOctalIntegerFound",
+			Type:    "ERROR",
+		},
+		"PHPCompatibility.PHP.LanguageConstructs.NewEmptyNonVariableFound": {
+			Message: "Only variables can be passed to empty() prior to PHP 5.5.",
+			Source:  "PHPCompatibility.PHP.LanguageConstructs.NewEmptyNonVariableFound",
 			Type:    "ERROR",
 		},
 		"PHPCompatibility.PHP.EmptyNonVariable.Found": {

@@ -13,9 +13,11 @@ var (
 
 // PhpCompatDetails describes details from `phpcs` phpcompatibility rules.
 type PhpCompatDetails struct {
-	Totals   map[string]int                       `json:"totals"`
-	ErrorMap map[string][]string                  `json:"error_map"`
-	Errors   map[string]PhpCompatDetailsViolation `json:"errors"`
+	Totals     map[string]int                       `json:"totals"`
+	ErrorMap   map[string][]string                  `json:"error_map"`
+	WarningMap map[string][]string                  `json:"warning_map"`
+	Errors     map[string]PhpCompatDetailsViolation `json:"errors"`
+	Warnings   map[string]PhpCompatDetailsViolation `json:"warnings"`
 }
 
 // PhpCompatDetailsViolation describes a single violation.
@@ -51,49 +53,80 @@ func GetPhpcsCompatibility(fullResults tide.PhpcsResults) ([]string, interface{}
 			"errors":   fullResults.Totals.Errors,
 			"warnings": fullResults.Totals.Warnings,
 		},
-		ErrorMap: make(map[string][]string),
-		Errors:   make(map[string]PhpCompatDetailsViolation),
+		ErrorMap:   make(map[string][]string),
+		WarningMap: make(map[string][]string),
+		Errors:     make(map[string]PhpCompatDetailsViolation),
+		Warnings:   make(map[string]PhpCompatDetailsViolation),
 	}
 
 	// Iterate files and only get summary data.
 	for filename, data := range fullResults.Files {
 		for _, sniffMessage := range data.Messages {
 
-			// Create the new Violation if we don't have it already.
-			// This happens only once because we group failures.
-			if _, ok := details.Errors[sniffMessage.Source]; !ok {
-				// Create the object.
-				violation := PhpCompatDetailsViolation{
-					Message:  sniffMessage.Message,
-					Source:   sniffMessage.Source,
-					Type:     sniffMessage.Type,
-					Severity: sniffMessage.Severity,
-					Files:    make(map[string][]FilePosition),
+			if sniffMessage.Type == "ERROR" {
+				// Create the new Violation if we don't have it already.
+				// This happens only once because we group failures.
+				if _, ok := details.Errors[sniffMessage.Source]; !ok {
+					// Create the object.
+					violation := PhpCompatDetailsViolation{
+						Message:  sniffMessage.Message,
+						Source:   sniffMessage.Source,
+						Type:     sniffMessage.Type,
+						Severity: sniffMessage.Severity,
+						Files:    make(map[string][]FilePosition),
+					}
+
+					// Get incompatible versions
+					versions := phpcompat.BreaksVersions(sniffMessage)
+					violation.Versions = versions
+
+					// Add the source to each broken version.
+					for _, version := range versions {
+						details.ErrorMap[version] = append(details.ErrorMap[version], sniffMessage.Source)
+					}
+
+					// Add to broken versions so that we can determine compatibility later.
+					brokenVersions = phpcompat.MergeVersions(brokenVersions, versions)
+
+					details.Errors[sniffMessage.Source] = violation
 				}
 
-				// Get incompatible versions
-				broken := phpcompat.BreaksVersions(sniffMessage)
-				violation.Versions = broken
+				// Each violating file needs to be added to the particular violation.
+				details.Errors[sniffMessage.Source].Files[filename] = append(
+					details.Errors[sniffMessage.Source].Files[filename],
+					FilePosition{
+						sniffMessage.Line,
+						sniffMessage.Column,
+					},
+				)
+			} else if sniffMessage.Type == "WARNING"  {
+				if _, ok := details.Warnings[sniffMessage.Source]; !ok {
+					violation := PhpCompatDetailsViolation{
+						Message:  sniffMessage.Message,
+						Source:   sniffMessage.Source,
+						Type:     sniffMessage.Type,
+						Severity: sniffMessage.Severity,
+						Files:    make(map[string][]FilePosition),
+					}
 
-				// Add the source to each broken version.
-				for _, version := range broken {
-					details.ErrorMap[version] = append(details.ErrorMap[version], sniffMessage.Source)
+					versions := phpcompat.NonBreakingVersions(sniffMessage)
+					violation.Versions = versions
+
+					for _, version := range versions {
+						details.WarningMap[version] = append(details.WarningMap[version], sniffMessage.Source)
+					}
+
+					details.Warnings[sniffMessage.Source] = violation
 				}
 
-				// Add to broken versions so that we can determine compatibility later.
-				brokenVersions = phpcompat.MergeVersions(brokenVersions, broken)
-
-				details.Errors[sniffMessage.Source] = violation
+				details.Warnings[sniffMessage.Source].Files[filename] = append(
+					details.Warnings[sniffMessage.Source].Files[filename],
+					FilePosition{
+						sniffMessage.Line,
+						sniffMessage.Column,
+					},
+				)
 			}
-
-			// Each violating file needs to be added to the particular violation.
-			details.Errors[sniffMessage.Source].Files[filename] = append(
-				details.Errors[sniffMessage.Source].Files[filename],
-				FilePosition{
-					sniffMessage.Line,
-					sniffMessage.Column,
-				},
-			)
 		}
 	}
 
