@@ -13,7 +13,6 @@ var (
 	// There are many other phrases used in messages, but these are all we need
 	// to assert the compatibility of a sniff violation.
 	verbs = []string{
-		"supported",
 		"not present",   // or earlier
 		"soft reserved", // "as of" "reserved keyword as of" , works like "deprecated"
 		"reserved",      // "since", "introduced", "as of"
@@ -26,7 +25,6 @@ var (
 		"and lower",
 		"<",
 		"magic method",
-		"not supported since",
 		"available since",
 		"since",
 	}
@@ -69,8 +67,6 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 
 		// NOTE: Order is VERY important
 		switch matches[0] {
-		case "supported":
-			fallthrough
 		case "not present":
 			low, high, majorMinor, reported := GetVersionParts(versions[0], "5.2.0")
 
@@ -189,8 +185,6 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 				reported,
 				majorMinor,
 			}
-		case "not supported since":
-			fallthrough
 		case "available since":
 			if breaks != nil {
 				breaks.Low = "5.2.1"
