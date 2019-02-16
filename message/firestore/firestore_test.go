@@ -143,35 +143,92 @@ func TestNew(t *testing.T) {
 		rootDocPath string
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    *Provider
-		wantErr bool
+		name string
+		args args
+		want reflect.Type
 	}{
 		{
-			"Test New Client - Fail because API access",
+			"Test New Client",
 			args{
 				context.Background(),
 				"sample-project",
 				"root-doc",
 			},
-			nil,
-			true,
+			reflect.TypeOf(&Provider{}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := New(tt.args.ctx, tt.args.projectID, tt.args.rootDocPath)
-			if (err != nil) && tt.wantErr {
-				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want && !tt.wantErr {
-				t.Errorf("New() = %v, want %v", got, tt.want)
+			if got, _ := New(tt.args.ctx, tt.args.projectID, tt.args.rootDocPath); reflect.TypeOf(got) != tt.want {
+				t.Errorf("New() = %v, want %v", reflect.TypeOf(got), tt.want)
 			}
 		})
 	}
 }
+
+func TestNewWithClient(t *testing.T) {
+	type args struct {
+		ctx         context.Context
+		projectID   string
+		rootDocPath string
+		client      fsClient.ClientInterface
+	}
+	tests := []struct {
+		name string
+		args args
+		want reflect.Type
+	}{
+		{
+			"New With Client",
+			args{
+				context.Background(),
+				"random-id",
+				"collection/doc",
+				nil,
+			},
+			reflect.TypeOf(&Provider{}),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, _ := NewWithClient(tt.args.ctx, tt.args.projectID, tt.args.rootDocPath, tt.args.client); reflect.TypeOf(got) != tt.want {
+				t.Errorf("NewWithClient() = %v, want %v", reflect.TypeOf(got), tt.want)
+			}
+		})
+	}
+}
+
+//func TestNew(t *testing.T) {
+//	type args struct {
+//		ctx         context.Context
+//		projectID   string
+//		rootDocPath string
+//	}
+//	tests := []struct {
+//		name    string
+//		args    args
+//		want    reflect.Type
+//		wantErr bool
+//	}{
+//		{
+//			"Test New Client - Fail because API access",
+//			args{
+//				context.Background(),
+//				"sample-project",
+//				"root-doc",
+//			},
+//			reflect.TypeOf(&Provider{}),
+//			true,
+//		},
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			if got, _ := New(tt.args.ctx, tt.args.projectID, tt.args.rootDocPath); reflect.TypeOf(got) != tt.want {
+//				t.Errorf("New() = %v, want %v", reflect.TypeOf(got), tt.want)
+//			}
+//		})
+//	}
+//}
 
 func TestFirestoreProvider_Close(t *testing.T) {
 	type fields struct {

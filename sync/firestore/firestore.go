@@ -115,7 +115,7 @@ func New(ctx context.Context, projectID string, rootDocPath string) (*Sync, erro
 // NewWithClient creates a new Sync (UpdateChecker) with a provided ClientInterface client.
 // Note: Use this one for the tests with a mock ClientInterface.
 func NewWithClient(ctx context.Context, projectID string, rootDocPath string, client fsClient.ClientInterface) (*Sync, error) {
-	if !client.Authenticated() {
+	if client == nil || !client.Authenticated() {
 		return nil, errors.New("firestore: could not authenticate sync client")
 	}
 

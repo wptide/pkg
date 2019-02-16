@@ -395,7 +395,7 @@ func TestNew(t *testing.T) {
 		want reflect.Type
 	}{
 		{
-			"Test New",
+			"Test New Client",
 			args{
 				context.Background(),
 				"random-project",
@@ -431,7 +431,7 @@ func TestNewWithClient(t *testing.T) {
 				context.Background(),
 				"random-id",
 				"collection/doc",
-				&mockClient{},
+				nil,
 			},
 			reflect.TypeOf(&Sync{}),
 		},

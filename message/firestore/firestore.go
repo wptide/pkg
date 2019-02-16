@@ -152,7 +152,7 @@ func New(ctx context.Context, projectID string, rootDocPath string) (*Provider, 
 // Note: Use this one for the tests with a mock ClientInterface.
 func NewWithClient(ctx context.Context, projectID string, rootDocPath string, client fsClient.ClientInterface) (*Provider, error) {
 	if client == nil || !client.Authenticated() {
-		return nil, errors.New("could not authenticate sync client")
+		return nil, errors.New("firestore: could not authenticate message client")
 	}
 
 	return &Provider{
