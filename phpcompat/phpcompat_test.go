@@ -80,6 +80,13 @@ func TestBreaksVersions(t *testing.T) {
 			[]string{"7.0", "7.1", "7.2"},
 		},
 		{
+			"PHPCompatibility.PHP.LanguageConstructs.NewEmptyNonVariableFound",
+			args{
+				testMessages["PHPCompatibility.PHP.LanguageConstructs.NewEmptyNonVariableFound"],
+			},
+			[]string{"5.2", "5.3", "5.4"},
+		},
+		{
 			"PHPCompatibility.PHP.EmptyNonVariable.Found",
 			args{
 				testMessages["PHPCompatibility.PHP.EmptyNonVariable.Found"],

@@ -74,6 +74,11 @@ var (
 			Source:  "PHPCompatibility.PHP.ValidIntegers.InvalidOctalIntegerFound",
 			Type:    "ERROR",
 		},
+		"PHPCompatibility.PHP.LanguageConstructs.NewEmptyNonVariableFound": {
+			Message: "Only variables can be passed to empty() prior to PHP 5.5.",
+			Source:  "PHPCompatibility.PHP.LanguageConstructs.NewEmptyNonVariableFound",
+			Type:    "ERROR",
+		},
 		"PHPCompatibility.PHP.EmptyNonVariable.Found": {
 			Message: "Only variables can be passed to empty() prior to PHP 5.5.",
 			Source:  "PHPCompatibility.PHP.EmptyNonVariable.Found",

@@ -143,18 +143,9 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 					reported,
 					majorMinor,
 				}
-			} else if e.Source == "PHPCompatibility.PHP.EmptyNonVariable.Found" {
+			} else {
 				version := PreviousVersion(versions[0])
 				low, high, majorMinor, reported := GetVersionParts(version, "5.2.0")
-
-				breaks = &CompatibilityRange{
-					low,
-					high,
-					reported,
-					majorMinor,
-				}
-			} else {
-				low, high, majorMinor, reported := GetVersionParts(versions[0], versions[0])
 
 				breaks = &CompatibilityRange{
 					low,
@@ -199,14 +190,7 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 				majorMinor,
 			}
 		case "not supported since":
-			low, high, majorMinor, reported := GetVersionParts(versions[0], versions[0])
-
-			breaks = &CompatibilityRange{
-				low,
-				high,
-				reported,
-				majorMinor,
-			}
+			fallthrough
 		case "available since":
 			if breaks != nil {
 				breaks.Low = "5.2.1"
