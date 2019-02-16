@@ -26,6 +26,7 @@ var (
 		"and lower",
 		"<",
 		"magic method",
+		"not supported since",
 		"available since",
 		"since",
 	}
@@ -132,8 +133,17 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 			}
 		case "prior to":
 
-			// Annoying bad grammar for this error...
-			if e.Source == "PHPCompatibility.PHP.EmptyNonVariable.Found" {
+			// Annoying bad grammar for these errors...
+			if e.Source == "PHPCompatibility.PHP.ValidIntegers.InvalidOctalIntegerFound" {
+				low, _, majorMinor, reported := GetVersionParts(versions[0], versions[0])
+
+				breaks = &CompatibilityRange{
+					low,
+					PhpLatest,
+					reported,
+					majorMinor,
+				}
+			} else if e.Source == "PHPCompatibility.PHP.EmptyNonVariable.Found" {
 				version := PreviousVersion(versions[0])
 				low, high, majorMinor, reported := GetVersionParts(version, "5.2.0")
 
@@ -156,7 +166,8 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 		case "<":
 			// Another annoying grammar.
 			if e.Source == "PHPCompatibility.PHP.TernaryOperators.MiddleMissing" {
-				low, high, majorMinor, reported := GetVersionParts(versions[0], versions[0])
+				version := PreviousVersion(versions[0])
+				low, high, majorMinor, reported := GetVersionParts(version, "5.2.0")
 
 				breaks = &CompatibilityRange{
 					low,
@@ -178,7 +189,6 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 				reported,
 				majorMinor,
 			}
-
 		case "magic method":
 			low, high, majorMinor, reported := GetVersionParts("all", "")
 
@@ -188,7 +198,15 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 				reported,
 				majorMinor,
 			}
+		case "not supported since":
+			low, high, majorMinor, reported := GetVersionParts(versions[0], versions[0])
 
+			breaks = &CompatibilityRange{
+				low,
+				high,
+				reported,
+				majorMinor,
+			}
 		case "available since":
 			if breaks != nil {
 				breaks.Low = "5.2.1"
@@ -198,7 +216,6 @@ func Parse(e tide.PhpcsFilesMessage) (Compatibility, error) {
 				warns.Low = "5.2.1"
 				warns.High = PreviousVersion(warns.MajorMinor)
 			}
-
 		case "since":
 			if breaks != nil {
 				breaks.High = PhpLatest
