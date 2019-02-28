@@ -169,7 +169,7 @@ func (cs *Phpcs) Do() error {
 	cmdArgs = append(cmdArgs, "-q")
 
 	// Prepare the command and set the stdOut pipe.
-	resultBytes, _, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
+	_, _, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
 
 	//log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
 
