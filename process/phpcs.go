@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/wptide/pkg/log"
@@ -150,9 +149,6 @@ func (cs *Phpcs) Do() error {
 		"--basepath=" + path, // Remove this part from the filenames in PHPCS report.
 		"--report=json",
 		"--report-json=" + filepath,
-		"--parallel=" + strconv.Itoa(parallel),
-		"-d",              // Required to be before "memory_limit".
-		"memory_limit=128M", // Leave memory handling up to the system.
 	}
 
 	// @todo fix message to accept array of options.
