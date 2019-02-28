@@ -22,23 +22,26 @@ var (
 			"max": "5.4.45",
 		},
 		"5.5": {
-			"max": "5.5.37",
+			"max": "5.5.38",
 		},
 		"5.6": {
-			"max": "5.6.32",
+			"max": "5.6.40",
 		},
 		"7.0": {
-			"max": "7.0.26",
+			"max": "7.0.33",
 		},
 		"7.1": {
-			"max": "7.1.13",
+			"max": "7.1.26",
 		},
 		"7.2": {
-			"max": "7.2.1",
+			"max": "7.2.15",
+		},
+		"7.3": {
+			"max": "7.3.2",
 		},
 	}
 	// PhpLatest represents the latest version of PHP.
-	PhpLatest = "7.2.1"
+	PhpLatest = "7.3.2"
 )
 
 // Compatibility describes a compatibility report with breaking and warning ranges.

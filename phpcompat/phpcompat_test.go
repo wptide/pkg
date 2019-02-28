@@ -35,28 +35,28 @@ func TestBreaksVersions(t *testing.T) {
 			args{
 				testMessages["PHPCompatibility.PHP.ForbiddenNames.constFound"],
 			},
-			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.DeprecatedFunctions.mysqli_send_long_dataDeprecatedRemoved",
 			args{
 				testMessages["PHPCompatibility.PHP.DeprecatedFunctions.mysqli_send_long_dataDeprecatedRemoved"],
 			},
-			[]string{"5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+			[]string{"5.4", "5.5", "5.6", "7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_cfbDeprecatedRemoved",
 			args{
 				testMessages["PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_cfbDeprecatedRemoved"],
 			},
-			[]string{"7.0", "7.1", "7.2"},
+			[]string{"7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.ForbiddenNames.cloneFound",
 			args{
 				testMessages["PHPCompatibility.PHP.ForbiddenNames.cloneFound"],
 			},
-			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.DynamicAccessToStatic.Found",
@@ -70,14 +70,14 @@ func TestBreaksVersions(t *testing.T) {
 			args{
 				testMessages["PHPCompatibility.PHP.ValidIntegers.HexNumericStringFound"],
 			},
-			[]string{"7.0", "7.1", "7.2"},
+			[]string{"7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.ValidIntegers.InvalidOctalIntegerFound",
 			args{
 				testMessages["PHPCompatibility.PHP.ValidIntegers.InvalidOctalIntegerFound"],
 			},
-			[]string{"7.0", "7.1", "7.2"},
+			[]string{"7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.LanguageConstructs.NewEmptyNonVariableFound",
@@ -105,7 +105,7 @@ func TestBreaksVersions(t *testing.T) {
 			args{
 				testMessages["PHPCompatibility.PHP.NonStaticMagicMethods.__getMethodVisibility"],
 			},
-			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.ShortArray.Found",
@@ -119,7 +119,7 @@ func TestBreaksVersions(t *testing.T) {
 			args{
 				testMessages["PHPCompatibility.PHP.ForbiddenSwitchWithMultipleDefaultBlocks.Found"],
 			},
-			[]string{"7.0", "7.1", "7.2"},
+			[]string{"7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			// Warnings only, no breaks.
@@ -168,35 +168,35 @@ func TestNonBreakingVersions(t *testing.T) {
 			args{
 				testMessages["PHPCompatibility.PHP.RemovedConstants.intl_idna_variant_2003Deprecated"],
 			},
-			[]string{"7.2"},
+			[]string{"7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.FakeAllWarning",
 			args{
 				testMessages["PHPCompatibility.PHP.FakeAllWarning"],
 			},
-			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated",
 			args{
 				testMessages["PHPCompatibility.PHP.DeprecatedFunctions.mcrypt_generic_deinitDeprecated"],
 			},
-			[]string{"7.1", "7.2"},
+			[]string{"7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.DeprecatedPHP4StyleConstructors.Found",
 			args{
 				testMessages["PHPCompatibility.PHP.DeprecatedPHP4StyleConstructors.Found"],
 			},
-			[]string{"7.0", "7.1", "7.2"},
+			[]string{"7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.ForbiddenNamesAsDeclared.resourceFound",
 			args{
 				testMessages["PHPCompatibility.PHP.ForbiddenNamesAsDeclared.resourceFound"],
 			},
-			[]string{"7.0", "7.1", "7.2"},
+			[]string{"7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.FakeAvailableSinceWarning",
@@ -210,7 +210,7 @@ func TestNonBreakingVersions(t *testing.T) {
 			args{
 				testMessages["PHPCompatibility.PHP.FakeSinceWarning"],
 			},
-			[]string{"7.0", "7.1", "7.2"},
+			[]string{"7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"PHPCompatibility.PHP.NewFunctions.random_bytesFound",
@@ -267,32 +267,39 @@ func TestPreviousVersion(t *testing.T) {
 			"5.4.45",
 		},
 		{
-			"7.2.0 -> 7.1.13",
+			"7.3.0 -> 7.2.15",
+			args{
+				"7.3.0",
+			},
+			"7.2.15",
+		},
+		{
+			"7.2.0 -> 7.1.26",
 			args{
 				"7.2.0",
 			},
-			"7.1.13",
+			"7.1.26",
 		},
 		{
-			"7.1.0 -> 7.0.26",
+			"7.1.0 -> 7.0.33",
 			args{
 				"7.1",
 			},
-			"7.0.26",
+			"7.0.33",
 		},
 		{
-			"7.0.0 -> 5.6.32",
+			"7.0.0 -> 5.6.40",
 			args{
 				"7.0.0",
 			},
-			"5.6.32",
+			"5.6.40",
 		},
 		{
-			"5.6 -> 5.5.37",
+			"5.6 -> 5.5.38",
 			args{
 				"5.6",
 			},
-			"5.5.37",
+			"5.5.38",
 		},
 		{
 			"5.5 -> 5.4.45",
@@ -438,7 +445,7 @@ func TestGetVersionParts(t *testing.T) {
 				"",
 			},
 			"7.2.0",
-			"7.2.1",
+			"7.2.15",
 			"7.2",
 			"7.2",
 		},
@@ -491,7 +498,7 @@ func TestPhpMajorVersions(t *testing.T) {
 	}{
 		{
 			"Get all major.minor versions",
-			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+			[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2", "7.3"},
 		},
 	}
 	for _, tt := range tests {
@@ -545,16 +552,16 @@ func TestExcludeVersions(t *testing.T) {
 		{
 			"5.6",
 			args{
-				[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
+				[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2", "7.3"},
 				[]string{"5.6"},
 			},
-			[]string{"5.2", "5.3", "5.4", "5.5", "7.0", "7.1", "7.2"},
+			[]string{"5.2", "5.3", "5.4", "5.5", "7.0", "7.1", "7.2", "7.3"},
 		},
 		{
 			"5.2, 5.3, 7.1, 7.2",
 			args{
-				[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2"},
-				[]string{"5.2", "5.3", "7.1", "7.2"},
+				[]string{"5.2", "5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2", "7.3"},
+				[]string{"5.2", "5.3", "7.1", "7.2", "7.3"},
 			},
 			[]string{"5.4", "5.5", "5.6", "7.0"},
 		},
