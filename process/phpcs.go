@@ -152,7 +152,7 @@ func (cs *Phpcs) Do() error {
 		"--report-json=" + filepath,
 		"--parallel=" + strconv.Itoa(parallel),
 		"-d",              // Required to be before "memory_limit".
-		"memory_limit=-1", // Leave memory handling up to the system.
+		"memory_limit=128M", // Leave memory handling up to the system.
 	}
 
 	// @todo fix message to accept array of options.
