@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/wptide/pkg/log"
@@ -123,6 +124,12 @@ func (cs *Phpcs) Do() error {
 	pathPrefix := strings.TrimRight(cs.TempFolder, "/") + "/"
 	filepath := pathPrefix + filename
 
+	// Provide in implementation, not from message.
+	parallel, ok := cs.Config["parallel"].(int)
+	if !ok {
+		parallel = 1
+	}
+
 	// Get encoding from message and provide a fallback.
 	encoding := audit.Options.Encoding
 	if encoding == "" {
@@ -143,6 +150,9 @@ func (cs *Phpcs) Do() error {
 		"--basepath=" + path, // Remove this part from the filenames in PHPCS report.
 		"--report=json",
 		"--report-json=" + filepath,
+		"--parallel=" + strconv.Itoa(parallel),
+		"-d",              // Required to be before "memory_limit".
+		"memory_limit=-1", // Leave memory handling up to the system.
 	}
 
 	// @todo fix message to accept array of options.
@@ -159,12 +169,13 @@ func (cs *Phpcs) Do() error {
 	cmdArgs = append(cmdArgs, "-q")
 
 	// Prepare the command and set the stdOut pipe.
-	resultBytes, _, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
+	resultBytes, errorsBytes, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
+
+	log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
+	log.Log(cs.Message.Title, fmt.Sprintf("phpcs error:\n %s", strings.TrimSpace(string(errorsBytes))))
 	if err != nil {
 		return err
 	}
-
-	log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
 
 	// We already have a reference to the report file, so lets upload and get the storage reference in a result.
 	log.Log(cs.Message.Title, "Uploading "+standard+" results to remote storage.")
