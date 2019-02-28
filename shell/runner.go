@@ -27,8 +27,8 @@ func (c *Command) Run(name string, arg ...string) ([]byte, []byte, int, error) {
 		}
 	})
 
-	var resultsBuffer bytes.Buffer
-	var errorsBuffer bytes.Buffer
+	resultsBuffer := bytes.Buffer{}
+	errorsBuffer := bytes.Buffer{}
 	cmd := c.execFunc(name, arg...)
 	cmd.Stdout = &resultsBuffer
 	cmd.Stderr = &errorsBuffer
