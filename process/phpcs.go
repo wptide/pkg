@@ -166,7 +166,7 @@ func (cs *Phpcs) Do() error {
 	//}
 
 	cmdArgs = append(cmdArgs, path)
-	cmdArgs = append(cmdArgs, "-q")
+	cmdArgs = append(cmdArgs, "-p")
 
 	// Prepare the command and set the stdOut pipe.
 	resultBytes, _, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
