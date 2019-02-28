@@ -123,12 +123,6 @@ func (cs *Phpcs) Do() error {
 	pathPrefix := strings.TrimRight(cs.TempFolder, "/") + "/"
 	filepath := pathPrefix + filename
 
-	// Provide in implementation, not from message.
-	parallel, ok := cs.Config["parallel"].(int)
-	if !ok {
-		parallel = 1
-	}
-
 	// Get encoding from message and provide a fallback.
 	encoding := audit.Options.Encoding
 	if encoding == "" {
