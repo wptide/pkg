@@ -171,7 +171,7 @@ func (cs *Phpcs) Do() error {
 	// Prepare the command and set the stdOut pipe.
 	resultBytes, errorsBytes, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
 
-	if errorsBytes != nil {
+	if len(errorsBytes) > 0 {
 		log.Log(cs.Message.Title, fmt.Sprintf("phpcs error:\n %s", strings.TrimSpace(string(errorsBytes))))
 	}
 	log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
