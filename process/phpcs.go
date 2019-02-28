@@ -169,9 +169,9 @@ func (cs *Phpcs) Do() error {
 	cmdArgs = append(cmdArgs, "-q")
 
 	// Prepare the command and set the stdOut pipe.
-	_, _, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
+	resultBytes, _, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
 
-	//log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
+	log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
 
 	// We already have a reference to the report file, so lets upload and get the storage reference in a result.
 	log.Log(cs.Message.Title, "Uploading "+standard+" results to remote storage.")
