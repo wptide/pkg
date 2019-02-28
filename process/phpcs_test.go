@@ -68,6 +68,10 @@ func (m mockPhpcsRunner) Run(name string, arg ...string) ([]byte, []byte, int, e
 		return []byte(msg), nil, 0, nil
 	}
 
+	if basepath == "./testdata/info/phpcompatinternalerror/unzipped" && standard == "phpcompatibility" {
+		return []byte("could be anything"), []byte("some sort or trace error"), 255, nil
+	}
+
 	if basepath == "./testdata/info/phpcompatuploaderror/unzipped" {
 		msg := examplePhpcsPhpCompatibilityReport()
 		ioutil.WriteFile(
@@ -509,6 +513,28 @@ func TestPhpcs_Run(t *testing.T) {
 							"checksum": "phpcompatwriteerror",
 						},
 						FilesPath: "./testdata/info/phpcompatwriteerror",
+					},
+				},
+			},
+			true,
+			true,
+			false,
+		},
+		{
+			"phpcompatibility - PHPCS internal error",
+			validFields,
+			[]Processor{
+				&Info{
+					Process: Process{
+						Message: message.Message{
+							Title:  "phpcompat internal error",
+							Slug:   "test",
+							Audits: auditsPhpCompatibility,
+						},
+						Result: &Result{
+							"checksum": "phpcompatinternalerror",
+						},
+						FilesPath: "./testdata/info/phpcompatinternalerror",
 					},
 				},
 			},

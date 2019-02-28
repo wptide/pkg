@@ -169,8 +169,11 @@ func (cs *Phpcs) Do() error {
 	cmdArgs = append(cmdArgs, "-q")
 
 	// Prepare the command and set the stdOut pipe.
-	resultBytes, _, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
+	resultBytes, errorBytes, exitCode, err := phpcsRunner.Run(cmdName, cmdArgs...)
 
+	if len(errorBytes) > 0 {
+		log.Log(cs.Message.Title, fmt.Sprintf("phpcs error:\n %s", strings.TrimSpace(string(errorBytes))))
+	}
 	log.Log(cs.Message.Title, fmt.Sprintf("phpcs output:\n %s", strings.TrimSpace(string(resultBytes))))
 
 	// We already have a reference to the report file, so lets upload and get the storage reference in a result.
