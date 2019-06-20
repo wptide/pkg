@@ -43,7 +43,7 @@ type FilePosition struct {
 // - the impacted files and relevant phpcs messages
 //
 // Process is required to implement audit.PostProcessor.
-func GetPhpcsCompatibility(fullResults tide.PhpcsResults) ([]string, interface{}) {
+func GetPhpcsCompatibility(fullResults tide.PhpcsResults) ([]string, []string, interface{}) {
 
 	brokenVersions := []string{}
 
@@ -131,5 +131,6 @@ func GetPhpcsCompatibility(fullResults tide.PhpcsResults) ([]string, interface{}
 	}
 
 	compatibleVersion := phpcompat.ExcludeVersions(phpcompat.PhpMajorVersions(), brokenVersions)
-	return compatibleVersion, details
+	incompatibleVersion := brokenVersions
+	return compatibleVersion, incompatibleVersion, details
 }

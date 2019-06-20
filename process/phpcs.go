@@ -212,7 +212,7 @@ func (cs *Phpcs) Do() error {
 	// Only PHPCompatibility provides parsed results.
 	// @todo Abstract this later.
 	if kind == "phpcs_phpcompatibility" {
-		compatibleVersions, compatResults := phpcs.GetPhpcsCompatibility(*phpcsResults)
+		compatibleVersions, incompatibleVersions, compatResults := phpcs.GetPhpcsCompatibility(*phpcsResults)
 
 		resultsJSON, _ := json.Marshal(compatResults)
 
@@ -236,6 +236,7 @@ func (cs *Phpcs) Do() error {
 		}
 
 		auditResults.CompatibleVersions = compatibleVersions
+		auditResults.IncompatibleVersions = incompatibleVersions
 	}
 
 	// Reset current audit.
