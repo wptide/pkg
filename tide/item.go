@@ -59,12 +59,13 @@ type ClocResult struct {
 
 // AuditResult contain results about an audit.
 type AuditResult struct {
-	Raw                AuditDetails           `json:"raw,omitempty"`
-	Parsed             AuditDetails           `json:"parsed,omitempty"`
-	Summary            AuditSummary           `json:"summary,omitempty"`
-	CompatibleVersions []string               `json:"compatible_versions,omitempty"`
-	Error              string                 `json:"error,omitempty"`
-	Extra              map[string]interface{} `json:"extra,omitempty"`
+	Raw                  AuditDetails           `json:"raw,omitempty"`
+	Parsed               AuditDetails           `json:"parsed,omitempty"`
+	Summary              AuditSummary           `json:"summary,omitempty"`
+	CompatibleVersions   []string               `json:"compatible_versions,omitempty"`
+	IncompatibleVersions []string               `json:"incompatible_versions,omitempty"`
+	Error                string                 `json:"error,omitempty"`
+	Extra                map[string]interface{} `json:"extra,omitempty"`
 }
 
 // PhpcsResults contains the results from a phpcs audit.
