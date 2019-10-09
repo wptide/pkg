@@ -23,13 +23,13 @@ var (
 
 // Phpcs defines the structure for our Phpcs process.
 type Phpcs struct {
-	Process                           // Inherits methods from Process.
-	In              <-chan Processor  // Expects a processor channel as input.
-	Out             chan Processor    // Send results to an output channel.
-	Config          Result            // Additional config.
-	TempFolder      string            // Path to a temp folder where reports will be generated.
-	StorageProvider storage.Provider  // Storage provider to upload reports to.
-	Versions        map[string]string // PHPCS versions
+	Process                                      // Inherits methods from Process.
+	In              <-chan Processor             // Expects a processor channel as input.
+	Out             chan Processor               // Send results to an output channel.
+	Config          Result                       // Additional config.
+	TempFolder      string                       // Path to a temp folder where reports will be generated.
+	StorageProvider storage.Provider             // Storage provider to upload reports to.
+	Versions        map[string]map[string]string // PHPCS versions
 }
 
 // Run executes the process in a pipe.

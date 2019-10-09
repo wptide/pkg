@@ -188,7 +188,7 @@ func TestPhpcs_Run(t *testing.T) {
 		Out             chan Processor
 		TempFolder      string
 		StorageProvider storage.Provider
-		Versions        map[string]string
+		Versions        map[string]map[string]string
 	}
 
 	validFields := fields{
@@ -196,9 +196,16 @@ func TestPhpcs_Run(t *testing.T) {
 		Out:             make(chan Processor),
 		StorageProvider: &mockStorage{},
 		TempFolder:      "./testdata/tmp",
-		Versions: map[string]string{
-			"phpcompatibility": "0.0.1-phpcompat",
-			"wordpress":        "0.0.1-wp",
+		Versions: map[string]map[string]string{
+			"phpcompatibility": {
+				"phpcs": "0.0.1-phpcs",
+				"phpcompatibility": "0.0.1-phpcompatibility",
+				"phpcompatibility_wp": "0.0.1-phpcompatibility_wp",
+			},
+			"wordpress": {
+				"phpcs": "0.0.1-phpcs",
+				"wpcs": "0.0.1-wpcs",
+			},
 		},
 	}
 
@@ -282,7 +289,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions:        map[string]string{},
+				Versions:        map[string]map[string]string{},
 			},
 			[]Processor{
 				&Info{
@@ -310,7 +317,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions:        map[string]string{},
+				Versions:        map[string]map[string]string{},
 			},
 			[]Processor{
 				&Info{
@@ -338,8 +345,11 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions: map[string]string{
-					"wordpress": "0.0.1-wp",
+				Versions: map[string]map[string]string{
+					"wordpress": {
+						"phpcs": "0.0.1-phpcs",
+						"wpcs": "0.0.1-wpcs",
+					},
 				},
 			},
 			[]Processor{
@@ -446,8 +456,12 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions: map[string]string{
-					"phpcompatibility": "0.0.1-phpcompat",
+				Versions: map[string]map[string]string{
+					"phpcompatibility": {
+						"phpcs": "0.0.1-phpcs",
+						"phpcompatibility": "0.0.1-phpcompatibility",
+						"phpcompatibility_wp": "0.0.1-phpcompatibility_wp",
+					},
 				},
 			},
 			[]Processor{
