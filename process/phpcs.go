@@ -112,9 +112,9 @@ func (cs *Phpcs) Do() error {
 		return errors.New("could not determine standard for report")
 	}
 
-	version, ok := cs.Versions[standard]
+	versions, ok := cs.Versions[standard]
 	if !ok {
-		return errors.New("could not determine PHPCS version")
+		return errors.New("could not determine dependency versions")
 	}
 
 	checksum, ok := result["checksum"].(string)
@@ -201,7 +201,7 @@ func (cs *Phpcs) Do() error {
 			FileName: fFileName,
 			Path:     fPath,
 		},
-		Version: version,
+		Versions: versions,
 	}
 
 	// `uploadToStorage` already did the error checking.

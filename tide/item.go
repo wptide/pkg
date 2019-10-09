@@ -66,7 +66,7 @@ type AuditResult struct {
 	IncompatibleVersions []string               `json:"incompatible_versions,omitempty"`
 	Error                string                 `json:"error,omitempty"`
 	Extra                map[string]interface{} `json:"extra,omitempty"`
-	Version              map[string]string      `json:"version,omitempty"`
+	Versions             map[string]string      `json:"versions,omitempty"`
 }
 
 // PhpcsResults contains the results from a phpcs audit.
