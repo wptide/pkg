@@ -188,7 +188,7 @@ func TestPhpcs_Run(t *testing.T) {
 		Out             chan Processor
 		TempFolder      string
 		StorageProvider storage.Provider
-		Versions        map[string]map[string]string
+		PhpcsVersions   map[string]map[string]string
 	}
 
 	validFields := fields{
@@ -196,7 +196,7 @@ func TestPhpcs_Run(t *testing.T) {
 		Out:             make(chan Processor),
 		StorageProvider: &mockStorage{},
 		TempFolder:      "./testdata/tmp",
-		Versions: map[string]map[string]string{
+		PhpcsVersions: map[string]map[string]string{
 			"phpcompatibility": {
 				"phpcs": "0.0.1-phpcs",
 				"phpcompatibility": "0.0.1-phpcompatibility",
@@ -223,7 +223,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions:        validFields.Versions,
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			nil,
 			true,
@@ -236,7 +236,7 @@ func TestPhpcs_Run(t *testing.T) {
 				In:              make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions:        validFields.Versions,
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			nil,
 			true,
@@ -249,7 +249,7 @@ func TestPhpcs_Run(t *testing.T) {
 				In:              make(chan Processor),
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
-				Versions:        validFields.Versions,
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			nil,
 			true,
@@ -259,10 +259,10 @@ func TestPhpcs_Run(t *testing.T) {
 		{
 			"No Storage Provider",
 			fields{
-				In:         make(chan Processor),
-				Out:        make(chan Processor),
-				TempFolder: "./testdata/tmp",
-				Versions:   validFields.Versions,
+				In:            make(chan Processor),
+				Out:           make(chan Processor),
+				TempFolder:    "./testdata/tmp",
+				PhpcsVersions: validFields.PhpcsVersions,
 			},
 			nil,
 			true,
@@ -289,7 +289,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions:        map[string]map[string]string{},
+				PhpcsVersions:   map[string]map[string]string{},
 			},
 			[]Processor{
 				&Info{
@@ -317,7 +317,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions:        map[string]map[string]string{},
+				PhpcsVersions:   map[string]map[string]string{},
 			},
 			[]Processor{
 				&Info{
@@ -345,7 +345,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions: map[string]map[string]string{
+				PhpcsVersions:   map[string]map[string]string{
 					"wordpress": {
 						"phpcs": "0.0.1-phpcs",
 						"wpcs": "0.0.1-wpcs",
@@ -378,7 +378,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions:        validFields.Versions,
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			[]Processor{
 				&Info{
@@ -403,7 +403,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions:        validFields.Versions,
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			[]Processor{
 				&Info{
@@ -428,7 +428,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions:        validFields.Versions,
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			[]Processor{
 				&Info{
@@ -456,7 +456,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
-				Versions: map[string]map[string]string{
+				PhpcsVersions:   map[string]map[string]string{
 					"phpcompatibility": {
 						"phpcs": "0.0.1-phpcs",
 						"phpcompatibility": "0.0.1-phpcompatibility",
@@ -581,7 +581,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "closeContext",
-				Versions:        validFields.Versions,
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			[]Processor{},
 			true,
@@ -682,7 +682,7 @@ func TestPhpcs_Run(t *testing.T) {
 				In:              make(chan Processor),
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
-				Versions:        validFields.Versions,
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			nil,
 			false,
@@ -742,7 +742,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             tt.fields.Out,
 				TempFolder:      tt.fields.TempFolder,
 				StorageProvider: tt.fields.StorageProvider,
-				Versions:        tt.fields.Versions,
+				PhpcsVersions:   tt.fields.PhpcsVersions,
 			}
 
 			cs.SetContext(ctx)

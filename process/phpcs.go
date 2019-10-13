@@ -29,7 +29,7 @@ type Phpcs struct {
 	Config          Result                       // Additional config.
 	TempFolder      string                       // Path to a temp folder where reports will be generated.
 	StorageProvider storage.Provider             // Storage provider to upload reports to.
-	Versions        map[string]map[string]string // PHPCS versions
+	PhpcsVersions   map[string]map[string]string // PHPCS versions,
 }
 
 // Run executes the process in a pipe.
@@ -50,7 +50,7 @@ func (cs *Phpcs) Run(errc *chan error) error {
 		return errors.New("requires a next process")
 	}
 
-	if cs.Versions == nil {
+	if cs.PhpcsVersions == nil {
 		return errors.New("requires a map of PHPCS versions")
 	}
 
@@ -112,9 +112,9 @@ func (cs *Phpcs) Do() error {
 		return errors.New("could not determine standard for report")
 	}
 
-	versions, ok := cs.Versions[standard]
+	phpcsVersions, ok := cs.PhpcsVersions[standard]
 	if !ok {
-		return errors.New("could not determine dependency versions")
+		return errors.New("could not determine PHPCS versions")
 	}
 
 	checksum, ok := result["checksum"].(string)
@@ -201,7 +201,7 @@ func (cs *Phpcs) Do() error {
 			FileName: fFileName,
 			Path:     fPath,
 		},
-		Versions: versions,
+		PhpcsVersions: phpcsVersions,
 	}
 
 	// `uploadToStorage` already did the error checking.
