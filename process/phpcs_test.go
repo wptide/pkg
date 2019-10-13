@@ -188,6 +188,7 @@ func TestPhpcs_Run(t *testing.T) {
 		Out             chan Processor
 		TempFolder      string
 		StorageProvider storage.Provider
+		PhpcsVersions   map[string]map[string]string
 	}
 
 	validFields := fields{
@@ -195,6 +196,17 @@ func TestPhpcs_Run(t *testing.T) {
 		Out:             make(chan Processor),
 		StorageProvider: &mockStorage{},
 		TempFolder:      "./testdata/tmp",
+		PhpcsVersions: map[string]map[string]string{
+			"phpcompatibility": {
+				"phpcs": "0.0.1-phpcs",
+				"phpcompatibility": "0.0.1-phpcompatibility",
+				"phpcompatibilitywp": "0.0.1-phpcompatibilitywp",
+			},
+			"wordpress": {
+				"phpcs": "0.0.1-phpcs",
+				"wpcs": "0.0.1-wpcs",
+			},
+		},
 	}
 
 	tests := []struct {
@@ -211,6 +223,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			nil,
 			true,
@@ -223,6 +236,7 @@ func TestPhpcs_Run(t *testing.T) {
 				In:              make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			nil,
 			true,
@@ -235,6 +249,7 @@ func TestPhpcs_Run(t *testing.T) {
 				In:              make(chan Processor),
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			nil,
 			true,
@@ -244,9 +259,10 @@ func TestPhpcs_Run(t *testing.T) {
 		{
 			"No Storage Provider",
 			fields{
-				In:         make(chan Processor),
-				Out:        make(chan Processor),
-				TempFolder: "./testdata/tmp",
+				In:            make(chan Processor),
+				Out:           make(chan Processor),
+				TempFolder:    "./testdata/tmp",
+				PhpcsVersions: validFields.PhpcsVersions,
 			},
 			nil,
 			true,
@@ -254,8 +270,88 @@ func TestPhpcs_Run(t *testing.T) {
 			true,
 		},
 		{
+			"No Versions",
+			fields{
+				In:              make(chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+				TempFolder:      "./testdata/tmp",
+			},
+			nil,
+			true,
+			false,
+			true,
+		},
+		{
+			"No Version - Phpcompatibility",
+			fields{
+				In:              make(chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+				TempFolder:      "./testdata/tmp",
+				PhpcsVersions:   map[string]map[string]string{},
+			},
+			[]Processor{
+				&Info{
+					Process: Process{
+						Message: message.Message{
+							Title:  "Valid Phpcompat",
+							Slug:   "test",
+							Audits: auditsPhpCompatibility,
+						},
+						Result: &Result{
+							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
+						},
+						FilesPath: "./testdata/info/plugin",
+					},
+				},
+			},
+			true,
+			true,
+			false,
+		},
+		{
+			"No Version - WordPress",
+			fields{
+				In:              make(chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+				TempFolder:      "./testdata/tmp",
+				PhpcsVersions:   map[string]map[string]string{},
+			},
+			[]Processor{
+				&Info{
+					Process: Process{
+						Message: message.Message{
+							Title:  "Valid Test",
+							Slug:   "test",
+							Audits: auditsWordPress,
+						},
+						Result: &Result{
+							"checksum": "39c7d71a68565ddd7b6a0fd68d94924d0db449a99541439b3ab8a477c5f1fc4e",
+						},
+						FilesPath: "./testdata/info/plugin",
+					},
+				},
+			},
+			true,
+			true,
+			false,
+		},
+		{
 			"Valid Item - WordPress",
-			validFields,
+			fields{
+				In:              make(chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+				TempFolder:      "./testdata/tmp",
+				PhpcsVersions:   map[string]map[string]string{
+					"wordpress": {
+						"phpcs": "0.0.1-phpcs",
+						"wpcs": "0.0.1-wpcs",
+					},
+				},
+			},
 			[]Processor{
 				&Info{
 					Process: Process{
@@ -282,6 +378,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			[]Processor{
 				&Info{
@@ -306,6 +403,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			[]Processor{
 				&Info{
@@ -330,6 +428,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "./testdata/tmp",
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			[]Processor{
 				&Info{
@@ -352,7 +451,19 @@ func TestPhpcs_Run(t *testing.T) {
 		},
 		{
 			"Valid Item - Phpcompatibility",
-			validFields,
+			fields{
+				In:              make(chan Processor),
+				Out:             make(chan Processor),
+				StorageProvider: &mockStorage{},
+				TempFolder:      "./testdata/tmp",
+				PhpcsVersions:   map[string]map[string]string{
+					"phpcompatibility": {
+						"phpcs": "0.0.1-phpcs",
+						"phpcompatibility": "0.0.1-phpcompatibility",
+						"phpcompatibilitywp": "0.0.1-phpcompatibilitywp",
+					},
+				},
+			},
 			[]Processor{
 				&Info{
 					Process: Process{
@@ -470,6 +581,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
 				TempFolder:      "closeContext",
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			[]Processor{},
 			true,
@@ -570,6 +682,7 @@ func TestPhpcs_Run(t *testing.T) {
 				In:              make(chan Processor),
 				Out:             make(chan Processor),
 				StorageProvider: &mockStorage{},
+				PhpcsVersions:   validFields.PhpcsVersions,
 			},
 			nil,
 			false,
@@ -629,6 +742,7 @@ func TestPhpcs_Run(t *testing.T) {
 				Out:             tt.fields.Out,
 				TempFolder:      tt.fields.TempFolder,
 				StorageProvider: tt.fields.StorageProvider,
+				PhpcsVersions:   tt.fields.PhpcsVersions,
 			}
 
 			cs.SetContext(ctx)

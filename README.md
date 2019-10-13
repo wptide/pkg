@@ -31,7 +31,10 @@ Have questions? Don't open an Issue, come join us in the [`#tide` channel](https
 
 ## Props
 
-[@rheinardkorf](https://github.com/rheinardkorf), [@valendesigns](https://github.com/valendesigns)
+[Derek Herman (@valendesigns)](https://github.com/valendesigns),
+[Otto Kekäläinen (@ottok)](https://github.com/ottok),
+[Pierre Gordon (@pierlon)](https://github.com/pierlon),
+[Rheinard Korf (@rheinardkorf)](https://github.com/rheinardkorf)
 
 ## License
 Tide `pkg` utilizes an [MIT license](LICENSE).

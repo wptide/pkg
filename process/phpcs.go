@@ -23,12 +23,13 @@ var (
 
 // Phpcs defines the structure for our Phpcs process.
 type Phpcs struct {
-	Process                          // Inherits methods from Process.
-	In              <-chan Processor // Expects a processor channel as input.
-	Out             chan Processor   // Send results to an output channel.
-	Config          Result           // Additional config.
-	TempFolder      string           // Path to a temp folder where reports will be generated.
-	StorageProvider storage.Provider // Storage provider to upload reports to.
+	Process                                      // Inherits methods from Process.
+	In              <-chan Processor             // Expects a processor channel as input.
+	Out             chan Processor               // Send results to an output channel.
+	Config          Result                       // Additional config.
+	TempFolder      string                       // Path to a temp folder where reports will be generated.
+	StorageProvider storage.Provider             // Storage provider to upload reports to.
+	PhpcsVersions   map[string]map[string]string // PHPCS versions.
 }
 
 // Run executes the process in a pipe.
@@ -47,6 +48,10 @@ func (cs *Phpcs) Run(errc *chan error) error {
 	}
 	if cs.Out == nil {
 		return errors.New("requires a next process")
+	}
+
+	if cs.PhpcsVersions == nil {
+		return errors.New("requires a map of PHPCS versions")
 	}
 
 	go func() {
@@ -105,6 +110,11 @@ func (cs *Phpcs) Do() error {
 	standard := audit.Options.Standard
 	if standard == "" {
 		return errors.New("could not determine standard for report")
+	}
+
+	phpcsVersions, ok := cs.PhpcsVersions[standard]
+	if !ok {
+		return errors.New("could not determine PHPCS versions")
 	}
 
 	checksum, ok := result["checksum"].(string)
@@ -184,13 +194,14 @@ func (cs *Phpcs) Do() error {
 		return err
 	}
 
-	// Initialise the result and set the "Raw" entry to the uploaded file.
+	// Initialise the result, set the "Raw" entry to the uploaded file and set the PHPCS version.
 	auditResults := tide.AuditResult{
 		Raw: tide.AuditDetails{
 			Type:     fType,
 			FileName: fFileName,
 			Path:     fPath,
 		},
+		PhpcsVersions: phpcsVersions,
 	}
 
 	// `uploadToStorage` already did the error checking.
