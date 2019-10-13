@@ -29,7 +29,7 @@ type Phpcs struct {
 	Config          Result                       // Additional config.
 	TempFolder      string                       // Path to a temp folder where reports will be generated.
 	StorageProvider storage.Provider             // Storage provider to upload reports to.
-	PhpcsVersions   map[string]map[string]string // PHPCS versions,
+	PhpcsVersions   map[string]map[string]string // PHPCS versions.
 }
 
 // Run executes the process in a pipe.
