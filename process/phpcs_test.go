@@ -200,7 +200,7 @@ func TestPhpcs_Run(t *testing.T) {
 			"phpcompatibility": {
 				"phpcs": "0.0.1-phpcs",
 				"phpcompatibility": "0.0.1-phpcompatibility",
-				"phpcompatibility_wp": "0.0.1-phpcompatibility_wp",
+				"phpcompatibilitywp": "0.0.1-phpcompatibilitywp",
 			},
 			"wordpress": {
 				"phpcs": "0.0.1-phpcs",
@@ -460,7 +460,7 @@ func TestPhpcs_Run(t *testing.T) {
 					"phpcompatibility": {
 						"phpcs": "0.0.1-phpcs",
 						"phpcompatibility": "0.0.1-phpcompatibility",
-						"phpcompatibility_wp": "0.0.1-phpcompatibility_wp",
+						"phpcompatibilitywp": "0.0.1-phpcompatibilitywp",
 					},
 				},
 			},
